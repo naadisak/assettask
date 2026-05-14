@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AssetSys — บันทึก Upgrade</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red-1:#ff2d2d;--red-2:#c00;--red-3:#7a0000;
+  --bg:#0a0a0a;--surface:#141414;--surface2:#1e1e1e;--surface3:#252525;
+  --text:#f0f0f0;--muted:#777;--border:#2a2a2a;--radius:14px;
+  --nav-h:60px;--topbar-h:56px;
+}
+html{height:100%;scroll-behavior:smooth}
+body{min-height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;overflow-x:hidden}
+
+/* ── Topbar ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--topbar-h);z-index:100;
+  background:rgba(10,10,10,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1rem;gap:10px;
+}
+.topbar-logo{display:flex;align-items:center;gap:8px}
+.topbar-icon{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--red-1),var(--red-3));display:flex;align-items:center;justify-content:center}
+.topbar-icon svg{width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.topbar-name{font-size:.9rem;font-weight:600;letter-spacing:-.3px}
+.topbar-spacer{flex:1}
+.topbar-user{display:flex;align-items:center;gap:8px;cursor:pointer}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red-2),var(--red-3));display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;color:#fff;overflow:hidden;flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.user-info{text-align:right}
+.user-name{font-size:.75rem;font-weight:500}
+.user-role{font-size:.65rem;color:var(--muted)}
+
+/* ── Scroll content ── */
+.content{padding:calc(var(--topbar-h) + 1rem) 1rem calc(var(--nav-h) + 1.5rem);max-width:480px;margin:0 auto}
+
+/* ── Page title ── */
+.page-header{margin-bottom:1.25rem}
+.page-title{font-size:1.2rem;font-weight:600;letter-spacing:-.3px}
+.page-sub{font-size:.75rem;color:var(--muted);margin-top:.2rem}
+.date-badge{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:.25rem .7rem;font-size:.7rem;color:var(--muted);margin-top:.5rem;font-family:'IBM Plex Mono',monospace}
+
+/* ── Section card ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.85rem;overflow:hidden}
+.card-header{display:flex;align-items:center;gap:8px;padding:.85rem 1rem;border-bottom:1px solid var(--border)}
+.card-icon{width:28px;height:28px;border-radius:8px;background:rgba(192,0,0,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-icon svg{width:14px;height:14px;stroke:var(--red-1);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.card-title{font-size:.8rem;font-weight:600;letter-spacing:.2px}
+.card-body{padding:1rem}
+
+/* ── Field ── */
+.field{margin-bottom:1rem}
+.field:last-child{margin-bottom:0}
+.field-label{font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.6px;margin-bottom:.4rem;display:flex;align-items:center;justify-content:space-between}
+.required{color:var(--red-1);margin-left:2px}
+.field-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:.7rem .9rem;font-size:.875rem;color:var(--text);
+  font-family:inherit;outline:none;transition:border-color .2s;
+  -webkit-appearance:none;
+}
+.field-input:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.08)}
+.field-input::placeholder{color:#404040}
+.field-input option{background:var(--surface2);color:var(--text)}
+
+/* ── Datalist autocomplete wrapper ── */
+.autocomplete-wrap{position:relative}
+.dept-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface3);border:1px solid var(--border);border-radius:10px;max-height:160px;overflow-y:auto;z-index:50;display:none}
+.dept-list.show{display:block}
+.dept-item{padding:.6rem .9rem;font-size:.85rem;cursor:pointer;transition:background .15s}
+.dept-item:hover{background:var(--surface2)}
+.dept-item mark{background:none;color:var(--red-1);font-weight:600}
+
+/* ── Toggle (2 choices) ── */
+.toggle-wrap{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.toggle-btn{
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:.65rem;text-align:center;font-size:.825rem;font-weight:500;cursor:pointer;
+  transition:all .2s;color:var(--muted);-webkit-tap-highlight-color:transparent;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.toggle-btn.active{background:rgba(192,0,0,.12);border-color:var(--red-1);color:var(--text)}
+.toggle-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+
+/* ── Sub-options (OS detail) ── */
+.sub-opts{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;animation:fadeIn .2s ease}
+.sub-btn{
+  background:var(--surface2);border:1px solid var(--border);border-radius:9px;
+  padding:.5rem;text-align:center;font-size:.75rem;font-weight:500;cursor:pointer;
+  transition:all .15s;color:var(--muted);-webkit-tap-highlight-color:transparent;
+}
+.sub-btn.active{background:rgba(192,0,0,.1);border-color:rgba(192,0,0,.4);color:var(--text)}
+
+/* ── Status chips ── */
+.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.status-chip{
+  background:var(--surface2);border:1px solid var(--border);border-radius:9px;
+  padding:.55rem .4rem;text-align:center;font-size:.75rem;font-weight:500;cursor:pointer;
+  transition:all .15s;color:var(--muted);-webkit-tap-highlight-color:transparent;
+}
+.status-chip.active.pass{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);color:#4ade80}
+.status-chip.active.doi{background:rgba(250,204,21,.1);border-color:rgba(250,204,21,.4);color:#fde047}
+.status-chip.active.reject{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);color:#f87171}
+
+/* ── Note / emoji / images ── */
+.note-wrap{position:relative}
+.note-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:.7rem .9rem;padding-right:70px;font-size:.875rem;color:var(--text);
+  font-family:inherit;outline:none;transition:border-color .2s;resize:none;
+}
+.note-input:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.08)}
+.note-char{position:absolute;right:.9rem;bottom:.7rem;font-size:.65rem;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.note-char.warn{color:#f87171}
+
+.emoji-row{display:flex;gap:8px;margin-top:.5rem}
+.emoji-btn{
+  width:36px;height:36px;border-radius:9px;background:var(--surface2);border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;flex-shrink:0;
+}
+.emoji-btn.active{border-color:var(--red-1);background:rgba(192,0,0,.1);transform:scale(1.1)}
+.emoji-label{font-size:.7rem;color:var(--muted);display:flex;align-items:center}
+
+/* ── Image upload ── */
+.img-upload-area{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.75rem}
+.img-slot{
+  aspect-ratio:1;background:var(--surface2);border:1.5px dashed var(--border);border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;overflow:hidden;transition:border-color .2s;
+}
+.img-slot:hover{border-color:#444}
+.img-slot.has-img{border-style:solid;border-color:rgba(192,0,0,.3)}
+.img-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-slot-icon{font-size:1.5rem;margin-bottom:4px}
+.img-slot-label{font-size:.65rem;color:var(--muted);text-align:center;line-height:1.4}
+.img-preview{position:absolute;inset:0;object-fit:cover;width:100%;height:100%}
+.img-remove{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(0,0,0,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;cursor:pointer;color:#fff;z-index:5;border:none}
+.img-uploading{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+
+/* ── IT Agent field (read-only) ── */
+.agent-row{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.65rem .9rem}
+.agent-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--red-2),var(--red-3));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:600;color:#fff;flex-shrink:0;overflow:hidden}
+.agent-avatar img{width:100%;height:100%;object-fit:cover}
+.agent-name{font-size:.85rem;font-weight:500;flex:1}
+.agent-badge{font-size:.65rem;background:rgba(192,0,0,.15);border:1px solid rgba(192,0,0,.3);color:#ff6060;border-radius:10px;padding:.15rem .5rem}
+
+/* ── Submit button ── */
+.submit-btn{
+  width:100%;padding:.95rem;background:linear-gradient(135deg,var(--red-1),var(--red-2));
+  border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:600;
+  font-family:inherit;cursor:pointer;transition:opacity .2s,transform .15s;
+  letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:.5rem;
+}
+.submit-btn:disabled{opacity:.35;pointer-events:none}
+.submit-btn:active{transform:scale(.98)}
+.submit-btn svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Bottom nav ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);z-index:100;
+  background:rgba(10,10,10,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;
+  padding:0 .5rem;
+}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:.5rem .75rem;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:10px;transition:background .15s;text-decoration:none;color:var(--muted)}
+.nav-item.active{color:var(--red-1)}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nav-label{font-size:.6rem;font-weight:500;letter-spacing:.3px}
+.nav-item.active .nav-dot{width:4px;height:4px;border-radius:50%;background:var(--red-1);margin-top:-1px}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;top:calc(var(--topbar-h) + 8px);left:50%;transform:translateX(-50%) translateY(-80px);
+  background:var(--surface3);border:1px solid var(--border);border-radius:12px;
+  padding:.65rem 1.1rem;font-size:.8rem;font-weight:500;z-index:200;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;display:flex;align-items:center;gap:8px;
+  box-shadow:0 8px 30px rgba(0,0,0,.4);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(34,197,94,.3);color:#4ade80}
+.toast.error{border-color:rgba(239,68,68,.3);color:#f87171}
+.toast-icon{font-size:1rem}
+
+/* ── Success sheet ── */
+.success-sheet{
+  position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);
+  display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.success-sheet.show{opacity:1;pointer-events:all}
+.sheet-card{background:var(--surface);border-radius:24px 24px 0 0;padding:2rem 1.5rem 2.5rem;width:100%;max-width:480px;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1)}
+.success-sheet.show .sheet-card{transform:none}
+.sheet-check{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;animation:popIn .5s ease}
+.sheet-check svg{width:32px;height:32px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.sheet-title{text-align:center;font-size:1.1rem;font-weight:600;margin-bottom:.3rem}
+.sheet-sub{text-align:center;font-size:.8rem;color:var(--muted);margin-bottom:1.5rem}
+.sheet-info{background:var(--surface2);border-radius:12px;padding:1rem;margin-bottom:1.25rem}
+.sheet-row{display:flex;justify-content:space-between;padding:.3rem 0;font-size:.8rem}
+.sheet-row-label{color:var(--muted)}
+.sheet-row-value{font-weight:500;font-family:'IBM Plex Mono',monospace;font-size:.75rem}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sheet-btn{padding:.75rem;border-radius:12px;text-align:center;font-size:.85rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit}
+.sheet-btn.primary{background:linear-gradient(135deg,var(--red-1),var(--red-2));border-color:transparent;color:#fff}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-icon">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M7 8h10M7 11h6"/></svg>
+    </div>
+    <span class="topbar-name">AssetSys</span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-user" onclick="window.location.href='profile.html'">
+    <div class="user-info">
+      <div class="user-name" id="top-name">—</div>
+      <div class="user-role" id="top-role">—</div>
+    </div>
+    <div class="avatar" id="top-avatar">??</div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content">
+  <div class="page-header">
+    <div class="page-title">บันทึก Upgrade PC</div>
+    <div class="page-sub">กรอกข้อมูลให้ครบถ้วนทุกช่อง</div>
+    <div class="date-badge">
+      <svg style="width:11px;height:11px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span id="date-now">—</span>
+    </div>
+  </div>
+
+  <!-- ส่วนงาน + Computer -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+      <span class="card-title">ข้อมูลเครื่อง</span>
+    </div>
+    <div class="card-body">
+      <!-- ส่วนงาน -->
+      <div class="field">
+        <div class="field-label">ส่วนงาน <span class="required">*</span></div>
+        <div class="autocomplete-wrap">
+          <input class="field-input" id="f-dept" placeholder="พิมพ์หรือเลือกส่วนงาน" autocomplete="off" spellcheck="false">
+          <div class="dept-list" id="dept-list"></div>
+        </div>
+      </div>
+      <!-- Computer name -->
+      <div class="field">
+        <div class="field-label">Computer Name <span class="required">*</span></div>
+        <input class="field-input" id="f-pc" placeholder="เช่น PC-IT-001" spellcheck="false">
+      </div>
+      <!-- EXT -->
+      <div class="field" style="margin-bottom:0">
+        <div class="field-label">หมายเลข SIP / EXT</div>
+        <input class="field-input" id="f-ext" placeholder="เช่น 1234" inputmode="numeric" maxlength="6">
+      </div>
+    </div>
+  </div>
+
+  <!-- Current OS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+      <span class="card-title">OS ปัจจุบัน <span style="color:var(--red-1)">*</span></span>
+    </div>
+    <div class="card-body">
+      <div class="toggle-wrap" id="cur-os-toggle">
+        <div class="toggle-btn" data-v="windows" onclick="selectOS('cur','windows')">
+          <svg viewBox="0 0 24 24"><path d="M3 5.5L11 4v8H3zM13 4l8-1.5V12h-8zM3 13h8v8L3 19.5zM13 13h8v6.5L13 21z"/></svg>Windows
+        </div>
+        <div class="toggle-btn" data-v="ubuntu" onclick="selectOS('cur','ubuntu')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Ubuntu
+        </div>
+      </div>
+      <div class="sub-opts" id="cur-sub" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Upgrade To -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg></div>
+      <span class="card-title">Upgrade เป็น <span style="color:var(--red-1)">*</span></span>
+    </div>
+    <div class="card-body">
+      <div class="toggle-wrap" id="up2-os-toggle">
+        <div class="toggle-btn" data-v="windows" onclick="selectOS('up2','windows')">
+          <svg viewBox="0 0 24 24"><path d="M3 5.5L11 4v8H3zM13 4l8-1.5V12h-8zM3 13h8v8L3 19.5zM13 13h8v6.5L13 21z"/></svg>Windows
+        </div>
+        <div class="toggle-btn" data-v="ubuntu" onclick="selectOS('up2','ubuntu')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Ubuntu
+        </div>
+      </div>
+      <div class="sub-opts" id="up2-sub" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <span class="card-title">สถานะผลงาน <span style="color:var(--red-1)">*</span></span>
+    </div>
+    <div class="card-body">
+      <div class="status-grid" id="status-grid">
+        <!-- จะ render จาก settings -->
+      </div>
+    </div>
+  </div>
+
+  <!-- IT Agent -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <span class="card-title">IT Agent</span>
+    </div>
+    <div class="card-body">
+      <div class="agent-row">
+        <div class="agent-avatar" id="agent-avatar">??</div>
+        <span class="agent-name" id="agent-name">กำลังโหลด...</span>
+        <span class="agent-badge" id="agent-role">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Note + Image -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+      <span class="card-title">บันทึก / หลักฐาน</span>
+    </div>
+    <div class="card-body">
+      <!-- Emoji -->
+      <div class="field">
+        <div class="field-label">Emoji สรุป</div>
+        <div class="emoji-row" id="emoji-row">
+          <!-- render by JS -->
+        </div>
+      </div>
+      <!-- Note -->
+      <div class="field">
+        <div class="field-label">บันทึกย่อ <span style="font-weight:400;color:var(--muted)">(ไม่เกิน 50 ตัวอักษร)</span></div>
+        <div class="note-wrap">
+          <textarea class="note-input" id="f-note" rows="2" maxlength="50" placeholder="บันทึกรายละเอียดเพิ่มเติม..."></textarea>
+          <span class="note-char" id="note-count">0/50</span>
+        </div>
+      </div>
+      <!-- Images -->
+      <div class="field" style="margin-bottom:0">
+        <div class="field-label">รูปภาพหลักฐาน <span style="font-weight:400;color:var(--muted)">(สูงสุด 2 รูป)</span></div>
+        <div class="img-upload-area">
+          <div class="img-slot" id="slot-1" onclick="triggerUpload(1)">
+            <input type="file" id="img-1" accept="image/*" onchange="handleUpload(event,1)">
+            <div class="img-slot-icon">📷</div>
+            <div class="img-slot-label">แตะเพื่ออัปโหลด<br>รูปที่ 1</div>
+          </div>
+          <div class="img-slot" id="slot-2" onclick="triggerUpload(2)">
+            <input type="file" id="img-2" accept="image/*" onchange="handleUpload(event,2)">
+            <div class="img-slot-icon">📷</div>
+            <div class="img-slot-label">แตะเพื่ออัปโหลด<br>รูปที่ 2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+    <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    บันทึกข้อมูล
+  </button>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <a class="nav-item active" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    <span class="nav-label">บันทึก</span>
+    <div class="nav-dot"></div>
+  </a>
+  <a class="nav-item" href="records.html">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span class="nav-label">รายการ</span>
+  </a>
+  <a class="nav-item" href="profile.html">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="nav-label">โปรไฟล์</span>
+  </a>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon"></span>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- Success sheet -->
+<div class="success-sheet" id="success-sheet">
+  <div class="sheet-card">
+    <div class="sheet-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="sheet-title">บันทึกสำเร็จ! 🎉</div>
+    <div class="sheet-sub" id="sheet-id">—</div>
+    <div class="sheet-info" id="sheet-summary"></div>
+    <div class="sheet-actions">
+      <div class="sheet-btn" onclick="resetForm()">+ บันทึกใหม่</div>
+      <div class="sheet-btn primary" onclick="window.location.href='records.html'">ดูรายการ →</div>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+API.requireLogin();
+
+// ── State ────────────────────────────────────────────────────
+let user       = null;
+let depts      = [];
+let osSettings = {};  // { windows: [{value,label}], ubuntu: [...] }
+let statuses   = [];
+let form = {
+  dept:'', pc:'', ext:'',
+  curOS:'', curOSDetail:'',
+  up2OS:'', up2OSDetail:'',
+  status:'', statusLabel:'',
+  emoji:'', note:'',
+  img1:'', img2:'',
+};
+
+// ── Init ─────────────────────────────────────────────────────
+async function init() {
+  // Date
+  document.getElementById('date-now').textContent = new Date().toLocaleString('th-TH',{
+    year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'
+  });
+
+  // Load user + settings in parallel
+  const [meRes, deptsRes, settingsRes] = await Promise.all([
+    API.me(),
+    API.getDepartments(),
+    API.getSettings(''),
+  ]);
+
+  user  = meRes?.user;
+  depts = deptsRes || [];
+
+  // Parse OS settings
+  const all = settingsRes || [];
+  const winOpts    = all.filter(s => s.category === 'os' && (s.value.startsWith('win')));
+  const ubuntuOpts = all.filter(s => s.category === 'os' && s.value.startsWith('ubuntu'));
+  osSettings = { windows: winOpts, ubuntu: ubuntuOpts };
+  statuses   = all.filter(s => s.category === 'status');
+
+  // Render user
+  if (user) {
+    const initials = (user.first_name?.[0] || '') + (user.last_name?.[0] || '');
+    document.getElementById('top-name').textContent  = `${user.first_name} ${user.last_name}`;
+    document.getElementById('top-role').textContent  = user.role === 'admin' ? 'Admin' : 'IT Agent';
+    document.getElementById('top-avatar').textContent = initials;
+    if (user.avatar_url) document.getElementById('top-avatar').innerHTML = `<img src="${user.avatar_url}">`;
+
+    document.getElementById('agent-name').textContent = `${user.first_name} ${user.last_name}`;
+    document.getElementById('agent-role').textContent = user.role === 'admin' ? 'Admin' : 'IT Agent';
+    document.getElementById('agent-avatar').textContent = initials;
+    if (user.avatar_url) document.getElementById('agent-avatar').innerHTML = `<img src="${user.avatar_url}" style="width:100%;height:100%;object-fit:cover">`;
+  }
+
+  // Status grid
+  renderStatuses();
+
+  // Emoji
+  renderEmojis();
+
+  // Department autocomplete
+  initDeptAutocomplete();
+}
+
+// ── Department autocomplete ──────────────────────────────────
+function initDeptAutocomplete() {
+  const input = document.getElementById('f-dept');
+  const list  = document.getElementById('dept-list');
+
+  input.addEventListener('input', () => {
+    const q    = input.value.trim().toLowerCase();
+    const hits = q ? depts.filter(d => d.toLowerCase().includes(q)) : depts;
+    renderDeptList(hits, q);
+    list.classList.toggle('show', hits.length > 0);
+    form.dept = input.value.trim();
+  });
+
+  input.addEventListener('focus', () => {
+    if (depts.length) renderDeptList(depts, '');
+    if (depts.length) list.classList.add('show');
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.autocomplete-wrap')) list.classList.remove('show');
+  });
+}
+
+function renderDeptList(items, q) {
+  const list = document.getElementById('dept-list');
+  list.innerHTML = items.map(d => {
+    const hi = q ? d.replace(new RegExp(`(${q})`,'gi'), '<mark>$1</mark>') : d;
+    return `<div class="dept-item" onclick="pickDept('${d}')">${hi}</div>`;
+  }).join('');
+}
+
+function pickDept(name) {
+  document.getElementById('f-dept').value = name;
+  document.getElementById('dept-list').classList.remove('show');
+  form.dept = name;
+}
+
+// ── OS selector ──────────────────────────────────────────────
+function selectOS(type, os) {
+  const toggleId = type === 'cur' ? 'cur-os-toggle' : 'up2-os-toggle';
+  const subId    = type === 'cur' ? 'cur-sub'        : 'up2-sub';
+
+  document.querySelectorAll(`#${toggleId} .toggle-btn`).forEach(b => b.classList.remove('active'));
+  document.querySelector(`#${toggleId} [data-v="${os}"]`).classList.add('active');
+
+  if (type === 'cur') { form.curOS = os; form.curOSDetail = ''; }
+  else                { form.up2OS = os; form.up2OSDetail = ''; }
+
+  renderOSSub(subId, os, type);
+}
+
+function renderOSSub(subId, os, type) {
+  const sub  = document.getElementById(subId);
+  const opts = osSettings[os] || [];
+
+  if (!opts.length) { sub.style.display = 'none'; return; }
+
+  sub.style.display = 'grid';
+  sub.innerHTML = opts.map(o =>
+    `<div class="sub-btn" data-v="${o.value}" onclick="selectOSDetail('${type}','${o.value}','${o.label}')">${o.label}</div>`
+  ).join('');
+}
+
+function selectOSDetail(type, val, label) {
+  const subId = type === 'cur' ? 'cur-sub' : 'up2-sub';
+  document.querySelectorAll(`#${subId} .sub-btn`).forEach(b => b.classList.remove('active'));
+  document.querySelector(`#${subId} [data-v="${val}"]`).classList.add('active');
+  if (type === 'cur') form.curOSDetail = val;
+  else form.up2OSDetail = val;
+}
+
+// ── Status ───────────────────────────────────────────────────
+function renderStatuses() {
+  const colorMap = { pass:'pass', doi:'doi', reject_user:'reject' };
+  document.getElementById('status-grid').innerHTML = statuses.map(s =>
+    `<div class="status-chip ${colorMap[s.value] || ''}" data-v="${s.value}" onclick="selectStatus('${s.value}','${s.label}')">${s.label}</div>`
+  ).join('');
+}
+
+function selectStatus(val, label) {
+  document.querySelectorAll('.status-chip').forEach(c => c.classList.remove('active'));
+  const chip = document.querySelector(`.status-chip[data-v="${val}"]`);
+  if (chip) chip.classList.add('active');
+  form.status = val; form.statusLabel = label;
+}
+
+// ── Emoji ────────────────────────────────────────────────────
+function renderEmojis() {
+  document.getElementById('emoji-row').innerHTML = CONFIG.NOTE_EMOJIS.map(e =>
+    `<div class="emoji-btn" onclick="selectEmoji('${e}')">${e}</div>`
+  ).join('') + `<span class="emoji-label" style="margin-left:4px;font-size:.7rem;color:var(--muted)">แตะเพื่อเลือก</span>`;
+}
+
+function selectEmoji(e) {
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('active'));
+  const btn = [...document.querySelectorAll('.emoji-btn')].find(b => b.textContent === e);
+  if (btn) btn.classList.add('active');
+  form.emoji = form.emoji === e ? '' : e;
+  if (!btn?.classList.contains('active')) form.emoji = '';
+}
+
+// ── Note char count ──────────────────────────────────────────
+document.getElementById('f-note').addEventListener('input', function() {
+  const n   = this.value.length;
+  const cnt = document.getElementById('note-count');
+  cnt.textContent = `${n}/50`;
+  cnt.classList.toggle('warn', n >= 45);
+  form.note = this.value;
+});
+
+// ── Image upload ─────────────────────────────────────────────
+function triggerUpload(n) {
+  const slot = document.getElementById(`slot-${n}`);
+  if (slot.classList.contains('has-img')) return;
+}
+
+async function handleUpload(event, n) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const slot = document.getElementById(`slot-${n}`);
+
+  // Show uploading
+  slot.innerHTML = `<div class="img-uploading"><div class="spin"></div></div>
+    <input type="file" id="img-${n}" accept="image/*" onchange="handleUpload(event,${n})" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">`;
+
+  try {
+    const res = await API.uploadImage(file);
+    if (n === 1) form.img1 = res.url;
+    else form.img2 = res.url;
+
+    slot.classList.add('has-img');
+    slot.innerHTML = `
+      <img class="img-preview" src="${res.url}">
+      <button class="img-remove" onclick="removeImg(${n},event)">✕</button>
+    `;
+    showToast('✅', `อัปโหลดรูปที่ ${n} สำเร็จ`, 'success');
+  } catch(err) {
+    slot.innerHTML = `
+      <div class="img-slot-icon">📷</div>
+      <div class="img-slot-label">แตะเพื่ออัปโหลด<br>รูปที่ ${n}</div>
+      <input type="file" id="img-${n}" accept="image/*" onchange="handleUpload(event,${n})" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+    `;
+    showToast('❌', 'อัปโหลดไม่สำเร็จ: ' + err.message, 'error');
+  }
+}
+
+function removeImg(n, e) {
+  e.stopPropagation();
+  if (n === 1) form.img1 = '';
+  else form.img2 = '';
+
+  const slot = document.getElementById(`slot-${n}`);
+  slot.classList.remove('has-img');
+  slot.innerHTML = `
+    <input type="file" id="img-${n}" accept="image/*" onchange="handleUpload(event,${n})">
+    <div class="img-slot-icon">📷</div>
+    <div class="img-slot-label">แตะเพื่ออัปโหลด<br>รูปที่ ${n}</div>
+  `;
+}
+
+// ── Validate ─────────────────────────────────────────────────
+function validate() {
+  const f = form;
+  f.dept   = document.getElementById('f-dept').value.trim();
+  f.pc     = document.getElementById('f-pc').value.trim();
+  f.ext    = document.getElementById('f-ext').value.trim();
+  f.note   = document.getElementById('f-note').value.trim();
+
+  if (!f.dept)       { showToast('⚠️','กรุณาระบุส่วนงาน','error'); return false; }
+  if (!f.pc)         { showToast('⚠️','กรุณาระบุ Computer Name','error'); return false; }
+  if (!f.curOS)      { showToast('⚠️','กรุณาเลือก OS ปัจจุบัน','error'); return false; }
+  if (!f.curOSDetail){ showToast('⚠️','กรุณาเลือกเวอร์ชัน OS ปัจจุบัน','error'); return false; }
+  if (!f.up2OS)      { showToast('⚠️','กรุณาเลือก OS ที่ Upgrade ไป','error'); return false; }
+  if (!f.up2OSDetail){ showToast('⚠️','กรุณาเลือกเวอร์ชัน OS ใหม่','error'); return false; }
+  if (!f.status)     { showToast('⚠️','กรุณาเลือกสถานะ','error'); return false; }
+  return true;
+}
+
+// ── Submit ───────────────────────────────────────────────────
+async function submitForm() {
+  if (!validate()) return;
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> กำลังบันทึก...';
+
+  try {
+    const res = await API.saveRecord({
+      department:        form.dept,
+      computer_name:     form.pc,
+      ext:               form.ext,
+      current_os:        form.curOS,
+      current_os_detail: form.curOSDetail,
+      up2_os:            form.up2OS,
+      up2_os_detail:     form.up2OSDetail,
+      status:            form.status,
+      note:              form.note,
+      emoji:             form.emoji,
+      image1_url:        form.img1,
+      image2_url:        form.img2,
+    });
+
+    showSuccessSheet(res.id);
+    // Refresh dept list (might have new dept)
+    depts = await API.getDepartments();
+
+  } catch(err) {
+    showToast('❌', err.message || 'บันทึกไม่สำเร็จ', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>บันทึกข้อมูล';
+  }
+}
+
+// ── Success sheet ─────────────────────────────────────────────
+function showSuccessSheet(id) {
+  document.getElementById('sheet-id').textContent = `Record ID: ${id}`;
+  const osLabel = (v) => {
+    const all = [...(osSettings.windows||[]), ...(osSettings.ubuntu||[])];
+    return all.find(o => o.value === v)?.label || v;
+  };
+  document.getElementById('sheet-summary').innerHTML = `
+    <div class="sheet-row"><span class="sheet-row-label">ส่วนงาน</span><span class="sheet-row-value">${form.dept}</span></div>
+    <div class="sheet-row"><span class="sheet-row-label">PC</span><span class="sheet-row-value">${form.pc}</span></div>
+    <div class="sheet-row"><span class="sheet-row-label">จาก OS</span><span class="sheet-row-value">${osLabel(form.curOSDetail)}</span></div>
+    <div class="sheet-row"><span class="sheet-row-label">Upgrade เป็น</span><span class="sheet-row-value">${osLabel(form.up2OSDetail)}</span></div>
+    <div class="sheet-row"><span class="sheet-row-label">สถานะ</span><span class="sheet-row-value">${form.emoji} ${form.statusLabel}</span></div>
+  `;
+  document.getElementById('success-sheet').classList.add('show');
+}
+
+// ── Reset form ────────────────────────────────────────────────
+function resetForm() {
+  document.getElementById('success-sheet').classList.remove('show');
+  document.getElementById('f-dept').value = '';
+  document.getElementById('f-pc').value   = '';
+  document.getElementById('f-ext').value  = '';
+  document.getElementById('f-note').value = '';
+  document.getElementById('note-count').textContent = '0/50';
+  document.querySelectorAll('.toggle-btn,.sub-btn,.status-chip,.emoji-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sub-opts').forEach(s => s.style.display = 'none');
+  form = { dept:'',pc:'',ext:'',curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:'',statusLabel:'',emoji:'',note:'',img1:'',img2:'' };
+  // reset image slots
+  [1,2].forEach(n => {
+    const slot = document.getElementById(`slot-${n}`);
+    slot.classList.remove('has-img');
+    slot.innerHTML = `<input type="file" id="img-${n}" accept="image/*" onchange="handleUpload(event,${n})"><div class="img-slot-icon">📷</div><div class="img-slot-label">แตะเพื่ออัปโหลด<br>รูปที่ ${n}</div>`;
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+let toastTimer;
+function showToast(icon, msg, type='success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent  = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
