@@ -104,10 +104,30 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .field-input::placeholder{color:var(--muted)}
 
 .ac-wrap{position:relative}
-.dept-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface3);border:1px solid var(--border);border-radius:10px;max-height:150px;overflow-y:auto;z-index:50;display:none;box-shadow:0 8px 24px rgba(0,0,0,.2)}
-.dept-list.show{display:block}
-.dept-item{padding:.55rem .85rem;font-size:.82rem;cursor:pointer;transition:background .12s;color:var(--text)}
-.dept-item:hover{background:var(--surface2)}
+.dept-list{
+  position:absolute;top:calc(100% + 5px);left:0;right:0;
+  background:rgba(20,4,4,.92);
+  border:1px solid rgba(255,45,45,.25);
+  border-radius:11px;max-height:155px;overflow-y:auto;
+  z-index:50;display:none;
+  box-shadow:0 6px 28px rgba(255,0,0,.12),0 2px 8px rgba(0,0,0,.4);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+[data-theme="light"] .dept-list{
+  background:rgba(255,245,245,.96);
+  border-color:rgba(255,45,45,.2);
+  box-shadow:0 6px 28px rgba(255,0,0,.08),0 2px 8px rgba(0,0,0,.08);
+}
+.dept-list.show{display:block;animation:fadeIn .15s ease}
+.dept-item{
+  padding:.58rem .9rem;font-size:.83rem;cursor:pointer;
+  color:rgba(255,200,200,.9);transition:background .12s,color .12s;
+  border-bottom:1px solid rgba(255,45,45,.08);
+}
+[data-theme="light"] .dept-item{color:rgba(160,30,30,.9)}
+.dept-item:last-child{border-bottom:none}
+.dept-item:hover{background:rgba(255,45,45,.1);color:#fff}
+[data-theme="light"] .dept-item:hover{background:rgba(255,45,45,.08);color:#c00}
 .dept-item mark{background:none;color:var(--red-1);font-weight:700}
 
 /* ── OS toggles ── */
@@ -182,24 +202,60 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .btn-save{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
 .btn-sv-icon{width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
 
-/* ── Neon "Add Note" button ── */
+/* ── Neon "Add Note" button — 4-span border trace ── */
 .btn-note{
-  width:100%;margin-top:9px;padding:.82rem;border-radius:12px;
+  width:100%;margin-top:10px;padding:.85rem;border-radius:12px;
   font-size:.88rem;font-weight:700;font-family:'Bai Jamjuree',sans-serif;
-  cursor:pointer;border:1.5px solid rgba(255,45,45,.5);
-  background:rgba(255,45,45,.06);color:var(--red-1);
+  cursor:pointer;border:none;outline:none;
+  background:transparent;color:var(--red-1);
   display:flex;align-items:center;justify-content:center;gap:7px;
   letter-spacing:.2px;position:relative;overflow:hidden;
-  transition:background .2s,transform .1s;
-  animation:neon-blink 2.2s ease-in-out infinite;
+  transition:color .2s,transform .1s;
 }
 .btn-note:active{transform:scale(.97)}
-.btn-note svg{width:14px;height:14px;stroke:var(--red-1);stroke-width:2;fill:none;stroke-linecap:round}
-
-@keyframes neon-blink{
-  0%,100%{box-shadow:0 0 6px rgba(255,45,45,.25),0 0 14px rgba(255,45,45,.15),inset 0 0 8px rgba(255,45,45,.04);border-color:rgba(255,45,45,.5)}
-  50%{box-shadow:0 0 12px rgba(255,45,45,.55),0 0 28px rgba(255,45,45,.35),0 0 48px rgba(255,45,45,.15),inset 0 0 12px rgba(255,45,45,.08);border-color:rgba(255,45,45,.9)}
+.btn-note .btn-note-bg{
+  position:absolute;inset:0;border-radius:12px;
+  background:rgba(255,45,45,.05);
+  border:1px solid rgba(255,45,45,.15);
+  pointer-events:none;
+  transition:background .2s;
 }
+.btn-note:hover .btn-note-bg{background:rgba(255,45,45,.1);}
+.btn-note-txt{position:relative;z-index:2;display:flex;align-items:center;gap:7px}
+.btn-note svg{width:14px;height:14px;stroke:var(--red-1);stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0}
+
+/* 4 spans — each traces one edge */
+.btn-note span.n-line{position:absolute;display:block;pointer-events:none}
+
+/* top: left → right */
+.btn-note span.n-line:nth-child(1){
+  top:0;left:-100%;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,#ff2d2d);
+  animation:neon-t 3s linear infinite;
+}
+/* right: top → bottom */
+.btn-note span.n-line:nth-child(2){
+  top:-100%;right:0;width:2px;height:100%;
+  background:linear-gradient(180deg,transparent,#ff2d2d);
+  animation:neon-r 3s linear infinite;animation-delay:.75s;
+}
+/* bottom: right → left */
+.btn-note span.n-line:nth-child(3){
+  bottom:0;right:-100%;width:100%;height:2px;
+  background:linear-gradient(270deg,transparent,#ff2d2d);
+  animation:neon-b 3s linear infinite;animation-delay:1.5s;
+}
+/* left: bottom → top */
+.btn-note span.n-line:nth-child(4){
+  bottom:-100%;left:0;width:2px;height:100%;
+  background:linear-gradient(0deg,transparent,#ff2d2d);
+  animation:neon-l 3s linear infinite;animation-delay:2.25s;
+}
+
+@keyframes neon-t{0%{left:-100%}50%,100%{left:100%}}
+@keyframes neon-r{0%{top:-100%}50%,100%{top:100%}}
+@keyframes neon-b{0%{right:-100%}50%,100%{right:100%}}
+@keyframes neon-l{0%{bottom:-100%}50%,100%{bottom:100%}}
 
 /* ── Agent bar ── */
 .agent-bar{position:fixed;bottom:calc(var(--nav-h));left:0;right:0;z-index:90;background:var(--surface);border-top:1px solid var(--border);padding:.5rem 1rem;display:flex;align-items:center;gap:9px;transition:background .25s,border-color .25s}
@@ -374,10 +430,17 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
         </button>
       </div>
 
-      <!-- Neon Add Note btn -->
+      <!-- Neon Add Note btn — 4-span border trace -->
       <button class="btn-note" onclick="goStep(3)">
-        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        + เพิ่มบันทึก / รูปภาพ
+        <span class="n-line"></span>
+        <span class="n-line"></span>
+        <span class="n-line"></span>
+        <span class="n-line"></span>
+        <div class="btn-note-bg"></div>
+        <div class="btn-note-txt">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          + เพิ่มบันทึก / รูปภาพ
+        </div>
       </button>
     </div>
 
