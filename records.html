@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AssetSys — รายการ</title>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red-1:#ff2d2d;--red-2:#c00;--red-3:#7a0000;
+  --bg:#0a0a0a;--surface:#141414;--surface2:#1e1e1e;--surface3:#252525;
+  --text:#f0f0f0;--muted:#666;--border:#2a2a2a;
+  --card-bg:#141414;--input-bg:#1e1e1e;--input-txt:#f0f0f0;
+  --topbar-bg:rgba(10,10,10,.92);--nav-bg:rgba(10,10,10,.95);
+  --radius:13px;--nav-h:60px;--topbar-h:54px;
+  --pass-bg:rgba(34,197,94,.1);--pass-border:rgba(34,197,94,.3);--pass-text:#4ade80;
+  --doi-bg:rgba(249,115,22,.1);--doi-border:rgba(249,115,22,.3);--doi-text:#fb923c;
+  --rej-bg:rgba(239,68,68,.1);--rej-border:rgba(239,68,68,.3);--rej-text:#f87171;
+}
+[data-theme="light"]{
+  --bg:#f0f0f5;--surface:#fff;--surface2:#f5f5f5;--surface3:#eaeaea;
+  --text:#111;--muted:#999;--border:#e0e0e0;
+  --card-bg:#fff;--input-bg:#f5f5f5;--input-txt:#111;
+  --topbar-bg:rgba(255,255,255,.92);--nav-bg:rgba(255,255,255,.95);
+  --pass-text:#16a34a;--doi-text:#ea580c;--rej-text:#dc2626;
+}
+html{height:100%;scroll-behavior:smooth}
+body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jamjuree',sans-serif;overflow-x:hidden;transition:background .25s,color .25s}
+
+/* ── Topbar ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);z-index:100;background:var(--topbar-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 .9rem;gap:8px;transition:background .25s,border-color .25s}
+.tb-logo{width:32px;height:32px;border-radius:9px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 10px rgba(192,0,0,.3)}
+.tb-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.tb-name{font-size:.9rem;font-weight:700;letter-spacing:-.2px;flex:1}
+.theme-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;flex-shrink:0}
+.av-wrap{display:flex;align-items:center;gap:7px;cursor:pointer;margin-left:4px}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red-2),var(--red-3));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.u-name{font-size:.7rem;font-weight:600;text-align:right}
+.u-role{font-size:.6rem;color:var(--muted);text-align:right}
+
+/* ── Page ── */
+.page{padding:calc(var(--topbar-h) + .85rem) 1rem calc(var(--nav-h) + 1rem);max-width:480px;margin:0 auto}
+.page-title{font-size:1.15rem;font-weight:700;letter-spacing:-.2px;margin-bottom:.15rem}
+.page-sub{font-size:.72rem;color:var(--muted);margin-bottom:.85rem}
+
+/* ── Search + Filter bar ── */
+.search-row{display:flex;gap:7px;margin-bottom:.75rem}
+.search-wrap{flex:1;position:relative}
+.search-wrap svg{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--muted);stroke-width:2;fill:none;stroke-linecap:round;pointer-events:none}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.65rem .85rem .65rem 2.2rem;font-size:.85rem;color:var(--text);font-family:'Bai Jamjuree',sans-serif;outline:none;transition:border-color .2s,background .25s}
+.search-input:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.08)}
+.search-input::placeholder{color:var(--muted)}
+.filter-btn{width:40px;height:40px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s;position:relative}
+.filter-btn svg{width:16px;height:16px;stroke:var(--text);stroke-width:2;fill:none;stroke-linecap:round}
+.filter-btn.active{background:rgba(255,45,45,.1);border-color:var(--red-1)}
+.filter-btn.active svg{stroke:var(--red-1)}
+.filter-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red-1);display:none}
+.filter-btn.active .filter-dot{display:block}
+
+/* ── Filter panel ── */
+.filter-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;margin-bottom:.75rem;display:none;animation:fadeIn .2s ease}
+.filter-panel.show{display:block}
+.filter-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:.65rem}
+.filter-row:last-child{margin-bottom:0}
+.f-label{font-size:.67rem;font-weight:600;color:var(--muted);letter-spacing:.5px;margin-bottom:.3rem}
+.f-select{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:.58rem .75rem;font-size:.8rem;color:var(--text);font-family:'Bai Jamjuree',sans-serif;outline:none;-webkit-appearance:none;transition:border-color .2s}
+.f-select:focus{border-color:var(--red-1)}
+.f-input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:.58rem .75rem;font-size:.8rem;color:var(--text);font-family:'Bai Jamjuree',sans-serif;outline:none;transition:border-color .2s}
+.f-input:focus{border-color:var(--red-1)}
+.filter-actions{display:flex;gap:6px;margin-top:.65rem}
+.f-btn{flex:1;padding:.6rem;border-radius:8px;font-size:.78rem;font-weight:700;font-family:'Bai Jamjuree',sans-serif;cursor:pointer;border:none}
+.f-btn-clear{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.f-btn-apply{background:linear-gradient(135deg,var(--red-1),var(--red-2));color:#fff}
+
+/* ── Summary bar ── */
+.summary-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.rec-count{font-size:.75rem;color:var(--muted);font-weight:500}
+.rec-count span{color:var(--text);font-weight:700}
+.export-btn{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:var(--red-1);cursor:pointer;background:none;border:none;font-family:'Bai Jamjuree',sans-serif;padding:0}
+.export-btn svg{width:13px;height:13px;stroke:var(--red-1);stroke-width:2;fill:none;stroke-linecap:round}
+
+/* ── Status pills ── */
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:.2rem .55rem;font-size:.66rem;font-weight:700;border:1px solid;line-height:1}
+.pill.pass{background:var(--pass-bg);border-color:var(--pass-border);color:var(--pass-text)}
+.pill.doi{background:var(--doi-bg);border-color:var(--doi-border);color:var(--doi-text)}
+.pill.rej{background:var(--rej-bg);border-color:var(--rej-border);color:var(--rej-text)}
+
+/* ── Record cards ── */
+.rec-list{display:flex;flex-direction:column;gap:.6rem}
+
+.rec-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:border-color .2s,background .25s;-webkit-tap-highlight-color:transparent}
+.rec-card:hover,[data-theme="dark"] .rec-card:hover{border-color:#3a3a3a}
+.rec-card.expanded{border-color:rgba(255,45,45,.25)}
+
+/* Card top row */
+.rec-top{display:flex;align-items:flex-start;gap:10px;padding:.85rem}
+.rec-icon{width:36px;height:36px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem}
+.rec-main{flex:1;min-width:0}
+.rec-pc{font-size:.9rem;font-weight:700;letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-dept{font-size:.7rem;color:var(--muted);margin-top:.1rem}
+.rec-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.rec-date{font-size:.62rem;color:var(--muted);font-family:'Bai Jamjuree',monospace}
+
+/* Card meta row */
+.rec-meta{display:flex;align-items:center;gap:7px;padding:0 .85rem .75rem;flex-wrap:wrap}
+.os-tag{display:inline-flex;align-items:center;gap:3px;font-size:.67rem;font-weight:600;padding:.18rem .5rem;border-radius:6px;border:1px solid}
+.os-tag.win{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.25);color:#38bdf8}
+.os-tag.ubu{background:rgba(139,26,26,.12);border-color:rgba(180,40,40,.3);color:#fca5a5}
+.os-arrow{font-size:.65rem;color:var(--muted)}
+.ext-tag{font-size:.65rem;color:var(--muted);font-family:'Bai Jamjuree',monospace}
+
+/* Card agent row */
+.rec-agent{display:flex;align-items:center;gap:7px;padding:.6rem .85rem;border-top:1px solid var(--border);background:rgba(0,0,0,.15)}
+[data-theme="light"] .rec-agent{background:rgba(0,0,0,.02)}
+.agent-mini-av{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--red-2),var(--red-3));display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.agent-mini-av img{width:100%;height:100%;object-fit:cover}
+.agent-mini-name{font-size:.7rem;color:var(--muted);flex:1}
+.rec-id{font-size:.6rem;color:#3a3a3a;font-family:'Bai Jamjuree',monospace}
+
+/* ── Expanded detail ── */
+.rec-detail{border-top:1px solid var(--border);padding:.85rem;display:none;animation:fadeIn .2s ease;background:var(--surface2)}
+.rec-card.expanded .rec-detail{display:block}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .75rem;margin-bottom:.85rem}
+.d-item{}
+.d-key{font-size:.64rem;font-weight:600;color:var(--muted);letter-spacing:.4px;margin-bottom:.15rem}
+.d-val{font-size:.8rem;font-weight:500}
+.d-val.mono{font-family:'Bai Jamjuree',monospace;font-size:.75rem}
+
+/* Note + images in detail */
+.detail-note{background:var(--card-bg);border:1px solid var(--border);border-radius:9px;padding:.65rem .85rem;font-size:.82rem;line-height:1.55;margin-bottom:.75rem;transition:background .25s,border-color .25s}
+.detail-imgs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:.85rem}
+.detail-img{aspect-ratio:16/9;border-radius:9px;overflow:hidden;background:var(--surface3);cursor:zoom-in}
+.detail-img img{width:100%;height:100%;object-fit:cover}
+
+/* Action buttons in detail */
+.detail-actions{display:flex;gap:7px}
+.d-btn{flex:1;padding:.65rem;border-radius:10px;font-size:.8rem;font-weight:700;font-family:'Bai Jamjuree',sans-serif;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:5px;transition:opacity .2s,transform .1s}
+.d-btn:active{transform:scale(.97)}
+.d-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+.d-btn-edit{background:rgba(255,45,45,.1);border:1px solid rgba(255,45,45,.25);color:var(--red-1)}
+.d-btn-copy{background:var(--card-bg);border:1px solid var(--border);color:var(--muted)}
+.d-btn-edit.disabled{opacity:.3;pointer-events:none}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty-ico{font-size:2.5rem;margin-bottom:.75rem;opacity:.4}
+.empty h3{font-size:.92rem;font-weight:600;margin-bottom:.35rem;color:var(--text)}
+.empty p{font-size:.78rem;line-height:1.5}
+
+/* ── Loading ── */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;gap:.75rem;color:var(--muted)}
+.loading-spin{width:28px;height:28px;border:2.5px solid var(--border);border-top-color:var(--red-1);border-radius:50%;animation:spin .8s linear infinite}
+
+/* ── Skeleton card ── */
+.skel-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem;margin-bottom:.6rem}
+.skel{background:var(--surface2);border-radius:6px;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── Edit bottom sheet ── */
+.edit-sheet{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.edit-sheet.show{opacity:1;pointer-events:all}
+.edit-card{background:var(--surface);border-radius:22px 22px 0 0;padding:1.25rem 1.25rem 2rem;width:100%;max-width:480px;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1),background .25s;max-height:90dvh;overflow-y:auto}
+.edit-sheet.show .edit-card{transform:none}
+.edit-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 1.1rem}
+.edit-title{font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.edit-close{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.edit-close svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+.e-field{margin-bottom:.85rem}
+.e-field:last-child{margin-bottom:0}
+.e-label{font-size:.68rem;font-weight:600;color:var(--muted);letter-spacing:.5px;margin-bottom:.35rem}
+.e-input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:9px;padding:.65rem .85rem;font-size:.88rem;color:var(--input-txt);font-family:'Bai Jamjuree',sans-serif;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.e-input:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.08)}
+.e-select{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:9px;padding:.65rem .85rem;font-size:.88rem;color:var(--input-txt);font-family:'Bai Jamjuree',sans-serif;outline:none;-webkit-appearance:none}
+.edit-os-wrap{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.edit-os-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:.6rem;text-align:center;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .15s;font-family:'Bai Jamjuree',sans-serif}
+.edit-os-btn.win.active{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.4);color:#38bdf8}
+.edit-os-btn.ubu.active{background:rgba(139,26,26,.15);border-color:rgba(180,40,40,.4);color:#fca5a5}
+.edit-status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.edit-status-chip{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:.55rem .4rem;text-align:center;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted);transition:all .15s;font-family:'Bai Jamjuree',sans-serif}
+.edit-status-chip.active.pass{background:var(--pass-bg);border-color:var(--pass-border);color:var(--pass-text)}
+.edit-status-chip.active.doi{background:var(--doi-bg);border-color:var(--doi-border);color:var(--doi-text)}
+.edit-status-chip.active.rej{background:var(--rej-bg);border-color:var(--rej-border);color:var(--rej-text)}
+.edit-sub{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+.edit-sub-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;font-size:.72rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .15s;font-family:'Bai Jamjuree',sans-serif}
+.edit-sub-btn.win.active{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.3);color:#38bdf8}
+.edit-sub-btn.ubu.active{background:rgba(139,26,26,.1);border-color:rgba(180,40,40,.3);color:#fca5a5}
+.edit-save-btn{width:100%;padding:.85rem;margin-top:1rem;background:linear-gradient(135deg,var(--red-1),var(--red-2));border:none;border-radius:12px;color:#fff;font-size:.92rem;font-weight:700;font-family:'Bai Jamjuree',sans-serif;cursor:pointer;transition:opacity .2s}
+.edit-save-btn:disabled{opacity:.35;pointer-events:none}
+.spin-sm{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
+
+/* ── Image lightbox ── */
+.lightbox{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;padding:1rem}
+.lightbox.show{opacity:1;pointer-events:all}
+.lightbox img{max-width:100%;max-height:90dvh;border-radius:12px;object-fit:contain}
+.lightbox-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff}
+.lightbox-close svg{width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
+
+/* ── Toast ── */
+.toast{position:fixed;top:calc(var(--topbar-h)+8px);left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface3);border:1px solid var(--border);border-radius:12px;padding:.6rem 1rem;font-size:.78rem;font-weight:600;z-index:500;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;display:flex;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(0,0,0,.3);font-family:'Bai Jamjuree',sans-serif}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(34,197,94,.3);color:#4ade80}
+.toast.error{border-color:rgba(239,68,68,.3);color:#f87171}
+.toast.info{border-color:rgba(14,165,233,.3);color:#38bdf8}
+
+/* ── Bottom nav ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);z-index:100;background:var(--nav-bg);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 .5rem;transition:background .25s,border-color .25s}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:.5rem .65rem;text-decoration:none;color:var(--muted);-webkit-tap-highlight-color:transparent}
+.nav-item.active{color:var(--red-1)}
+.nav-item svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nav-label{font-size:.58rem;font-weight:600;letter-spacing:.3px}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:var(--red-1);margin-top:-1px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="tb-logo"><img src="https://i.ibb.co/xSpNYB3j/technology.png" alt=""></div>
+  <span class="tb-name">รายการ ASSET</span>
+  <button class="theme-btn" id="theme-btn"></button>
+  <div class="av-wrap" onclick="location.href='profile.html'">
+    <div style="text-align:right">
+      <div class="u-name" id="top-name">—</div>
+      <div class="u-role" id="top-role">—</div>
+    </div>
+    <div class="avatar" id="top-av">?</div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-title">รายการบันทึก</div>
+  <div class="page-sub">ข้อมูล Upgrade PC Client ทั้งหมด</div>
+
+  <!-- Search + Filter -->
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="search-input" placeholder="ค้นหา PC, ส่วนงาน..." autocomplete="off" spellcheck="false">
+    </div>
+    <div class="filter-btn" id="filter-btn" onclick="toggleFilter()">
+      <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <div class="filter-dot"></div>
+    </div>
+  </div>
+
+  <!-- Filter panel -->
+  <div class="filter-panel" id="filter-panel">
+    <div class="filter-row">
+      <div>
+        <div class="f-label">ส่วนงาน</div>
+        <select class="f-select" id="f-dept">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
+      <div>
+        <div class="f-label">สถานะ</div>
+        <select class="f-select" id="f-status">
+          <option value="">ทั้งหมด</option>
+          <option value="pass">Pass</option>
+          <option value="doi">ด๋อย</option>
+          <option value="reject_user">Reject</option>
+        </select>
+      </div>
+    </div>
+    <div class="filter-row">
+      <div>
+        <div class="f-label">วันที่เริ่ม</div>
+        <input type="date" class="f-input" id="f-from">
+      </div>
+      <div>
+        <div class="f-label">วันที่สิ้นสุด</div>
+        <input type="date" class="f-input" id="f-to">
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button class="f-btn f-btn-clear" onclick="clearFilter()">ล้างตัวกรอง</button>
+      <button class="f-btn f-btn-apply" onclick="applyFilter()">กรองข้อมูล</button>
+    </div>
+  </div>
+
+  <!-- Summary bar -->
+  <div class="summary-bar">
+    <div class="rec-count">แสดง <span id="count-display">—</span> รายการ</div>
+    <button class="export-btn" onclick="exportCSV()">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+  </div>
+
+  <!-- Record list -->
+  <div id="rec-list" class="rec-list">
+    <!-- Skeleton loading -->
+    <div class="skel-card" id="skel-1">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <div class="skel" style="width:36px;height:36px;border-radius:9px;flex-shrink:0"></div>
+        <div style="flex:1"><div class="skel" style="height:14px;width:65%;margin-bottom:5px"></div><div class="skel" style="height:10px;width:40%"></div></div>
+        <div class="skel" style="width:50px;height:20px;border-radius:10px"></div>
+      </div>
+      <div style="display:flex;gap:6px"><div class="skel" style="height:20px;width:70px;border-radius:6px"></div><div class="skel" style="height:20px;width:50px;border-radius:6px"></div></div>
+    </div>
+    <div class="skel-card" id="skel-2">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <div class="skel" style="width:36px;height:36px;border-radius:9px;flex-shrink:0"></div>
+        <div style="flex:1"><div class="skel" style="height:14px;width:55%;margin-bottom:5px"></div><div class="skel" style="height:10px;width:35%"></div></div>
+        <div class="skel" style="width:50px;height:20px;border-radius:10px"></div>
+      </div>
+      <div style="display:flex;gap:6px"><div class="skel" style="height:20px;width:60px;border-radius:6px"></div><div class="skel" style="height:20px;width:55px;border-radius:6px"></div></div>
+    </div>
+  </div>
+
+  <div class="empty" id="empty-state" style="display:none">
+    <div class="empty-ico">📋</div>
+    <h3>ไม่พบรายการ</h3>
+    <p>ลองเปลี่ยนคำค้นหาหรือ<br>ล้างตัวกรองแล้วลองใหม่</p>
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    <span class="nav-label">บันทึก</span>
+  </a>
+  <a class="nav-item active" href="records.html">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span class="nav-label">รายการ</span>
+    <div class="nav-dot"></div>
+  </a>
+  <a class="nav-item" href="profile.html">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="nav-label">โปรไฟล์</span>
+  </a>
+</nav>
+
+<!-- Edit bottom sheet -->
+<div class="edit-sheet" id="edit-sheet">
+  <div class="edit-card" id="edit-card">
+    <div class="edit-handle"></div>
+    <div class="edit-title">
+      <span>แก้ไขรายการ</span>
+      <button class="edit-close" onclick="closeEdit()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <div class="e-field">
+      <div class="e-label">ส่วนงาน <span style="color:var(--red-1)">*</span></div>
+      <input class="e-input" id="e-dept" placeholder="ส่วนงาน">
+    </div>
+    <div class="e-field">
+      <div class="e-label">Computer Name <span style="color:var(--red-1)">*</span></div>
+      <input class="e-input" id="e-pc" placeholder="Computer Name">
+    </div>
+    <div class="e-field">
+      <div class="e-label">SIP / EXT</div>
+      <input class="e-input" id="e-ext" placeholder="เช่น 1234" inputmode="numeric" maxlength="6">
+    </div>
+
+    <div class="e-field">
+      <div class="e-label">OS ปัจจุบัน</div>
+      <div class="edit-os-wrap" id="e-cur-toggle">
+        <div class="edit-os-btn win" onclick="editSelectOS('cur','windows')">Windows</div>
+        <div class="edit-os-btn ubu" onclick="editSelectOS('cur','ubuntu')">Ubuntu</div>
+      </div>
+      <div class="edit-sub" id="e-cur-sub"></div>
+    </div>
+
+    <div class="e-field">
+      <div class="e-label">Upgrade เป็น</div>
+      <div class="edit-os-wrap" id="e-up2-toggle">
+        <div class="edit-os-btn win" onclick="editSelectOS('up2','windows')">Windows</div>
+        <div class="edit-os-btn ubu" onclick="editSelectOS('up2','ubuntu')">Ubuntu</div>
+      </div>
+      <div class="edit-sub" id="e-up2-sub"></div>
+    </div>
+
+    <div class="e-field">
+      <div class="e-label">สถานะ</div>
+      <div class="edit-status-grid">
+        <div class="edit-status-chip pass" onclick="editSelectStatus('pass','Pass')">✅ Pass</div>
+        <div class="edit-status-chip doi" onclick="editSelectStatus('doi','ด๋อย')">⚠️ ด๋อย</div>
+        <div class="edit-status-chip rej" onclick="editSelectStatus('reject_user','Reject')">🚫 Reject</div>
+      </div>
+    </div>
+
+    <div class="e-field">
+      <div class="e-label">บันทึกย่อ</div>
+      <input class="e-input" id="e-note" placeholder="บันทึกย่อ" maxlength="60">
+    </div>
+
+    <button class="edit-save-btn" id="edit-save-btn" onclick="saveEdit()">บันทึกการแก้ไข</button>
+  </div>
+</div>
+
+<!-- Image Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+  <button class="lightbox-close" onclick="closeLightbox()">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="t-ico"></span><span id="t-msg"></span></div>
+
+<script src="js/config.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/api.js"></script>
+<script>
+API.requireLogin();
+Theme.renderBtn(document.getElementById('theme-btn'));
+
+// ── State ─────────────────────────────────────────────────────
+let user=null, allRecords=[], filtered=[], osSettings={};
+let editRecord=null, editState={curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:''};
+let filterState={dept:'',status:'',from:'',to:''};
+let searchQ='';
+
+// ── OS label helper ────────────────────────────────────────────
+function osLabel(val){
+  const all=[...(osSettings.windows||[]),...(osSettings.ubuntu||[])];
+  return all.find(o=>o.value===val)?.label || val;
+}
+
+// ── Status helpers ─────────────────────────────────────────────
+const STATUS_CLASS={pass:'pass',doi:'doi',reject_user:'rej'};
+const STATUS_LABEL={pass:'Pass',doi:'ด๋อย',reject_user:'Reject'};
+const STATUS_ICON={pass:'✅',doi:'⚠️',reject_user:'🚫'};
+function pillHTML(val){
+  const c=STATUS_CLASS[val]||'';
+  const l=STATUS_LABEL[val]||val;
+  const i=STATUS_ICON[val]||'';
+  return `<span class="pill ${c}">${i} ${l}</span>`;
+}
+
+// ── OS type from value ─────────────────────────────────────────
+function osType(val){ return val.startsWith('win')?'windows':'ubuntu'; }
+function osTagClass(val){ return val.startsWith('win')?'win':'ubu'; }
+
+// ── Date format ────────────────────────────────────────────────
+function fmtDate(str){
+  if(!str)return'—';
+  const d=new Date(str.replace(' ','T'));
+  return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+}
+function fmtDateTime(str){
+  if(!str)return'—';
+  const d=new Date(str.replace(' ','T'));
+  return d.toLocaleString('th-TH',{day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+
+// ── Init ──────────────────────────────────────────────────────
+async function init(){
+  const [meR,setR,deptR]=await Promise.all([API.me(),API.getSettings(''),API.getDepartments()]);
+  user=meR?.user;
+  const all=setR||[];
+  osSettings={
+    windows:all.filter(s=>s.category==='os'&&s.value.startsWith('win')),
+    ubuntu: all.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
+  };
+
+  if(user){
+    const ini=(user.first_name?.[0]||'')+(user.last_name?.[0]||'');
+    document.getElementById('top-name').textContent=`${user.first_name} ${user.last_name}`;
+    document.getElementById('top-role').textContent=user.role==='admin'?'Admin':'IT';
+    const av=document.getElementById('top-av');
+    av.textContent=ini;
+    if(user.avatar_url)av.innerHTML=`<img src="${user.avatar_url}">`;
+  }
+
+  // Dept filter options
+  const deptSel=document.getElementById('f-dept');
+  (deptR||[]).forEach(d=>{
+    const opt=document.createElement('option');opt.value=d;opt.textContent=d;deptSel.appendChild(opt);
+  });
+
+  await loadRecords();
+}
+
+async function loadRecords(){
+  try{
+    allRecords=await API.getRecords();
+    applyFilter();
+  }catch(err){
+    document.getElementById('rec-list').innerHTML=`<div class="empty"><div class="empty-ico">⚠️</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>${err.message}</p></div>`;
+  }
+}
+
+// ── Filter + Search ────────────────────────────────────────────
+function applyFilter(){
+  filterState.dept  =document.getElementById('f-dept').value;
+  filterState.status=document.getElementById('f-status').value;
+  filterState.from  =document.getElementById('f-from').value;
+  filterState.to    =document.getElementById('f-to').value;
+
+  const hasFilter=filterState.dept||filterState.status||filterState.from||filterState.to;
+  document.getElementById('filter-btn').classList.toggle('active',!!hasFilter);
+
+  filtered=allRecords.filter(r=>{
+    if(filterState.dept   &&r.department!==filterState.dept)return false;
+    if(filterState.status &&r.status!==filterState.status)return false;
+    if(filterState.from   &&r.created_at<filterState.from)return false;
+    if(filterState.to     &&r.created_at>filterState.to+' 23:59:59')return false;
+    if(searchQ){
+      const q=searchQ.toLowerCase();
+      if(!r.computer_name.toLowerCase().includes(q)&&
+         !r.department.toLowerCase().includes(q)&&
+         !r.it_agent.toLowerCase().includes(q)&&
+         !(r.ext&&r.ext.includes(q)))return false;
+    }
+    return true;
+  });
+
+  document.getElementById('count-display').textContent=filtered.length;
+  renderList(filtered);
+  document.getElementById('filter-panel').classList.remove('show');
+}
+
+function clearFilter(){
+  ['f-dept','f-status','f-from','f-to'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  filterState={dept:'',status:'',from:'',to:''};
+  document.getElementById('filter-btn').classList.remove('active');
+  applyFilter();
+}
+
+function toggleFilter(){
+  document.getElementById('filter-panel').classList.toggle('show');
+}
+
+// Search
+document.getElementById('search-input').addEventListener('input',function(){
+  searchQ=this.value.trim();
+  applyFilter();
+});
+
+// ── Render list ────────────────────────────────────────────────
+function renderList(recs){
+  // Remove skeletons
+  document.getElementById('skel-1')?.remove();
+  document.getElementById('skel-2')?.remove();
+
+  const list=document.getElementById('rec-list');
+  const empty=document.getElementById('empty-state');
+
+  if(!recs.length){
+    list.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+
+  list.innerHTML=recs.map(r=>recCardHTML(r)).join('');
+}
+
+function recCardHTML(r){
+  const canEdit=user?.role==='admin'||r.created_by===user?.employee_id;
+  const curType=osTagClass(r.current_os_detail||r.current_os);
+  const up2Type=osTagClass(r.up2_os_detail||r.up2_os);
+  const noteHTML=r.note?`<div class="detail-note">${r.note}</div>`:'';
+  const img1HTML=r.image1_url?`<div class="detail-img" onclick="openLightbox('${r.image1_url}')"><img src="${r.image1_url}" loading="lazy"></div>`:'';
+  const img2HTML=r.image2_url?`<div class="detail-img" onclick="openLightbox('${r.image2_url}')"><img src="${r.image2_url}" loading="lazy"></div>`:'';
+  const imgsHTML=(r.image1_url||r.image2_url)?`<div class="detail-imgs">${img1HTML}${img2HTML}</div>`:'';
+
+  return `<div class="rec-card" id="rc-${r.id}" onclick="toggleCard('${r.id}')">
+    <div class="rec-top">
+      <div class="rec-icon">${r.emoji||'💻'}</div>
+      <div class="rec-main">
+        <div class="rec-pc">${r.computer_name}</div>
+        <div class="rec-dept">${r.department}${r.ext?` · EXT ${r.ext}`:''}</div>
+      </div>
+      <div class="rec-right">
+        ${pillHTML(r.status)}
+        <div class="rec-date">${fmtDate(r.created_at)}</div>
+      </div>
+    </div>
+    <div class="rec-meta">
+      <span class="os-tag ${curType}">${osLabel(r.current_os_detail)||r.current_os}</span>
+      <span class="os-arrow">→</span>
+      <span class="os-tag ${up2Type}">${osLabel(r.up2_os_detail)||r.up2_os}</span>
+      ${r.ext?`<span class="ext-tag">📞 ${r.ext}</span>`:''}
+    </div>
+    <div class="rec-agent">
+      <div class="agent-mini-av">${r.it_agent?.[0]?.toUpperCase()||'?'}</div>
+      <span class="agent-mini-name">${r.it_agent}</span>
+      <span class="rec-id">${r.id}</span>
+    </div>
+    <div class="rec-detail">
+      <div class="detail-grid">
+        <div class="d-item"><div class="d-key">บันทึกเมื่อ</div><div class="d-val mono">${fmtDateTime(r.created_at)}</div></div>
+        <div class="d-item"><div class="d-key">บันทึกโดย</div><div class="d-val mono">${r.created_by}</div></div>
+        <div class="d-item"><div class="d-key">OS เดิม</div><div class="d-val">${osLabel(r.current_os_detail)||r.current_os}</div></div>
+        <div class="d-item"><div class="d-key">OS ใหม่</div><div class="d-val">${osLabel(r.up2_os_detail)||r.up2_os}</div></div>
+      </div>
+      ${noteHTML}
+      ${imgsHTML}
+      <div class="detail-actions">
+        <button class="d-btn d-btn-edit ${canEdit?'':'disabled'}" onclick="event.stopPropagation();openEdit('${r.id}')">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          ${canEdit?'แก้ไข':'ดูอย่างเดียว'}
+        </button>
+        <button class="d-btn d-btn-copy" onclick="event.stopPropagation();copyId('${r.id}')">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          คัดลอก ID
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleCard(id){
+  const card=document.getElementById(`rc-${id}`);
+  if(!card)return;
+  const wasExpanded=card.classList.contains('expanded');
+  // collapse all others
+  document.querySelectorAll('.rec-card.expanded').forEach(c=>c.classList.remove('expanded'));
+  if(!wasExpanded)card.classList.add('expanded');
+}
+
+// ── Copy ID ────────────────────────────────────────────────────
+function copyId(id){
+  navigator.clipboard?.writeText(id).then(()=>toast('📋','คัดลอก ID แล้ว','info')).catch(()=>toast('❌','คัดลอกไม่ได้','error'));
+}
+
+// ── Lightbox ───────────────────────────────────────────────────
+function openLightbox(url){
+  document.getElementById('lightbox-img').src=url;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('show');}
+
+// ── Edit sheet ─────────────────────────────────────────────────
+function openEdit(id){
+  editRecord=allRecords.find(r=>r.id===id);
+  if(!editRecord)return;
+  editState={
+    curOS:editRecord.current_os||'',curOSDetail:editRecord.current_os_detail||'',
+    up2OS:editRecord.up2_os||'',up2OSDetail:editRecord.up2_os_detail||'',
+    status:editRecord.status||'',
+  };
+
+  document.getElementById('e-dept').value=editRecord.department||'';
+  document.getElementById('e-pc').value=editRecord.computer_name||'';
+  document.getElementById('e-ext').value=editRecord.ext||'';
+  document.getElementById('e-note').value=editRecord.note||'';
+
+  // OS toggles
+  if(editState.curOS){
+    document.querySelectorAll('#e-cur-toggle .edit-os-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector(`#e-cur-toggle .${editState.curOS==='windows'?'win':'ubu'}`)?.classList.add('active');
+    renderEditSub('cur',editState.curOS,editState.curOSDetail);
+  }
+  if(editState.up2OS){
+    document.querySelectorAll('#e-up2-toggle .edit-os-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector(`#e-up2-toggle .${editState.up2OS==='windows'?'win':'ubu'}`)?.classList.add('active');
+    renderEditSub('up2',editState.up2OS,editState.up2OSDetail);
+  }
+  // Status
+  document.querySelectorAll('.edit-status-chip').forEach(c=>c.classList.remove('active'));
+  const statusMap={pass:'pass',doi:'doi',reject_user:'rej'};
+  document.querySelector(`.edit-status-chip.${statusMap[editState.status]||editState.status}`)?.classList.add('active');
+
+  document.getElementById('edit-sheet').classList.add('show');
+}
+
+function closeEdit(){ document.getElementById('edit-sheet').classList.remove('show'); }
+
+function editSelectOS(type,os){
+  const toggleId=type==='cur'?'e-cur-toggle':'e-up2-toggle';
+  document.querySelectorAll(`#${toggleId} .edit-os-btn`).forEach(b=>b.classList.remove('active'));
+  document.querySelector(`#${toggleId} .${os==='windows'?'win':'ubu'}`)?.classList.add('active');
+  if(type==='cur'){editState.curOS=os;editState.curOSDetail='';}
+  else{editState.up2OS=os;editState.up2OSDetail='';}
+  renderEditSub(type,os,'');
+}
+
+function renderEditSub(type,os,selected){
+  const subId=type==='cur'?'e-cur-sub':'e-up2-sub';
+  const opts=osSettings[os]||[];
+  const cls=os==='windows'?'win':'ubu';
+  document.getElementById(subId).innerHTML=opts.map(o=>
+    `<div class="edit-sub-btn ${cls}${o.value===selected?' active':''}" onclick="editSelectOSSub('${type}','${o.value}')">${o.label}</div>`
+  ).join('');
+}
+
+function editSelectOSSub(type,val){
+  const subId=type==='cur'?'e-cur-sub':'e-up2-sub';
+  document.querySelectorAll(`#${subId} .edit-sub-btn`).forEach(b=>b.classList.remove('active'));
+  document.querySelector(`#${subId} [onclick*="${val}"]`)?.classList.add('active');
+  if(type==='cur')editState.curOSDetail=val; else editState.up2OSDetail=val;
+}
+
+function editSelectStatus(val,label){
+  const m={pass:'pass',doi:'doi',reject_user:'rej'};
+  document.querySelectorAll('.edit-status-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`.edit-status-chip.${m[val]||val}`)?.classList.add('active');
+  editState.status=val;
+}
+
+async function saveEdit(){
+  if(!editRecord)return;
+  const dept=document.getElementById('e-dept').value.trim();
+  const pc  =document.getElementById('e-pc').value.trim();
+  if(!dept||!pc){toast('⚠️','กรุณาระบุส่วนงานและ PC Name','error');return;}
+
+  const btn=document.getElementById('edit-save-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spin-sm"></span>กำลังบันทึก...';
+
+  try{
+    await API.updateRecord({
+      id:editRecord.id,
+      department:dept, computer_name:pc,
+      ext:document.getElementById('e-ext').value.trim(),
+      current_os:editState.curOS, current_os_detail:editState.curOSDetail,
+      up2_os:editState.up2OS, up2_os_detail:editState.up2OSDetail,
+      status:editState.status,
+      note:document.getElementById('e-note').value.trim(),
+    });
+    closeEdit();
+    toast('✅','แก้ไขสำเร็จ','success');
+    await loadRecords();
+  }catch(err){toast('❌',err.message||'แก้ไขไม่สำเร็จ','error');}
+  finally{btn.disabled=false;btn.textContent='บันทึกการแก้ไข';}
+}
+
+// ── Export CSV ─────────────────────────────────────────────────
+function exportCSV(){
+  if(!filtered.length){toast('⚠️','ไม่มีข้อมูลสำหรับ export','error');return;}
+  const cols=['id','created_at','department','computer_name','ext','current_os','current_os_detail','up2_os','up2_os_detail','status','it_agent','note','created_by'];
+  const rows=[cols.join(','),...filtered.map(r=>cols.map(c=>`"${(r[c]||'').replace(/"/g,'""')}"`).join(','))];
+  const blob=new Blob(['\ufeff'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`assetsys_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('📥','Export สำเร็จ','success');
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+let tTimer;
+function toast(ico,msg,type='success'){
+  const el=document.getElementById('toast');
+  document.getElementById('t-ico').textContent=ico;
+  document.getElementById('t-msg').textContent=msg;
+  el.className=`toast ${type} show`;
+  clearTimeout(tTimer);tTimer=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// Close edit sheet on backdrop click
+document.getElementById('edit-sheet').addEventListener('click',function(e){
+  if(e.target===this)closeEdit();
+});
+
+init();
+</script>
+</body>
+</html>
