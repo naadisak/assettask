@@ -2,80 +2,113 @@
 <html lang="th" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AssetSys — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --red-1:#ff2d2d;--red-2:#c00;--red-3:#7a0000;
   --bg:#0a0a0a;--surface:#141414;--surface2:#1e1e1e;--surface3:#252525;
-  --text:#f0f0f0;--muted:#777;--border:#2a2a2a;
-  --input-bg:#1e1e1e;--input-txt:#f0f0f0;--card-bg:#141414;
-  --key-bg:#1e1e1e;--key-text:#f0f0f0;--dot-empty:#333;--radius:16px;
+  --text:#f0f0f0;--muted:#666;--border:#2a2a2a;
+  --card-bg:#141414;--input-bg:#1e1e1e;--key-text:#f0f0f0;--dot-empty:#2a2a2a;
 }
 [data-theme="light"]{
-  --bg:#f2f2f7;--surface:#ffffff;--surface2:#f8f8f8;--surface3:#efefef;
-  --text:#111;--muted:#888;--border:#e0e0e0;
-  --input-bg:#f8f8f8;--input-txt:#111;--card-bg:#fff;
-  --key-bg:#fff;--key-text:#111;--dot-empty:#ccc;
+  --bg:#f0f0f5;--surface:#fff;--surface2:#f5f5f5;--surface3:#ebebeb;
+  --text:#111;--muted:#999;--border:#e0e0e0;
+  --card-bg:#fff;--input-bg:#f5f5f5;--key-text:#111;--dot-empty:#ddd;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;overflow:hidden;transition:background .25s,color .25s}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(192,0,0,.28) 0%,transparent 70%);pointer-events:none;z-index:0}
-[data-theme="light"] body::before{background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(192,0,0,.1) 0%,transparent 70%)}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;transition:background .25s,color .25s}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 90% 55% at 50% -5%,rgba(192,0,0,.32) 0%,transparent 65%);pointer-events:none;z-index:0}
+[data-theme="light"] body::before{background:radial-gradient(ellipse 90% 55% at 50% -5%,rgba(192,0,0,.1) 0%,transparent 65%)}
 
-/* ── Theme btn ── */
-.theme-btn{position:fixed;top:14px;right:14px;z-index:200;width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .25s,border-color .25s}
+/* Theme btn */
+.theme-btn{position:fixed;top:14px;right:14px;z-index:200;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}
 
-.wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:1.5rem}
+/* Layout */
+.wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:1.25rem}
 
-.logo{text-align:center;margin-bottom:1.75rem;animation:fadeDown .6s ease both}
-.logo-icon{width:72px;height:72px;border-radius:22px;overflow:hidden;margin:0 auto .85rem;box-shadow:0 8px 30px rgba(192,0,0,.35)}
+/* Logo */
+.logo{text-align:center;margin-bottom:1.75rem;animation:fadeDown .5s ease both}
+.logo-icon{width:72px;height:72px;border-radius:22px;overflow:hidden;margin:0 auto .8rem;box-shadow:0 6px 30px rgba(192,0,0,.4)}
 .logo-icon img{width:100%;height:100%;object-fit:cover;display:block}
-.logo h1{font-size:1.45rem;font-weight:600;letter-spacing:-.5px}
-.logo p{font-size:.72rem;color:var(--muted);margin-top:.2rem;letter-spacing:.8px}
+.logo h1{font-size:1.5rem;font-weight:600;letter-spacing:-.5px}
+.logo p{font-size:.7rem;color:var(--muted);margin-top:.2rem;letter-spacing:1px}
 
-.card{width:100%;max-width:360px;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;animation:fadeUp .6s .1s ease both;transition:background .25s,border-color .25s}
+/* Card */
+.card{width:100%;max-width:380px;background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:1.75rem 1.5rem;animation:fadeUp .5s .08s ease both;transition:background .25s,border-color .25s}
 
-/* ── First-login notice ── */
-.notice{background:rgba(192,0,0,.08);border:1px solid rgba(192,0,0,.2);border-radius:10px;padding:.65rem .9rem;font-size:.75rem;color:#e06060;margin-bottom:1.1rem;line-height:1.65;display:flex;gap:8px;align-items:flex-start}
-[data-theme="light"] .notice{background:rgba(192,0,0,.06);color:#b03030}
+/* Notice */
+.notice{display:flex;gap:8px;align-items:flex-start;background:rgba(192,0,0,.08);border:1px solid rgba(192,0,0,.2);border-radius:10px;padding:.65rem .9rem;font-size:.75rem;color:#e07070;line-height:1.65;margin-bottom:1.1rem}
+[data-theme="light"] .notice{color:#a03030}
 
+/* Employee ID */
 .field{margin-bottom:1.1rem}
-.field label{display:block;font-size:.72rem;font-weight:500;color:var(--muted);letter-spacing:.8px;margin-bottom:.4rem}
-.field input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:.72rem 1rem;font-size:.92rem;color:var(--input-txt);font-family:inherit;outline:none;transition:border-color .2s,background .25s}
-.field input:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.1)}
-.field input::placeholder{color:var(--dot-empty)}
+.field-label{font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.7px;margin-bottom:.4rem}
+.field-input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:.72rem 1rem;font-size:.92rem;color:var(--text);font-family:inherit;outline:none;transition:border-color .2s,background .25s;-webkit-appearance:none}
+.field-input:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.1)}
+.field-input::placeholder{color:var(--muted)}
 
-.pin-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
-.pin-head label{font-size:.72rem;font-weight:500;color:var(--muted);letter-spacing:.8px}
-.pin-toggle{font-size:.7rem;color:var(--red-1);cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+/* ── PIN digit boxes ── */
+.pin-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem}
+.pin-label-row label{font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.7px}
+.pin-show-btn{font-size:.7rem;color:var(--red-1);background:none;border:none;font-family:inherit;cursor:pointer;padding:0}
 
-.pin-dots{display:flex;gap:10px;justify-content:center;margin-bottom:1.35rem}
-.pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--dot-empty);transition:all .15s}
-.pin-dot.filled{background:var(--red-1);border-color:var(--red-1);transform:scale(1.1)}
-.pin-dot.error{border-color:#ff4444;animation:shake .4s ease}
+.pin-boxes{display:flex;gap:8px;justify-content:center;margin-bottom:1.1rem}
+.pin-box{
+  width:46px;height:54px;border-radius:12px;border:1.5px solid var(--border);
+  background:var(--input-bg);color:var(--text);
+  font-size:1.4rem;font-family:'IBM Plex Mono',monospace;font-weight:500;
+  text-align:center;outline:none;caret-color:transparent;cursor:pointer;
+  transition:border-color .15s,background .25s,transform .1s;
+  -webkit-appearance:none;
+}
+.pin-box:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.1);transform:scale(1.05)}
+.pin-box.filled{border-color:var(--red-1)}
+.pin-box.shake{animation:shake .35s ease}
+[data-theme="light"] .pin-box{background:#f5f5f5}
 
-.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.key{background:var(--key-bg);border:1px solid var(--border);border-radius:12px;padding:.88rem;font-size:1.2rem;font-weight:500;cursor:pointer;font-family:'IBM Plex Mono',monospace;color:var(--key-text);transition:all .1s,background .25s,border-color .25s;user-select:none;-webkit-tap-highlight-color:transparent}
-.key:active{opacity:.65;transform:scale(.95)}
-.key.del{font-size:.95rem;font-family:'IBM Plex Sans Thai',sans-serif}
-.key.empty{background:transparent;border-color:transparent;pointer-events:none}
+/* ── Divider ── */
+.divider{display:flex;align-items:center;gap:10px;margin:.9rem 0;color:var(--muted);font-size:.72rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
 
-.btn-login{width:100%;padding:.85rem;margin-top:1.15rem;background:linear-gradient(135deg,var(--red-1),var(--red-2));border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:.3px}
+/* ── LINE login btn ── */
+.line-btn{
+  width:100%;padding:.78rem;border-radius:12px;border:none;
+  background:#06C755;color:#fff;font-size:.9rem;font-weight:600;
+  font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;
+  transition:opacity .2s,transform .1s;
+}
+.line-btn:active{transform:scale(.98);opacity:.9}
+.line-btn svg{width:22px;height:22px;flex-shrink:0}
+.line-btn-wrap{display:none}
+.line-btn-wrap.show{display:block}
+
+/* ── Login button ── */
+.btn-login{
+  width:100%;padding:.85rem;margin-top:.75rem;
+  background:linear-gradient(135deg,var(--red-1),var(--red-2));
+  border:none;border-radius:12px;color:#fff;font-size:.95rem;font-weight:600;
+  font-family:inherit;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:.3px;
+}
 .btn-login:active{transform:scale(.98)}
 .btn-login:disabled{opacity:.35;pointer-events:none}
 
-.err-msg{display:none;text-align:center;font-size:.8rem;color:#ff6060;margin-top:.7rem;padding:.5rem;background:rgba(255,60,60,.08);border-radius:8px}
+/* Error */
+.err-msg{display:none;text-align:center;font-size:.78rem;color:#f87171;margin-top:.65rem;padding:.5rem .75rem;background:rgba(248,113,113,.08);border-radius:8px}
 .err-msg.show{display:block;animation:fadeIn .3s ease}
+
+/* Spinner */
 .spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
 
-@keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+/* Footer */
+.footer{margin-top:1.25rem;font-size:.67rem;color:var(--muted);text-align:center;animation:fadeIn .8s .3s ease both}
+
+@keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.footer{margin-top:1.35rem;text-align:center;font-size:.68rem;color:var(--muted);animation:fadeIn .8s .4s ease both}
 </style>
 </head>
 <body>
@@ -92,36 +125,45 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
 
   <div class="card">
+    <!-- First-login notice -->
     <div class="notice">
       <span>💡</span>
       <span><strong>เข้าใช้งานครั้งแรก?</strong><br>ใช้ <strong>รหัสพนักงาน</strong> เป็น PIN แรก ระบบจะบังคับเปลี่ยน PIN ใหม่ทันที</span>
     </div>
 
+    <!-- Employee ID -->
     <div class="field">
-      <label>รหัสพนักงาน</label>
-      <input type="text" id="emp-id" placeholder="เช่น admin001" autocomplete="username" spellcheck="false">
+      <div class="field-label">รหัสพนักงาน</div>
+      <input class="field-input" type="text" id="emp-id" placeholder="เช่น admin001" autocomplete="username" spellcheck="false">
     </div>
 
-    <div class="pin-head">
+    <!-- PIN digit boxes -->
+    <div class="pin-label-row">
       <label>PIN 6 หลัก</label>
-      <button class="pin-toggle" id="pin-toggle">แสดง</button>
+      <button class="pin-show-btn" id="pin-show-btn" type="button">แสดง</button>
     </div>
-    <div class="pin-dots" id="pin-dots">
-      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    <div class="pin-boxes" id="pin-boxes">
+      <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="0">
+      <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="1">
+      <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="2">
+      <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="3">
+      <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="4">
+      <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="5">
     </div>
 
-    <div class="numpad">
-      <button class="key" data-v="1">1</button><button class="key" data-v="2">2</button><button class="key" data-v="3">3</button>
-      <button class="key" data-v="4">4</button><button class="key" data-v="5">5</button><button class="key" data-v="6">6</button>
-      <button class="key" data-v="7">7</button><button class="key" data-v="8">8</button><button class="key" data-v="9">9</button>
-      <button class="key empty"></button><button class="key" data-v="0">0</button>
-      <button class="key del" id="del-btn">⌫</button>
+    <!-- LINE login (แสดงเฉพาะถ้าเคย link LINE) -->
+    <div class="line-btn-wrap" id="line-wrap">
+      <div class="divider">หรือ</div>
+      <button class="line-btn" id="line-login-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.92 2 10.76c0 3.66 2.44 6.86 6.12 8.61-.27 1-.96 3.65-.96 3.65s-.04.18.09.25c.14.07.29-.01.29-.01l4.25-2.81c.68.09 1.38.14 2.11.14 5.52 0 10-3.92 10-8.76C22 5.92 17.52 2 12 2z"/></svg>
+        เข้าสู่ระบบด้วย LINE
+      </button>
     </div>
 
     <button class="btn-login" id="login-btn" disabled>เข้าสู่ระบบ</button>
     <div class="err-msg" id="err-msg"></div>
   </div>
+
   <div class="footer">AssetSys v1.0 · IT Department</div>
 </div>
 
@@ -130,63 +172,138 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <script src="js/api.js"></script>
 <script>
 Theme.renderBtn(document.getElementById('theme-btn'));
-if (API.isLoggedIn()) window.location.href = 'index.html';
 
-let pin='', showPin=false;
-const MAX=6;
-const empInput=document.getElementById('emp-id');
-const dots=document.querySelectorAll('.pin-dot');
-const loginBtn=document.getElementById('login-btn');
-const errMsg=document.getElementById('err-msg');
+// ── ถ้า login อยู่แล้ว ไป index ─────────────────────────────
+if (API.isLoggedIn()) { window.location.replace('index.html'); }
 
-function updateDots(){
-  dots.forEach((d,i)=>{
-    d.classList.toggle('filled', i<pin.length);
-    if(showPin && i<pin.length){
-      d.textContent=pin[i];
-      d.style.cssText='width:22px;height:22px;font-size:.85rem;font-family:"IBM Plex Mono",monospace;font-weight:500';
-    }else{d.textContent='';d.style.cssText='';}
+// ── LINE button — แสดงถ้าเคย link LINE ──────────────────────
+if (localStorage.getItem('assetsys_line_linked') === '1') {
+  document.getElementById('line-wrap').classList.add('show');
+}
+
+// ── Elements ─────────────────────────────────────────────────
+const empInput  = document.getElementById('emp-id');
+const boxes     = Array.from(document.querySelectorAll('.pin-box'));
+const loginBtn  = document.getElementById('login-btn');
+const errMsg    = document.getElementById('err-msg');
+const showBtn   = document.getElementById('pin-show-btn');
+let showPin = false;
+
+// ── PIN boxes logic ──────────────────────────────────────────
+function getPin() { return boxes.map(b => b.value).join(''); }
+
+function updateState() {
+  const pin = getPin();
+  const emp = empInput.value.trim();
+  loginBtn.disabled = !(pin.length === 6 && emp.length > 0);
+  boxes.forEach(b => b.classList.toggle('filled', b.value.length > 0));
+}
+
+// กรอกเลขแล้วเลื่อน focus ไปกล่องถัดไป
+boxes.forEach((box, i) => {
+  box.addEventListener('input', e => {
+    const val = e.target.value.replace(/\D/g, '');
+    box.value = val.slice(-1);               // รับแค่ 1 ตัว
+    if (val && i < 5) boxes[i + 1].focus();
+    updateState();
   });
-  loginBtn.disabled=!(pin.length===MAX && empInput.value.trim());
+
+  box.addEventListener('keydown', e => {
+    if (e.key === 'Backspace') {
+      if (!box.value && i > 0) {            // ถ้าว่างแล้ว ถอยกล่องก่อน
+        boxes[i - 1].focus();
+        boxes[i - 1].value = '';
+      }
+      updateState();
+    }
+    if (e.key === 'ArrowLeft' && i > 0)  boxes[i - 1].focus();
+    if (e.key === 'ArrowRight' && i < 5) boxes[i + 1].focus();
+    if (e.key === 'Enter') tryLogin();
+  });
+
+  // กด paste (วาง 6 หลักทีเดียว)
+  box.addEventListener('paste', e => {
+    e.preventDefault();
+    const txt = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+    txt.split('').forEach((ch, idx) => { if (boxes[idx]) boxes[idx].value = ch; });
+    boxes[Math.min(txt.length, 5)].focus();
+    updateState();
+  });
+});
+
+// กด enter บน emp input → focus pin
+empInput.addEventListener('keydown', e => { if (e.key === 'Enter') boxes[0].focus(); });
+empInput.addEventListener('input', updateState);
+
+// Show/hide PIN
+showBtn.addEventListener('click', () => {
+  showPin = !showPin;
+  const t = showPin ? 'text' : 'password';
+  boxes.forEach(b => b.type = t);
+  showBtn.textContent = showPin ? 'ซ่อน' : 'แสดง';
+});
+
+// ── Error ────────────────────────────────────────────────────
+function showError(msg) {
+  errMsg.textContent = msg;
+  errMsg.classList.add('show');
+  boxes.forEach(b => {
+    b.classList.add('shake');
+    setTimeout(() => b.classList.remove('shake'), 400);
+  });
+  // clear PIN
+  boxes.forEach(b => b.value = '');
+  boxes[0].focus();
+  updateState();
 }
 
-document.querySelector('.numpad').addEventListener('click',e=>{
-  const b=e.target.closest('.key');
-  if(b && b.dataset.v!==undefined && pin.length<MAX){pin+=b.dataset.v;updateDots();}
-});
-document.getElementById('del-btn').addEventListener('click',()=>{pin=pin.slice(0,-1);updateDots();});
-document.addEventListener('keydown',e=>{
-  if(document.activeElement===empInput)return;
-  if(/^[0-9]$/.test(e.key)&&pin.length<MAX){pin+=e.key;updateDots();}
-  if(e.key==='Backspace'){pin=pin.slice(0,-1);updateDots();}
-  if(e.key==='Enter')tryLogin();
-});
-empInput.addEventListener('input',updateDots);
-document.getElementById('pin-toggle').addEventListener('click',function(){
-  showPin=!showPin;this.textContent=showPin?'ซ่อน':'แสดง';updateDots();
-});
+function hideError() { errMsg.classList.remove('show'); }
 
-function showError(msg){
-  errMsg.textContent=msg;errMsg.classList.add('show');
-  dots.forEach(d=>{d.classList.add('error');setTimeout(()=>d.classList.remove('error'),500);});
-  pin='';updateDots();
-}
+// ── Login ─────────────────────────────────────────────────────
+async function tryLogin() {
+  const emp = empInput.value.trim();
+  const pin = getPin();
+  if (!emp || pin.length !== 6) return;
 
-async function tryLogin(){
-  const emp=empInput.value.trim();
-  if(!emp||pin.length!==MAX)return;
-  loginBtn.disabled=true;
-  loginBtn.innerHTML='<span class="spin"></span>กำลังเข้าสู่ระบบ...';
-  errMsg.classList.remove('show');
-  try{
-    const res=await API.login(emp,pin);
-    window.location.href=res?.must_change_pw?'change_pin.html':'index.html';
-  }catch(err){
-    showError(err.message||'เข้าสู่ระบบไม่สำเร็จ');
-    loginBtn.innerHTML='เข้าสู่ระบบ';loginBtn.disabled=false;
+  loginBtn.disabled = true;
+  loginBtn.innerHTML = '<span class="spin"></span>กำลังเข้าสู่ระบบ...';
+  hideError();
+
+  try {
+    const res = await API.login(emp, pin);
+
+    // ── ตรวจสอบ token จริงๆ ก่อน redirect ──────────────────
+    if (!res || !res.token) {
+      showError('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');
+      return;
+    }
+
+    // Redirect ตาม must_change_pw
+    window.location.replace(res.must_change_pw ? 'change_pin.html' : 'index.html');
+
+  } catch(err) {
+    showError(err.message || 'เข้าสู่ระบบไม่สำเร็จ');
+  } finally {
+    loginBtn.innerHTML = 'เข้าสู่ระบบ';
+    loginBtn.disabled = !(getPin().length === 6 && empInput.value.trim());
   }
 }
-loginBtn.addEventListener('click',tryLogin);
+
+loginBtn.addEventListener('click', tryLogin);
+
+// ── LINE login ───────────────────────────────────────────────
+document.getElementById('line-login-btn')?.addEventListener('click', () => {
+  // LINE OAuth — ต้องมี LINE_CHANNEL_ID ใน config
+  if (!CONFIG.LINE_CHANNEL_ID) {
+    showError('LINE login ยังไม่ได้ตั้งค่า Channel ID');
+    return;
+  }
+  const state    = Math.random().toString(36).substr(2);
+  const callback = encodeURIComponent(window.location.origin + '/line_callback.html');
+  const url = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${CONFIG.LINE_CHANNEL_ID}&redirect_uri=${callback}&state=${state}&scope=profile%20openid`;
+  localStorage.setItem('assetsys_line_state', state);
+  window.location.href = url;
+});
 </script>
 </body>
 </html>
