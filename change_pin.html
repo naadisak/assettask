@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AssetSys — ตั้งค่า PIN ใหม่</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red-1:#ff2d2d;--red-2:#c00;--red-3:#7a0000;
+  --bg:#0a0a0a;--surface:#141414;--surface2:#1e1e1e;
+  --text:#f5f5f5;--muted:#888;--border:#2a2a2a;--radius:16px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(192,0,0,.3) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+.wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:1.5rem}
+
+/* ── Header ── */
+.header{text-align:center;margin-bottom:2rem;animation:fadeDown .5s ease both}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(192,0,0,.15);border:1px solid rgba(192,0,0,.3);border-radius:20px;padding:.35rem .85rem;font-size:.7rem;font-weight:500;color:#ff6060;letter-spacing:.5px;margin-bottom:1rem}
+.header h2{font-size:1.3rem;font-weight:600}
+.header p{font-size:.8rem;color:var(--muted);margin-top:.35rem;line-height:1.5}
+
+/* ── Card ── */
+.card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;animation:fadeUp .5s .1s ease both}
+
+/* ── Step indicator ── */
+.steps{display:flex;gap:8px;justify-content:center;margin-bottom:1.75rem}
+.step{width:28px;height:4px;border-radius:2px;background:var(--border);transition:background .3s}
+.step.active{background:var(--red-1);width:40px}
+.step.done{background:#3a3a3a}
+
+.step-label{text-align:center;font-size:.75rem;color:var(--muted);margin-bottom:1.25rem;letter-spacing:.3px}
+
+/* ── PIN section ── */
+.pin-section{margin-bottom:1.5rem}
+.pin-section:last-of-type{margin-bottom:0}
+.pin-title{font-size:.72rem;font-weight:500;color:var(--muted);letter-spacing:.8px;margin-bottom:.6rem}
+
+.pin-dots{display:flex;gap:10px;justify-content:center;margin-bottom:.5rem}
+.pin-dot{width:13px;height:13px;border-radius:50%;border:2px solid #333;transition:all .15s}
+.pin-dot.filled{background:var(--red-1);border-color:var(--red-1);transform:scale(1.1)}
+.pin-dot.confirm-filled{background:#4ade80;border-color:#4ade80;transform:scale(1.1)}
+.pin-dot.match{background:#4ade80;border-color:#4ade80}
+.pin-dot.mismatch{background:#ff4444;border-color:#ff4444;animation:shake .4s ease}
+.pin-dot.error{border-color:#ff4444;animation:shake .4s ease}
+
+.pin-match-msg{text-align:center;font-size:.72rem;height:16px;transition:all .2s}
+.pin-match-msg.ok{color:#4ade80}
+.pin-match-msg.fail{color:#ff6060}
+
+/* ── Numpad ── */
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:1.25rem}
+.key{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:.85rem;font-size:1.2rem;font-weight:500;cursor:pointer;font-family:'IBM Plex Mono',monospace;color:var(--text);transition:all .1s;user-select:none;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+.key:active{background:#252525;transform:scale(.95)}
+.key.del{font-size:1rem;font-family:'IBM Plex Sans Thai',sans-serif}
+.key.empty{background:transparent;border-color:transparent;pointer-events:none}
+
+/* ── Rule ── */
+.rules{background:var(--surface2);border-radius:10px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.75rem;color:var(--muted);line-height:1.8}
+.rule-item{display:flex;align-items:center;gap:6px}
+.rule-item::before{content:'·';color:var(--red-1);font-size:1rem}
+
+/* ── Submit ── */
+.btn-save{width:100%;padding:.85rem;margin-top:1.25rem;background:linear-gradient(135deg,var(--red-1),var(--red-2));border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:.3px}
+.btn-save:disabled{opacity:.4;pointer-events:none}
+.btn-save:active{transform:scale(.98)}
+
+.err-msg{display:none;text-align:center;font-size:.8rem;color:#ff6060;margin-top:.75rem;padding:.5rem;background:rgba(255,60,60,.08);border-radius:8px}
+.err-msg.show{display:block;animation:fadeIn .3s ease}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Success overlay ── */
+.success-overlay{display:none;position:fixed;inset:0;z-index:100;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;animation:fadeIn .4s ease}
+.success-overlay.show{display:flex}
+.check-circle{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;animation:popIn .5s ease}
+.check-circle svg{width:40px;height:40px;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.success-overlay h3{font-size:1.2rem;font-weight:600;margin-bottom:.5rem}
+.success-overlay p{font-size:.85rem;color:var(--muted)}
+@keyframes popIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="badge">🔐 ครั้งแรก</div>
+    <h2>ตั้งค่า PIN ใหม่</h2>
+    <p>กรุณาตั้ง PIN 6 หลักสำหรับใช้งานระบบ<br>ห้ามใช้เลขซ้ำกันทั้ง 6 ตัว</p>
+  </div>
+
+  <div class="card">
+    <!-- Step indicator -->
+    <div class="steps">
+      <div class="step active" id="step1-bar"></div>
+      <div class="step" id="step2-bar"></div>
+    </div>
+    <div class="step-label" id="step-label">ขั้นที่ 1 — กรอก PIN ใหม่</div>
+
+    <!-- PIN 1 -->
+    <div class="pin-section" id="section-pin1">
+      <div class="pin-title">PIN ใหม่</div>
+      <div class="pin-dots" id="dots1">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+    </div>
+
+    <!-- PIN 2 (confirm) -->
+    <div class="pin-section" id="section-pin2" style="display:none">
+      <div class="pin-title">ยืนยัน PIN อีกครั้ง</div>
+      <div class="pin-dots" id="dots2">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-match-msg" id="match-msg"></div>
+    </div>
+
+    <!-- Rules -->
+    <div class="rules">
+      <div class="rule-item">ตัวเลขเท่านั้น 6 หลัก</div>
+      <div class="rule-item">ห้ามใช้รหัสเดิม (เบอร์โต๊ะ)</div>
+      <div class="rule-item">จำ PIN ไว้ ระบบไม่มี reset</div>
+    </div>
+
+    <!-- Numpad -->
+    <div class="numpad">
+      <button class="key" data-v="1">1</button>
+      <button class="key" data-v="2">2</button>
+      <button class="key" data-v="3">3</button>
+      <button class="key" data-v="4">4</button>
+      <button class="key" data-v="5">5</button>
+      <button class="key" data-v="6">6</button>
+      <button class="key" data-v="7">7</button>
+      <button class="key" data-v="8">8</button>
+      <button class="key" data-v="9">9</button>
+      <button class="key empty"></button>
+      <button class="key" data-v="0">0</button>
+      <button class="key del" id="del-btn">⌫</button>
+    </div>
+
+    <button class="btn-save" id="save-btn" disabled>ยืนยัน PIN</button>
+    <div class="err-msg" id="err-msg"></div>
+  </div>
+</div>
+
+<!-- Success -->
+<div class="success-overlay" id="success">
+  <div class="check-circle">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h3>ตั้งค่า PIN สำเร็จ!</h3>
+  <p>กำลังเข้าสู่ระบบ...</p>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+if (!API.isLoggedIn()) window.location.href = 'login.html';
+
+let pin1 = '', pin2 = '';
+let step = 1; // 1 or 2
+const MAX = 6;
+
+const dots1   = document.querySelectorAll('#dots1 .pin-dot');
+const dots2   = document.querySelectorAll('#dots2 .pin-dot');
+const saveBtn = document.getElementById('save-btn');
+const errMsg  = document.getElementById('err-msg');
+const matchMsg= document.getElementById('match-msg');
+
+function updateDots(arr, pin, type='normal') {
+  arr.forEach((d, i) => {
+    const filled = i < pin.length;
+    d.classList.remove('filled','confirm-filled','match','mismatch');
+    if (!filled) return;
+    if (type === 'confirm' && pin1.length === MAX && pin.length === MAX) {
+      d.classList.add(pin1 === pin2 ? 'match' : 'mismatch');
+    } else {
+      d.classList.add(type === 'confirm' ? 'confirm-filled' : 'filled');
+    }
+  });
+}
+
+function refresh() {
+  if (step === 1) {
+    updateDots(dots1, pin1);
+    saveBtn.textContent = pin1.length === MAX ? 'ถัดไป →' : 'ยืนยัน PIN';
+    saveBtn.disabled    = pin1.length < MAX;
+  } else {
+    updateDots(dots2, pin2, 'confirm');
+    if (pin2.length === MAX) {
+      const ok = pin1 === pin2;
+      matchMsg.textContent = ok ? '✓ PIN ตรงกัน' : '✗ PIN ไม่ตรงกัน';
+      matchMsg.className   = 'pin-match-msg ' + (ok ? 'ok' : 'fail');
+      saveBtn.disabled     = !ok;
+    } else {
+      matchMsg.textContent = '';
+      matchMsg.className   = 'pin-match-msg';
+      saveBtn.disabled     = true;
+    }
+  }
+}
+
+function goStep2() {
+  // Validate: ห้ามซ้ำทั้งหมด
+  if (/^(.)\1{5}$/.test(pin1)) {
+    showError('ห้ามใช้ตัวเลขซ้ำกัน 6 ตัว'); return;
+  }
+  step = 2;
+  document.getElementById('section-pin2').style.display = '';
+  document.getElementById('section-pin1').style.opacity = '.4';
+  document.getElementById('step1-bar').classList.replace('active','done');
+  document.getElementById('step2-bar').classList.add('active');
+  document.getElementById('step-label').textContent = 'ขั้นที่ 2 — ยืนยัน PIN';
+  saveBtn.textContent = 'บันทึก PIN';
+  saveBtn.disabled    = true;
+}
+
+function showError(msg) {
+  errMsg.textContent = msg;
+  errMsg.classList.add('show');
+  const target = step === 1 ? dots1 : dots2;
+  target.forEach(d => { d.classList.add('error'); setTimeout(() => d.classList.remove('error'), 500); });
+  if (step === 2) { pin2 = ''; } else { pin1 = ''; }
+  refresh();
+}
+
+// Numpad
+document.querySelector('.numpad').addEventListener('click', e => {
+  const btn = e.target.closest('.key');
+  if (!btn || btn.dataset.v === undefined) return;
+  errMsg.classList.remove('show');
+  if (step === 1 && pin1.length < MAX) { pin1 += btn.dataset.v; refresh(); }
+  else if (step === 2 && pin2.length < MAX) { pin2 += btn.dataset.v; refresh(); }
+});
+
+document.getElementById('del-btn').addEventListener('click', () => {
+  if (step === 1) pin1 = pin1.slice(0,-1);
+  else pin2 = pin2.slice(0,-1);
+  refresh();
+});
+
+// Save btn
+saveBtn.addEventListener('click', async () => {
+  if (step === 1) { goStep2(); return; }
+
+  // Submit
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<span class="spin"></span>กำลังบันทึก...';
+
+  try {
+    await API.changePin(pin1);
+    document.getElementById('success').classList.add('show');
+    setTimeout(() => window.location.href = 'index.html', 1800);
+  } catch (err) {
+    showError(err.message || 'บันทึกไม่สำเร็จ');
+    saveBtn.innerHTML = 'บันทึก PIN';
+    saveBtn.disabled  = false;
+  }
+});
+
+refresh();
+</script>
+</body>
+</html>

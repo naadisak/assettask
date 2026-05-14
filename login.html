@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AssetSys — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red-1:#ff2d2d;--red-2:#c00;--red-3:#7a0000;
+  --bg:#0a0a0a;--surface:#141414;--surface2:#1e1e1e;
+  --text:#f5f5f5;--muted:#888;--border:#2a2a2a;
+  --pin-size:14px;--radius:16px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;overflow:hidden}
+
+/* ── BG glow ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(192,0,0,.35) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;bottom:-20%;left:50%;transform:translateX(-50%);
+  width:60%;height:40%;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(122,0,0,.2) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+.wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:1.5rem}
+
+/* ── Logo ── */
+.logo{text-align:center;margin-bottom:2.5rem;animation:fadeDown .6s ease both}
+.logo-icon{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--red-1),var(--red-3));display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 0 40px rgba(192,0,0,.4)}
+.logo-icon svg{width:32px;height:32px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo h1{font-size:1.5rem;font-weight:600;letter-spacing:-.5px}
+.logo p{font-size:.8rem;color:var(--muted);margin-top:.25rem;letter-spacing:.5px}
+
+/* ── Card ── */
+.card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;animation:fadeUp .6s .1s ease both}
+
+.field{margin-bottom:1.25rem}
+.field label{display:block;font-size:.75rem;font-weight:500;color:var(--muted);letter-spacing:.8px;margin-bottom:.5rem}
+.field input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:.75rem 1rem;font-size:.95rem;color:var(--text);
+  font-family:inherit;outline:none;transition:border-color .2s;
+}
+.field input:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.1)}
+.field input::placeholder{color:#444}
+
+/* ── PIN dots ── */
+.pin-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+.pin-label label{font-size:.75rem;font-weight:500;color:var(--muted);letter-spacing:.8px}
+.pin-toggle{font-size:.7rem;color:var(--red-1);cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+
+.pin-dots{display:flex;gap:10px;justify-content:center;margin-bottom:1.5rem}
+.pin-dot{width:var(--pin-size);height:var(--pin-size);border-radius:50%;border:2px solid #333;transition:all .15s;position:relative}
+.pin-dot.filled{background:var(--red-1);border-color:var(--red-1);transform:scale(1.1)}
+.pin-dot.error{border-color:#ff4444;animation:shake .4s ease}
+
+/* ── Numpad ── */
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.key{
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  padding:.9rem;font-size:1.2rem;font-weight:500;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;color:var(--text);
+  transition:all .1s;user-select:none;-webkit-tap-highlight-color:transparent;
+  position:relative;overflow:hidden;
+}
+.key:active{background:#252525;transform:scale(.95)}
+.key.del{font-size:1rem;font-family:'IBM Plex Sans Thai',sans-serif}
+.key.empty{background:transparent;border-color:transparent;pointer-events:none}
+.key::after{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,0);transition:background .1s}
+.key:active::after{background:rgba(255,255,255,.05)}
+
+/* ── Submit ── */
+.btn-login{
+  width:100%;padding:.85rem;margin-top:1.25rem;
+  background:linear-gradient(135deg,var(--red-1),var(--red-2));
+  border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:600;
+  font-family:inherit;cursor:pointer;transition:opacity .2s,transform .1s;
+  letter-spacing:.3px;
+}
+.btn-login:active{transform:scale(.98)}
+.btn-login:disabled{opacity:.4;pointer-events:none}
+
+/* ── Error msg ── */
+.err-msg{display:none;text-align:center;font-size:.8rem;color:#ff6060;margin-top:.75rem;padding:.5rem;background:rgba(255,60,60,.08);border-radius:8px}
+.err-msg.show{display:block;animation:fadeIn .3s ease}
+
+/* ── Loading spinner ── */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+
+/* ── Animations ── */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Footer ── */
+.footer{margin-top:1.5rem;text-align:center;font-size:.7rem;color:#333;animation:fadeIn .8s .4s ease both}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h10M7 11h6" stroke="#fff" stroke-width="1.5"/></svg>
+    </div>
+    <h1>AssetSys</h1>
+    <p>PC UPGRADE TRACKING SYSTEM</p>
+  </div>
+
+  <div class="card">
+    <!-- Employee ID -->
+    <div class="field">
+      <label>รหัสพนักงาน</label>
+      <input type="text" id="emp-id" placeholder="เช่น admin001" autocomplete="username" inputmode="text" spellcheck="false">
+    </div>
+
+    <!-- PIN dots -->
+    <div class="pin-label">
+      <label>PIN 6 หลัก</label>
+      <button class="pin-toggle" id="pin-toggle" type="button">แสดง</button>
+    </div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" data-i="0"></div>
+      <div class="pin-dot" data-i="1"></div>
+      <div class="pin-dot" data-i="2"></div>
+      <div class="pin-dot" data-i="3"></div>
+      <div class="pin-dot" data-i="4"></div>
+      <div class="pin-dot" data-i="5"></div>
+    </div>
+
+    <!-- Numpad -->
+    <div class="numpad" id="numpad">
+      <button class="key" data-v="1">1</button>
+      <button class="key" data-v="2">2</button>
+      <button class="key" data-v="3">3</button>
+      <button class="key" data-v="4">4</button>
+      <button class="key" data-v="5">5</button>
+      <button class="key" data-v="6">6</button>
+      <button class="key" data-v="7">7</button>
+      <button class="key" data-v="8">8</button>
+      <button class="key" data-v="9">9</button>
+      <button class="key empty"></button>
+      <button class="key" data-v="0">0</button>
+      <button class="key del" id="del-btn">⌫</button>
+    </div>
+
+    <button class="btn-login" id="login-btn" disabled>เข้าสู่ระบบ</button>
+    <div class="err-msg" id="err-msg"></div>
+  </div>
+
+  <div class="footer">AssetSys v1.0 · IT Department</div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+// ── ถ้า login แล้ว redirect ──────────────────────────────────
+if (API.isLoggedIn()) window.location.href = 'index.html';
+
+let pin      = '';
+let showPin  = false;
+const MAX    = 6;
+
+const empInput  = document.getElementById('emp-id');
+const dots      = document.querySelectorAll('.pin-dot');
+const loginBtn  = document.getElementById('login-btn');
+const errMsg    = document.getElementById('err-msg');
+const delBtn    = document.getElementById('del-btn');
+const pinToggle = document.getElementById('pin-toggle');
+
+// ── Update dot display ────────────────────────────────────────
+function updateDots() {
+  dots.forEach((d, i) => {
+    d.classList.toggle('filled', i < pin.length);
+    if (showPin && i < pin.length) {
+      d.style.setProperty('--pin-size', 'auto');
+      d.style.fontSize = '.85rem';
+      d.style.fontFamily = 'IBM Plex Mono, monospace';
+      d.style.fontWeight = '500';
+      d.textContent = pin[i];
+      d.style.width = '22px';
+      d.style.height = '22px';
+    } else {
+      d.textContent = '';
+      d.style.width = '';
+      d.style.height = '';
+      d.style.fontSize = '';
+    }
+  });
+  loginBtn.disabled = !(pin.length === MAX && empInput.value.trim());
+}
+
+// ── Numpad ────────────────────────────────────────────────────
+document.getElementById('numpad').addEventListener('click', e => {
+  const btn = e.target.closest('.key');
+  if (!btn) return;
+  const v = btn.dataset.v;
+  if (v !== undefined && pin.length < MAX) {
+    pin += v;
+    updateDots();
+  }
+});
+
+delBtn.addEventListener('click', () => {
+  pin = pin.slice(0, -1);
+  updateDots();
+});
+
+// ── Keyboard support ──────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (document.activeElement === empInput) return;
+  if (/^[0-9]$/.test(e.key) && pin.length < MAX) { pin += e.key; updateDots(); }
+  if (e.key === 'Backspace') { pin = pin.slice(0,-1); updateDots(); }
+  if (e.key === 'Enter') tryLogin();
+});
+
+empInput.addEventListener('input', updateDots);
+
+// ── Toggle show PIN ───────────────────────────────────────────
+pinToggle.addEventListener('click', () => {
+  showPin = !showPin;
+  pinToggle.textContent = showPin ? 'ซ่อน' : 'แสดง';
+  updateDots();
+});
+
+// ── Error shake ───────────────────────────────────────────────
+function showError(msg) {
+  errMsg.textContent = msg;
+  errMsg.classList.add('show');
+  dots.forEach(d => { d.classList.add('error'); setTimeout(() => d.classList.remove('error'), 500); });
+  pin = '';
+  updateDots();
+}
+
+// ── Login ─────────────────────────────────────────────────────
+async function tryLogin() {
+  const emp = empInput.value.trim();
+  if (!emp || pin.length !== MAX) return;
+
+  loginBtn.disabled = true;
+  loginBtn.innerHTML = '<span class="spin"></span>กำลังเข้าสู่ระบบ...';
+  errMsg.classList.remove('show');
+
+  try {
+    const res = await API.login(emp, pin);
+    if (res?.must_change_pw) {
+      window.location.href = 'change_pin.html';
+    } else {
+      window.location.href = 'index.html';
+    }
+  } catch (err) {
+    showError(err.message || 'เข้าสู่ระบบไม่สำเร็จ');
+    loginBtn.innerHTML = 'เข้าสู่ระบบ';
+    loginBtn.disabled  = false;
+  }
+}
+
+loginBtn.addEventListener('click', tryLogin);
+</script>
+</body>
+</html>
