@@ -212,6 +212,16 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .nav-label{font-size:.58rem;font-weight:600;letter-spacing:.3px}
 .nav-dot{width:4px;height:4px;border-radius:50%;background:var(--red-1);margin-top:-1px}
 
+/* ── Pagination ── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:1.1rem;padding-bottom:.5rem;flex-wrap:wrap}
+.pg-btn{min-width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.82rem;font-weight:600;font-family:'Bai Jamjuree',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0 .5rem;-webkit-tap-highlight-color:transparent}
+.pg-btn:hover{border-color:#444}
+.pg-btn.active{background:var(--red-2);border-color:var(--red-2);color:#fff;box-shadow:0 0 0 3px rgba(192,0,0,.15)}
+.pg-btn:disabled{opacity:.3;pointer-events:none;cursor:default}
+.pg-btn.pg-arrow{background:transparent}
+.pg-dots{display:flex;align-items:center;color:var(--muted);font-size:.8rem;padding:0 2px}
+.pg-info{font-size:.7rem;color:var(--muted);text-align:center;margin-top:.4rem;font-weight:500}
+
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
@@ -317,6 +327,12 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
     <div class="empty-ico">📋</div>
     <h3>ไม่พบรายการ</h3>
     <p>ลองเปลี่ยนคำค้นหาหรือ<br>ล้างตัวกรองแล้วลองใหม่</p>
+  </div>
+
+  <!-- Pagination -->
+  <div id="pagination-wrap" style="display:none">
+    <div class="pagination" id="pagination"></div>
+    <div class="pg-info" id="pg-info"></div>
   </div>
 </div>
 
@@ -440,15 +456,36 @@ function pillHTML(val){
 function osType(val){ return val.startsWith('win')?'windows':'ubuntu'; }
 function osTagClass(val){ return val.startsWith('win')?'win':'ubu'; }
 
-// ── Date format ────────────────────────────────────────────────
+// ── Date format — รองรับทุก format ที่ GAS อาจส่งมา ───────────
+function parseDate(str){
+  if(!str || str==='' || str==='Invalid Date' || str==='0') return null;
+  const s = str.trim();
+
+  // 1) "yyyy-MM-dd HH:mm:ss" (format จาก now() ใน GAS) → แทน space ด้วย T
+  //    ใช้ regex เพื่อให้แน่ใจว่า replace แค่ space ระหว่าง date กับ time
+  const isoLike = s.replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/, '$1T$2');
+  const d1 = new Date(isoLike);
+  if(!isNaN(d1.getTime())) return d1;
+
+  // 2) "dd/MM/yyyy" หรือ format อื่นๆ ที่ GAS locale อาจส่งมา
+  const parts = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(parts){
+    const d2 = new Date(`${parts[3]}-${parts[2].padStart(2,'0')}-${parts[1].padStart(2,'0')}`);
+    if(!isNaN(d2.getTime())) return d2;
+  }
+
+  // 3) fallback: ให้ browser parse เอง (รองรับ "Mon May 14 2026 ..." ฯลฯ)
+  const d3 = new Date(s);
+  return isNaN(d3.getTime()) ? null : d3;
+}
 function fmtDate(str){
-  if(!str)return'—';
-  const d=new Date(str.replace(' ','T'));
+  const d=parseDate(str);
+  if(!d)return'—';
   return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
 }
 function fmtDateTime(str){
-  if(!str)return'—';
-  const d=new Date(str.replace(' ','T'));
+  const d=parseDate(str);
+  if(!d)return'—';
   return d.toLocaleString('th-TH',{day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 }
 
@@ -485,9 +522,15 @@ async function loadRecords(){
     allRecords=await API.getRecords();
     applyFilter();
   }catch(err){
+    document.getElementById('skel-1')?.remove();
+    document.getElementById('skel-2')?.remove();
     document.getElementById('rec-list').innerHTML=`<div class="empty"><div class="empty-ico">⚠️</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>${err.message}</p></div>`;
   }
 }
+
+// ── Pagination state ──────────────────────────────────────────
+const PAGE_SIZE = 10;
+let curPage = 1;
 
 // ── Filter + Search ────────────────────────────────────────────
 function applyFilter(){
@@ -514,8 +557,9 @@ function applyFilter(){
     return true;
   });
 
+  curPage=1;
   document.getElementById('count-display').textContent=filtered.length;
-  renderList(filtered);
+  renderPage();
   document.getElementById('filter-panel').classList.remove('show');
 }
 
@@ -538,23 +582,95 @@ document.getElementById('search-input').addEventListener('input',function(){
   applyFilter();
 });
 
-// ── Render list ────────────────────────────────────────────────
-function renderList(recs){
+// ── Render page ────────────────────────────────────────────────
+function renderPage(){
   // Remove skeletons
   document.getElementById('skel-1')?.remove();
   document.getElementById('skel-2')?.remove();
 
-  const list=document.getElementById('rec-list');
-  const empty=document.getElementById('empty-state');
+  const list   =document.getElementById('rec-list');
+  const empty  =document.getElementById('empty-state');
+  const pgWrap =document.getElementById('pagination-wrap');
 
-  if(!recs.length){
+  if(!filtered.length){
     list.innerHTML='';
     empty.style.display='block';
+    pgWrap.style.display='none';
     return;
   }
   empty.style.display='none';
 
-  list.innerHTML=recs.map(r=>recCardHTML(r)).join('');
+  const totalPages=Math.ceil(filtered.length/PAGE_SIZE);
+  const start=(curPage-1)*PAGE_SIZE;
+  const pageRecs=filtered.slice(start, start+PAGE_SIZE);
+
+  list.innerHTML=pageRecs.map(r=>recCardHTML(r)).join('');
+
+  // Show pagination only if > 1 page
+  if(totalPages<=1){
+    pgWrap.style.display='none';
+  }else{
+    pgWrap.style.display='block';
+    renderPagination(totalPages);
+  }
+
+  // Scroll to top of list smoothly
+  list.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function renderPagination(totalPages){
+  const pg   =document.getElementById('pagination');
+  const info =document.getElementById('pg-info');
+  const start=(curPage-1)*PAGE_SIZE+1;
+  const end  =Math.min(curPage*PAGE_SIZE, filtered.length);
+
+  info.textContent=`แสดง ${start}–${end} จาก ${filtered.length} รายการ`;
+
+  let html='';
+
+  // Prev button
+  html+=`<button class="pg-btn pg-arrow" onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>
+    <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>`;
+
+  // Page numbers with smart ellipsis
+  const pages = buildPageRange(curPage, totalPages);
+  pages.forEach(p=>{
+    if(p==='...'){
+      html+=`<span class="pg-dots">···</span>`;
+    }else{
+      html+=`<button class="pg-btn ${p===curPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    }
+  });
+
+  // Next button
+  html+=`<button class="pg-btn pg-arrow" onclick="goPage(${curPage+1})" ${curPage===totalPages?'disabled':''}>
+    <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>`;
+
+  pg.innerHTML=html;
+}
+
+// สร้าง array ของหน้าพร้อม ... เมื่อหน้าเยอะ
+function buildPageRange(cur, total){
+  if(total<=7)return Array.from({length:total},(_,i)=>i+1);
+  const pages=[];
+  if(cur<=4){
+    pages.push(1,2,3,4,5,'...',total);
+  }else if(cur>=total-3){
+    pages.push(1,'...',total-4,total-3,total-2,total-1,total);
+  }else{
+    pages.push(1,'...',cur-1,cur,cur+1,'...',total);
+  }
+  return pages;
+}
+
+function goPage(n){
+  const totalPages=Math.ceil(filtered.length/PAGE_SIZE);
+  if(n<1||n>totalPages)return;
+  curPage=n;
+  renderPage();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function recCardHTML(r){

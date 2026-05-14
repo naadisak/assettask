@@ -82,7 +82,16 @@ function getRows(sheet, cols) {
   if (data.length <= 1) return [];
   return data.slice(1).map(row => {
     const obj = {};
-    cols.forEach((c,i) => obj[c] = String(row[i] ?? ''));
+    cols.forEach((c, i) => {
+      const v = row[i];
+      // Google Sheets อาจส่งค่า Date object แทน string → แปลงเป็น string เอง
+      if (v instanceof Date) {
+        obj[c] = isNaN(v.getTime()) ? '' :
+          Utilities.formatDate(v, 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ss');
+      } else {
+        obj[c] = String(v ?? '');
+      }
+    });
     return obj;
   });
 }
