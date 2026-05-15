@@ -2,6 +2,7 @@
 <html lang="th" data-theme="dark">
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AssetSys — รายการ</title>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -434,7 +435,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lb-img" src="" alt="">
+  <img id="lb-img" src="" referrerpolicy="no-referrer" alt="">
   <button class="lb-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
 </div>
 
@@ -617,7 +618,7 @@ function cardHTML(r){
 
   // note/emoji
   const noteHTML=r.note?`<div class="detail-note">${r.note}</div>`:'';
-  const imgs=(r.image1_url||r.image2_url)?`<div class="detail-imgs">${r.image1_url?`<div class="detail-img" onclick="openLB('${r.image1_url}')"><img src="${r.image1_url}" loading="lazy"></div>`:''} ${r.image2_url?`<div class="detail-img" onclick="openLB('${r.image2_url}')"><img src="${r.image2_url}" loading="lazy"></div>`:''}</div>`:'';
+  const imgs=(r.image1_url||r.image2_url)?`<div class="detail-imgs">${r.image1_url?`<div class="detail-img" onclick="openLB('${r.image1_url}')"><img src="${r.image1_url}" loading="lazy" referrerpolicy="no-referrer"></div>`:''} ${r.image2_url?`<div class="detail-img" onclick="openLB('${r.image2_url}')"><img src="${r.image2_url}" loading="lazy" referrerpolicy="no-referrer"></div>`:''}</div>`:'';
 
   return `<div class="rec-card ${cls}" id="rc-${r.id}">
     <div class="rc-head" onclick="toggleCard('${r.id}')">
