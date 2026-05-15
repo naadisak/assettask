@@ -8,5 +8,5 @@ const CONFIG = {
   // ── App ─────────────────────────────────────────────────────
   NOTE_EMOJIS:     ['✅', '⚠️', '🔧', '💻', '🚫', '🎉', '👍', '❌', '🔄', '📝'],
   APP_NAME:        'AssetSys',
-  LINE_CHANNEL_ID: '',
+  LINE_CHANNEL_ID: '2010101105',
 };

@@ -109,13 +109,13 @@ GitHub repo → **Settings** → **Pages**
 
 | Key | Value |
 |-----|-------|
-| `LINE_CHANNEL_ID` | Channel ID จาก LINE Developers |
-| `LINE_CHANNEL_SECRET` | Channel Secret |
+| `LINE_CHANNEL_ID` | `2010101105` |
+| `LINE_CHANNEL_SECRET` | `a8b9036cb70f876cced7d6ddfb2e147d` |
 | `LINE_CALLBACK_URL` | `https://naadisak.github.io/assettask/line_callback.html` |
 
 2. ใน `js/config.js` ใส่:
 ```js
-LINE_CHANNEL_ID: 'YOUR_CHANNEL_ID'
+LINE_CHANNEL_ID: '2010101105'
 ```
 
 3. LINE Developers → Messaging API → **Callback URL**:
