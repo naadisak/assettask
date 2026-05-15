@@ -45,108 +45,133 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
   background:linear-gradient(135deg,#1a0000 0%,#5a0000 35%,#c00 65%,#ff2d2d 100%);
   box-shadow:0 8px 32px rgba(192,0,0,.35),0 2px 8px rgba(0,0,0,.4);
 }
-/* Mesh overlay */
+/* ══ Premium Card Design ══════════════════════════════════ */
+
+/* Outer card shine border */
+.profile-hero::before{
+  content:'';position:absolute;inset:0;border-radius:20px;
+  background:linear-gradient(135deg,
+    rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 40%,
+    rgba(255,255,255,.0) 60%,rgba(255,255,255,.1) 100%);
+  pointer-events:none;z-index:4;
+}
+/* Inner glow top-left */
 .hero-mesh{
-  position:absolute;inset:0;
-  background:
-    repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0px,transparent 1px,transparent 28px),
-    repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0px,transparent 1px,transparent 28px);
-  pointer-events:none;
+  position:absolute;inset:0;border-radius:20px;
+  background:radial-gradient(ellipse 80% 60% at -10% -10%,rgba(255,120,80,.22) 0%,transparent 65%);
+  pointer-events:none;z-index:1;
 }
-/* Glow orb */
+/* Subtle grid texture */
 .hero-orb{
-  position:absolute;top:-20%;right:-5%;width:50%;aspect-ratio:1;border-radius:50%;
-  background:radial-gradient(ellipse,rgba(255,60,60,.15) 0%,transparent 65%);
-  pointer-events:none;
+  position:absolute;inset:0;
+  background-image:repeating-linear-gradient(
+    0deg,rgba(255,255,255,.022) 0px,transparent 1px,transparent 30px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0px,transparent 1px,transparent 30px);
+  pointer-events:none;z-index:1;
 }
-/* Avatar as background — right side, transparent */
+
+/* Avatar bg — LEFT, fades right */
 .hero-avatar-bg{
-  position:absolute;left:0;top:0;bottom:0;width:55%;
-  overflow:hidden;pointer-events:none;
-  /* fade ขวา — ซ้ายชัด ขวาค่อยๆ หาย */
-  -webkit-mask-image:linear-gradient(to left,
-    transparent 0%,
-    rgba(0,0,0,.06) 18%,
-    rgba(0,0,0,.3) 42%,
-    rgba(0,0,0,.72) 68%,
-    rgba(0,0,0,.9) 100%
-  );
-  mask-image:linear-gradient(to left,
-    transparent 0%,
-    rgba(0,0,0,.06) 18%,
-    rgba(0,0,0,.3) 42%,
-    rgba(0,0,0,.72) 68%,
-    rgba(0,0,0,.9) 100%
-  );
+  position:absolute;left:0;top:0;bottom:0;width:50%;
+  overflow:hidden;pointer-events:none;z-index:2;
+  -webkit-mask-image:linear-gradient(to right,
+    rgba(0,0,0,.85) 0%,rgba(0,0,0,.55) 40%,rgba(0,0,0,.18) 70%,transparent 100%);
+  mask-image:linear-gradient(to right,
+    rgba(0,0,0,.85) 0%,rgba(0,0,0,.55) 40%,rgba(0,0,0,.18) 70%,transparent 100%);
 }
 .hero-avatar-bg img{
-  width:100%;height:100%;
-  object-fit:cover;object-position:top center;
-  display:block;
-  filter:saturate(.5) brightness(.6) contrast(1.05);
+  width:100%;height:100%;object-fit:cover;object-position:center top;
+  display:block;filter:saturate(.45) brightness(.55) contrast(1.1);
 }
 .hero-avatar-bg .no-img{display:none}
 .hero-avatar-bg.empty .no-img{display:block}
-/* Card content */
-.hero-body{position:absolute;inset:0;padding:1.1rem 1rem 1.1rem 1.25rem;display:flex;flex-direction:column;justify-content:space-between}
 
-/* Top row: logo + chip */
-.hero-top{display:flex;align-items:flex-start;justify-content:space-between}
-.hero-logo-txt{font-size:.7rem;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:2px}
-.hero-chip{
-  width:34px;height:26px;border-radius:4px;
-  background:linear-gradient(135deg,#d4a843,#f5d06a,#b8892e);
-  position:relative;overflow:hidden;flex-shrink:0;
+/* Card body */
+.hero-body{
+  position:absolute;inset:0;z-index:3;
+  padding:1.1rem 1rem 1rem 1.1rem;
+  display:flex;flex-direction:column;justify-content:space-between;
 }
-.hero-chip::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(0,0,0,.2);}
-.hero-chip::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:1px;background:rgba(0,0,0,.2);}
 
-/* Avatar on card */
+/* ── Top row ── */
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between}
+.hero-logo-txt{
+  font-size:.72rem;font-weight:700;color:rgba(255,255,255,.7);
+  letter-spacing:2.5px;line-height:1;
+}
+.hero-logo-sub{font-size:.56rem;color:rgba(255,255,255,.35);letter-spacing:1.5px;margin-top:3px}
+/* Gold chip */
+.hero-chip{
+  width:38px;height:28px;border-radius:5px;
+  background:linear-gradient(160deg,#e8c04a 0%,#f7da6e 35%,#c9961e 65%,#e8c04a 100%);
+  position:relative;overflow:hidden;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+.hero-chip::before{content:'';position:absolute;top:50%;left:0;right:0;height:1.5px;background:rgba(0,0,0,.22);}
+.hero-chip::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:1.5px;background:rgba(0,0,0,.22);}
+
+/* ── Avatar circle — right center ── */
 .avatar-wrap{
-  position:absolute;right:.9rem;top:50%;transform:translateY(-50%);
-  cursor:pointer;z-index:3;
+  position:absolute;right:.85rem;top:50%;transform:translateY(-58%);
+  cursor:pointer;z-index:5;
 }
 .avatar-img{
-  width:96px;height:96px;border-radius:50%;
-  background:rgba(0,0,0,.45);
-  border:3px solid rgba(255,255,255,.4);
+  width:90px;height:90px;border-radius:50%;
+  background:rgba(0,0,0,.4);
+  border:2.5px solid rgba(255,255,255,.5);
   display:flex;align-items:center;justify-content:center;
-  font-size:2rem;font-weight:700;color:rgba(255,255,255,.85);
+  font-size:1.9rem;font-weight:700;color:rgba(255,255,255,.9);
   overflow:hidden;
-  box-shadow:0 0 0 5px rgba(255,255,255,.08),0 6px 24px rgba(0,0,0,.6);
+  box-shadow:
+    0 0 0 4px rgba(255,45,45,.25),
+    0 0 0 7px rgba(255,255,255,.06),
+    0 8px 28px rgba(0,0,0,.55);
+  transition:box-shadow .2s;
 }
+.avatar-wrap:hover .avatar-img{box-shadow:0 0 0 4px rgba(255,45,45,.5),0 0 0 7px rgba(255,255,255,.08),0 8px 28px rgba(0,0,0,.55);}
 .avatar-img img{width:100%;height:100%;object-fit:cover;display:block}
 .avatar-edit{
-  position:absolute;bottom:-2px;right:-2px;width:28px;height:28px;
+  position:absolute;bottom:0;right:0;width:26px;height:26px;
   border-radius:50%;background:var(--red-1);
-  border:2.5px solid rgba(15,0,0,.85);
+  border:2px solid rgba(10,0,0,.9);
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 2px 8px rgba(0,0,0,.5);
+  transition:transform .15s;
 }
-.avatar-edit svg{width:13px;height:13px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.avatar-wrap:hover .avatar-edit{transform:scale(1.1)}
+.avatar-edit svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
 .avatar-input{display:none}
 
-/* Middle: card numbers */
-.hero-mid{padding-right:90px}
+/* ── Mid: IDs ── */
+.hero-mid{padding-right:108px}
 .hero-empid{
-  font-size:1.05rem;font-weight:700;color:#fff;
-  font-family:'Bai Jamjuree',monospace;letter-spacing:3px;
-  margin-bottom:.25rem;text-shadow:0 1px 4px rgba(0,0,0,.3);
+  font-size:1rem;font-weight:700;color:#fff;
+  font-family:'Bai Jamjuree',monospace;letter-spacing:4px;
+  text-shadow:0 1px 6px rgba(0,0,0,.4);margin-bottom:.2rem;
 }
-.hero-phone-row{display:flex;gap:12px;align-items:center}
-.hero-phone{font-size:.72rem;color:rgba(255,255,255,.65);font-family:'Bai Jamjuree',monospace;letter-spacing:1.5px}
-.hero-ext{font-size:.72rem;color:rgba(255,255,255,.65);font-family:'Bai Jamjuree',monospace;letter-spacing:1.5px}
+.hero-phone-row{display:flex;gap:10px;align-items:center}
+.hero-phone{font-size:.7rem;color:rgba(255,255,255,.6);font-family:'Bai Jamjuree',monospace;letter-spacing:2px}
+.hero-ext{display:none}
 
-/* Bottom: name + role */
-.hero-bottom{padding-right:90px}
-.user-fullname{font-size:.95rem;font-weight:700;color:#fff;letter-spacing:.3px;margin-bottom:.2rem;text-shadow:0 1px 4px rgba(0,0,0,.3)}
-.user-email{font-size:.62rem;color:rgba(255,255,255,.55);letter-spacing:.3px;margin-bottom:.3rem;word-break:break-all}
-.hero-role-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:.6rem;font-weight:700;
-  color:rgba(255,255,255,.7);letter-spacing:.5px;
+/* ── Bottom: name + role ── */
+.hero-bottom{padding-right:108px}
+.user-fullname{
+  font-size:.92rem;font-weight:700;color:#fff;
+  letter-spacing:.4px;margin-bottom:.18rem;
+  text-shadow:0 1px 6px rgba(0,0,0,.4);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-/* tags ยังคงอยู่แต่ hidden ใน card */
+.user-email{font-size:.6rem;color:rgba(255,255,255,.5);letter-spacing:.2px;margin-bottom:.3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero-role-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.58rem;font-weight:700;
+  color:rgba(255,255,255,.65);letter-spacing:.8px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:.22rem .65rem;
+}
+.hero-role-badge svg{width:9px;height:9px;stroke:rgba(255,200,200,.8);stroke-width:2;fill:none;stroke-linecap:round}
+/* tags hidden in card */
 .user-tags{display:none}
 .tag{display:inline-flex;align-items:center;gap:4px;padding:.22rem .6rem;border-radius:20px;font-size:.68rem;font-weight:700;border:1.5px solid}
 .tag-admin{background:rgba(255,45,45,.1);border-color:rgba(255,45,45,.3);color:var(--red-1)}
@@ -318,50 +343,51 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 
   <!-- Profile ID Card -->
   <div class="profile-hero" id="hero-card">
-    <div class="hero-mesh"></div>
-    <div class="hero-orb"></div>
-    <!-- Avatar background — right side transparent -->
+    <!-- Layers -->
+    <div class="hero-mesh"></div><!-- glow top-left -->
+    <div class="hero-orb"></div> <!-- grid texture -->
+    <!-- Avatar as transparent bg — LEFT -->
     <div class="hero-avatar-bg empty" id="hero-bg-wrap">
       <img id="hero-bg-img" src="" referrerpolicy="no-referrer" style="display:none">
-      <div class="no-img"></div>
     </div>
+    <!-- Card body -->
     <div class="hero-body">
-      <!-- Top -->
+      <!-- Top: logo + chip -->
       <div class="hero-top">
         <div>
           <div class="hero-logo-txt">ASSETSYS</div>
-          <div style="font-size:.52rem;color:rgba(255,255,255,.35);letter-spacing:1.5px;margin-top:2px">PC UPGRADE TRACKING</div>
+          <div class="hero-logo-sub">PC UPGRADE TRACKING</div>
         </div>
         <div class="hero-chip"></div>
       </div>
 
-      <!-- Avatar circle — clickable, right side of card -->
+      <!-- Avatar circle — RIGHT center, clickable -->
       <div class="avatar-wrap" onclick="document.getElementById('avatar-input').click()">
         <div class="avatar-img" id="hero-avatar">?</div>
-        <div class="avatar-edit">
+        <div class="avatar-edit" title="เปลี่ยนรูปโปรไฟล์">
           <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
       </div>
       <input type="file" id="avatar-input" class="avatar-input" accept="image/*" onchange="uploadAvatar(event)">
 
-      <!-- Mid: IDs -->
+      <!-- Mid: Employee ID + phone -->
       <div class="hero-mid">
         <div class="hero-empid" id="hero-empid">••••••</div>
         <div class="hero-phone-row">
-          <span class="hero-phone" id="hero-phone">——————</span>
+          <span class="hero-phone" id="hero-phone">— — — — — —</span>
         </div>
       </div>
 
-      <!-- Bottom: name + role -->
+      <!-- Bottom: name + email + role badge -->
       <div class="hero-bottom">
         <div class="user-fullname" id="hero-name">
-          <div class="skel" style="width:130px;height:14px;margin-bottom:5px;background:rgba(255,255,255,.12)"></div>
+          <div class="skel" style="width:120px;height:13px;margin-bottom:5px;background:rgba(255,255,255,.1);border-radius:4px"></div>
         </div>
         <div class="user-email" id="hero-email">
-          <div class="skel" style="width:160px;height:10px;background:rgba(255,255,255,.08)"></div>
+          <div class="skel" style="width:150px;height:9px;background:rgba(255,255,255,.07);border-radius:4px"></div>
         </div>
         <div class="hero-role-badge" id="hero-role-badge">
-          <svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:rgba(255,255,255,.6);stroke-width:2;fill:none;stroke-linecap:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           IT Department
         </div>
         <div class="user-tags" id="hero-tags"></div>
