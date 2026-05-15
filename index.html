@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AssetSys — บันทึกข้อมูล ASSET</title>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red-1:#ff2d2d;--red-2:#c00;--red-3:#7a0000;
+  --bg:#0a0a0a;--surface:#141414;--surface2:#1e1e1e;--surface3:#252525;
+  --text:#f0f0f0;--muted:#666;--border:#2a2a2a;
+  --card-bg:#141414;--input-bg:#1e1e1e;--input-txt:#f0f0f0;
+  --topbar-bg:rgba(10,10,10,.92);--nav-bg:rgba(10,10,10,.95);
+  --radius:13px;--nav-h:60px;--topbar-h:54px;
+  /* OS */
+  --win-bg:rgba(14,165,233,.1);--win-border:rgba(14,165,233,.35);--win-text:#38bdf8;
+  --ubu-bg:rgba(139,26,26,.18);--ubu-border:rgba(180,40,40,.45);--ubu-text:#fca5a5;
+  /* Status */
+  --pass-bg:rgba(34,197,94,.1);--pass-border:rgba(34,197,94,.35);--pass-text:#4ade80;
+  --doi-bg:rgba(249,115,22,.1);--doi-border:rgba(249,115,22,.35);--doi-text:#fb923c;
+  --rej-bg:rgba(239,68,68,.1);--rej-border:rgba(239,68,68,.35);--rej-text:#f87171;
+  /* Upgrade card tint */
+  --upgrade-bg:rgba(255,45,45,.04);--upgrade-border:rgba(255,45,45,.18);
+  /* Status card tint */
+  --status-card-bg:rgba(34,197,94,.04);--status-card-border:rgba(34,197,94,.18);
+}
+[data-theme="light"]{
+  --bg:#f0f0f5;--surface:#fff;--surface2:#f5f5f5;--surface3:#eaeaea;
+  --text:#111;--muted:#999;--border:#e0e0e0;
+  --card-bg:#fff;--input-bg:#f5f5f5;--input-txt:#111;
+  --topbar-bg:rgba(255,255,255,.92);--nav-bg:rgba(255,255,255,.95);
+  --win-text:#0284c7;--ubu-text:#991b1b;
+  --pass-text:#16a34a;--doi-text:#ea580c;--rej-text:#dc2626;
+  --upgrade-bg:rgba(255,45,45,.03);--upgrade-border:rgba(255,45,45,.14);
+  --status-card-bg:rgba(34,197,94,.03);--status-card-border:rgba(34,197,94,.14);
+}
+html{height:100%;scroll-behavior:smooth}
+body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jamjuree',sans-serif;overflow-x:hidden;transition:background .25s,color .25s}
+
+/* ── Topbar ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);z-index:100;background:var(--topbar-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 .9rem;gap:8px;transition:background .25s,border-color .25s}
+.tb-logo{width:32px;height:32px;border-radius:9px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 10px rgba(192,0,0,.3)}
+.tb-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.tb-name{font-size:.9rem;font-weight:700;letter-spacing:-.2px;flex:1}
+.theme-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;flex-shrink:0}
+.av-wrap{display:flex;align-items:center;gap:7px;cursor:pointer;margin-left:4px}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--red-2),var(--red-3));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.u-name{font-size:.7rem;font-weight:600;text-align:right}
+.u-role{font-size:.6rem;color:var(--muted);text-align:right}
+
+/* ── Page ── */
+.page{padding:calc(var(--topbar-h) + .85rem) 1rem calc(var(--nav-h) + 5.5rem);max-width:480px;margin:0 auto}
+.page-title{font-size:1.15rem;font-weight:700;letter-spacing:-.2px;margin-bottom:.15rem}
+.page-sub{font-size:.72rem;color:var(--muted)}
+
+/* ── Progress Indicator ── */
+.prog-wrap{margin:.9rem 0 1.15rem;display:flex;align-items:center}
+.ps{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;position:relative}
+.ps:not(:last-child)::after{content:'';position:absolute;top:14px;left:calc(50% + 14px);right:calc(-50% + 14px);height:2px;background:var(--border);transition:background .35s;z-index:0}
+.ps.done:not(:last-child)::after{background:var(--red-2)}
+.pd{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--muted);transition:all .35s;z-index:1;font-family:'Bai Jamjuree',sans-serif}
+.ps.active .pd{border-color:var(--red-1);background:var(--red-1);color:#fff;box-shadow:0 0 0 4px rgba(255,45,45,.15)}
+.ps.done .pd{border-color:var(--red-2);background:var(--red-2);color:#fff}
+.ps.done .pd .n{display:none}
+.ps.done .pd::after{content:'✓';font-size:.75rem}
+.p-lbl{font-size:.6rem;font-weight:500;color:var(--muted);text-align:center;line-height:1.3;white-space:nowrap}
+.ps.active .p-lbl{color:var(--text);font-weight:700}
+.ps.done .p-lbl{color:var(--red-2)}
+
+/* ── Step panels ── */
+.steps-container{overflow:hidden}
+.step-panel{display:none}
+.step-panel.active{display:block;animation:sIn .28s ease}
+.step-panel.back.active{animation:sBack .28s ease}
+@keyframes sIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+@keyframes sBack{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+
+/* ── Cards ── */
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.75rem;overflow:hidden;transition:background .25s,border-color .25s}
+.card.upgrade-tint{background:var(--upgrade-bg);border-color:var(--upgrade-border)}
+.card.status-tint{background:var(--status-card-bg);border-color:var(--status-card-border)}
+
+.card-header{display:flex;align-items:center;gap:8px;padding:.7rem .9rem;border-bottom:1px solid var(--border)}
+.card.upgrade-tint .card-header{border-bottom-color:var(--upgrade-border)}
+.card.status-tint .card-header{border-bottom-color:var(--status-card-border)}
+.card-icon{width:26px;height:26px;border-radius:7px;background:rgba(192,0,0,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card.upgrade-tint .card-icon{background:rgba(255,45,45,.12)}
+.card.status-tint .card-icon{background:rgba(34,197,94,.12)}
+.card-icon svg{width:13px;height:13px;stroke:var(--red-1);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.card.status-tint .card-icon svg{stroke:#4ade80}
+.card-title{font-size:.78rem;font-weight:700}
+.card-body{padding:.9rem}
+
+/* ── Fields ── */
+.field{margin-bottom:.85rem}
+.field:last-child{margin-bottom:0}
+.field-label{font-size:.68rem;font-weight:600;color:var(--muted);letter-spacing:.5px;margin-bottom:.35rem}
+.req{color:var(--red-1);margin-left:2px}
+.field-input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:9px;padding:.65rem .85rem;font-size:.88rem;color:var(--input-txt);font-family:'Bai Jamjuree',sans-serif;outline:none;transition:border-color .2s,background .25s;-webkit-appearance:none}
+.field-input:focus{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.08)}
+.field-input::placeholder{color:var(--muted)}
+
+.ac-wrap{position:relative}
+.dept-list{
+  position:absolute;top:calc(100% + 5px);left:0;right:0;
+  background:rgba(20,4,4,.92);
+  border:1px solid rgba(255,45,45,.25);
+  border-radius:11px;max-height:155px;overflow-y:auto;
+  z-index:50;display:none;
+  box-shadow:0 6px 28px rgba(255,0,0,.12),0 2px 8px rgba(0,0,0,.4);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+[data-theme="light"] .dept-list{
+  background:rgba(255,245,245,.96);
+  border-color:rgba(255,45,45,.2);
+  box-shadow:0 6px 28px rgba(255,0,0,.08),0 2px 8px rgba(0,0,0,.08);
+}
+.dept-list.show{display:block;animation:fadeIn .15s ease}
+.dept-item{
+  padding:.58rem .9rem;font-size:.83rem;cursor:pointer;
+  color:rgba(255,200,200,.9);transition:background .12s,color .12s;
+  border-bottom:1px solid rgba(255,45,45,.08);
+}
+[data-theme="light"] .dept-item{color:rgba(160,30,30,.9)}
+.dept-item:last-child{border-bottom:none}
+.dept-item:hover{background:rgba(255,45,45,.1);color:#fff}
+[data-theme="light"] .dept-item:hover{background:rgba(255,45,45,.08);color:#c00}
+.dept-item mark{background:none;color:var(--red-1);font-weight:700}
+
+/* ── OS toggles ── */
+.os-toggle{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.os-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:.7rem .5rem;display:flex;align-items:center;justify-content:center;gap:6px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s;-webkit-tap-highlight-color:transparent;font-family:'Bai Jamjuree',sans-serif}
+.os-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0}
+.os-btn.win.active{background:var(--win-bg);border-color:var(--win-border);color:var(--win-text)}
+.os-btn.ubu.active{background:var(--ubu-bg);border-color:var(--ubu-border);color:var(--ubu-text)}
+.sub-opts{margin-top:7px;display:grid;grid-template-columns:1fr 1fr;gap:5px;animation:fadeIn .2s ease}
+.sub-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;font-size:.73rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .15s;-webkit-tap-highlight-color:transparent;font-family:'Bai Jamjuree',sans-serif}
+.sub-btn.win-sub.active{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.3);color:var(--win-text)}
+.sub-btn.ubu-sub.active{background:rgba(139,26,26,.1);border-color:rgba(180,40,40,.3);color:var(--ubu-text)}
+
+/* ── Status chips ── */
+.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.status-chip{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:.65rem .4rem;text-align:center;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Bai Jamjuree',sans-serif}
+.status-chip .s-ico{font-size:1.15rem;line-height:1}
+.status-chip.active.pass{background:var(--pass-bg);border-color:var(--pass-border);color:var(--pass-text)}
+.status-chip.active.doi{background:var(--doi-bg);border-color:var(--doi-border);color:var(--doi-text)}
+.status-chip.active.rej{background:var(--rej-bg);border-color:var(--rej-border);color:var(--rej-text)}
+
+/* ── iPhone-style Emoji Editor ── */
+.emoji-editor-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--input-bg);transition:border-color .2s,background .25s}
+.emoji-editor-wrap:focus-within{border-color:var(--red-1);box-shadow:0 0 0 3px rgba(255,45,45,.08)}
+
+/* emoji picker bar */
+.emoji-bar{display:flex;gap:2px;padding:7px 8px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;background:var(--surface2)}
+.emoji-bar::-webkit-scrollbar{display:none}
+.em-pick{
+  width:34px;height:34px;flex-shrink:0;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+  cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;
+  background:transparent;border:1.5px solid transparent;
+  position:relative;
+}
+.em-pick:hover,.em-pick:active{background:var(--surface3);border-color:var(--border);transform:scale(1.15)}
+.em-pick::after{content:attr(data-label);position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:.55rem;color:var(--muted);white-space:nowrap;opacity:0;pointer-events:none;font-family:'Bai Jamjuree',sans-serif;transition:opacity .15s}
+.em-pick:hover::after{opacity:1}
+
+/* textarea inside */
+.note-textarea{
+  width:100%;background:transparent;border:none;outline:none;
+  padding:.65rem .85rem;font-size:.88rem;color:var(--input-txt);
+  font-family:'Bai Jamjuree',sans-serif;resize:none;min-height:72px;
+  line-height:1.55;
+}
+.note-textarea::placeholder{color:var(--muted)}
+.note-footer{display:flex;align-items:center;justify-content:space-between;padding:.35rem .85rem .5rem;border-top:1px solid var(--border)}
+.note-char-count{font-size:.62rem;color:var(--muted);font-family:'Bai Jamjuree',monospace}
+.note-char-count.warn{color:#f87171}
+
+/* ── Image upload ── */
+.img-area{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.6rem}
+.img-slot{aspect-ratio:1;background:var(--surface2);border:1.5px dashed var(--border);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;transition:all .2s}
+.img-slot:hover{border-color:#555}
+.img-slot.has-img{border-style:solid;border-color:rgba(192,0,0,.3)}
+.img-slot input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-slot-ico{font-size:1.4rem;margin-bottom:3px}
+.img-slot-lbl{font-size:.62rem;color:var(--muted);text-align:center;line-height:1.4}
+.img-preview{position:absolute;inset:0;object-fit:cover;width:100%;height:100%}
+.img-rm{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(0,0,0,.65);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;cursor:pointer;color:#fff;z-index:5;border:none}
+.img-uploading{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
+.spin-img{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+
+/* ── Action buttons ── */
+.btn-row{display:flex;gap:8px;margin-top:.75rem}
+.btn{flex:1;padding:.82rem;border-radius:12px;font-size:.88rem;font-weight:700;font-family:'Bai Jamjuree',sans-serif;cursor:pointer;transition:opacity .2s,transform .1s;border:none;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.2px}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.35;pointer-events:none}
+.btn-back{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.btn-next{background:linear-gradient(135deg,var(--red-1),var(--red-2));color:#fff}
+.btn-save{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-sv-icon{width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round}
+
+/* ── Neon "Add Note" button — 4-span border trace ── */
+.btn-note{
+  width:100%;margin-top:10px;padding:.85rem;border-radius:12px;
+  font-size:.88rem;font-weight:700;font-family:'Bai Jamjuree',sans-serif;
+  cursor:pointer;border:none;outline:none;
+  background:transparent;color:var(--red-1);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  letter-spacing:.2px;position:relative;overflow:hidden;
+  transition:color .2s,transform .1s;
+}
+.btn-note:active{transform:scale(.97)}
+.btn-note .btn-note-bg{
+  position:absolute;inset:0;border-radius:12px;
+  background:rgba(255,45,45,.05);
+  border:1px solid rgba(255,45,45,.15);
+  pointer-events:none;
+  transition:background .2s;
+}
+.btn-note:hover .btn-note-bg{background:rgba(255,45,45,.1);}
+.btn-note-txt{position:relative;z-index:2;display:flex;align-items:center;gap:7px}
+.btn-note svg{width:14px;height:14px;stroke:var(--red-1);stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0}
+
+/* 4 spans — each traces one edge */
+.btn-note span.n-line{position:absolute;display:block;pointer-events:none}
+
+/* top: left → right */
+.btn-note span.n-line:nth-child(1){
+  top:0;left:-100%;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,#ff2d2d);
+  animation:neon-t 3s linear infinite;
+}
+/* right: top → bottom */
+.btn-note span.n-line:nth-child(2){
+  top:-100%;right:0;width:2px;height:100%;
+  background:linear-gradient(180deg,transparent,#ff2d2d);
+  animation:neon-r 3s linear infinite;animation-delay:.75s;
+}
+/* bottom: right → left */
+.btn-note span.n-line:nth-child(3){
+  bottom:0;right:-100%;width:100%;height:2px;
+  background:linear-gradient(270deg,transparent,#ff2d2d);
+  animation:neon-b 3s linear infinite;animation-delay:1.5s;
+}
+/* left: bottom → top */
+.btn-note span.n-line:nth-child(4){
+  bottom:-100%;left:0;width:2px;height:100%;
+  background:linear-gradient(0deg,transparent,#ff2d2d);
+  animation:neon-l 3s linear infinite;animation-delay:2.25s;
+}
+
+@keyframes neon-t{0%{left:-100%}50%,100%{left:100%}}
+@keyframes neon-r{0%{top:-100%}50%,100%{top:100%}}
+@keyframes neon-b{0%{right:-100%}50%,100%{right:100%}}
+@keyframes neon-l{0%{bottom:-100%}50%,100%{bottom:100%}}
+
+/* ── Agent bar ── */
+.agent-bar{position:fixed;bottom:calc(var(--nav-h));left:0;right:0;z-index:90;background:var(--surface);border-top:1px solid var(--border);padding:.5rem 1rem;display:flex;align-items:center;gap:9px;transition:background .25s,border-color .25s}
+.agent-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--red-2),var(--red-3));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.agent-av img{width:100%;height:100%;object-fit:cover}
+.agent-name{font-size:.78rem;font-weight:600;flex:1}
+.agent-lbl{font-size:.6rem;color:var(--muted)}
+.agent-badge{font-size:.62rem;background:rgba(192,0,0,.12);border:1px solid rgba(192,0,0,.25);color:#ff6060;border-radius:9px;padding:.13rem .5rem}
+
+/* ── Bottom nav ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);z-index:100;background:var(--nav-bg);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 .5rem;transition:background .25s,border-color .25s}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:.5rem .65rem;text-decoration:none;color:var(--muted);-webkit-tap-highlight-color:transparent}
+.nav-item.active{color:var(--red-1)}
+.nav-item svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nav-label{font-size:.58rem;font-weight:600;letter-spacing:.3px}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:var(--red-1);margin-top:-1px}
+
+/* ── Toast ── */
+.toast{position:fixed;top:calc(var(--topbar-h)+8px);left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface3);border:1px solid var(--border);border-radius:12px;padding:.6rem 1rem;font-size:.78rem;font-weight:600;z-index:300;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;display:flex;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(0,0,0,.3);font-family:'Bai Jamjuree',sans-serif}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(34,197,94,.3);color:#4ade80}
+.toast.error{border-color:rgba(239,68,68,.3);color:#f87171}
+
+/* ── Success sheet ── */
+.success-sheet{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.success-sheet.show{opacity:1;pointer-events:all}
+.sheet-card{background:var(--surface);border-radius:22px 22px 0 0;padding:1.6rem 1.35rem 2.2rem;width:100%;max-width:480px;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1),background .25s}
+.success-sheet.show .sheet-card{transform:none}
+.sheet-check{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;margin:0 auto .85rem;animation:popIn .5s ease}
+.sheet-check svg{width:28px;height:28px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.sheet-title{text-align:center;font-size:1.05rem;font-weight:700;margin-bottom:.25rem}
+.sheet-sub{text-align:center;font-size:.73rem;color:var(--muted);margin-bottom:1rem}
+.sheet-info{background:var(--surface2);border-radius:11px;padding:.85rem;margin-bottom:.9rem}
+.srow{display:flex;justify-content:space-between;padding:.28rem 0;font-size:.76rem}
+.srow-k{color:var(--muted)}
+.srow-v{font-weight:600;font-family:'Bai Jamjuree',monospace;font-size:.73rem}
+.sheet-btns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.s-btn{padding:.68rem;border-radius:11px;text-align:center;font-size:.82rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Bai Jamjuree',sans-serif}
+.s-btn.primary{background:linear-gradient(135deg,var(--red-1),var(--red-2));border-color:transparent;color:#fff}
+
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="tb-logo"><img src="https://i.ibb.co/xSpNYB3j/technology.png" alt=""></div>
+  <span class="tb-name">AssetSys</span>
+  <button class="theme-btn" id="theme-btn"></button>
+  <div class="av-wrap" onclick="location.href='profile.html'">
+    <div style="text-align:right">
+      <div class="u-name" id="top-name">—</div>
+      <div class="u-role" id="top-role">—</div>
+    </div>
+    <div class="avatar" id="top-av">?</div>
+  </div>
+</div>
+
+<!-- Page -->
+<div class="page">
+  <div class="page-title">บันทึกข้อมูล ASSET</div>
+  <div class="page-sub">กรอกข้อมูลการ Upgrade PC Client</div>
+
+  <!-- Progress -->
+  <div class="prog-wrap">
+    <div class="ps active" id="ps-1"><div class="pd"><span class="n">1</span></div><div class="p-lbl">ข้อมูล<br>เครื่อง</div></div>
+    <div class="ps" id="ps-2"><div class="pd"><span class="n">2</span></div><div class="p-lbl">ข้อมูล<br>Upgrade</div></div>
+    <div class="ps" id="ps-3"><div class="pd"><span class="n">3</span></div><div class="p-lbl">บันทึก<br>อื่นๆ</div></div>
+  </div>
+
+  <div class="steps-container">
+
+    <!-- ══ Step 1 ══ -->
+    <div class="step-panel active" id="step-1">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+          <span class="card-title">ข้อมูลเครื่อง</span>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <div class="field-label">ส่วนงาน <span class="req">*</span></div>
+            <div class="ac-wrap">
+              <input class="field-input" id="f-dept" placeholder="พิมพ์หรือเลือก" autocomplete="off" spellcheck="false">
+              <div class="dept-list" id="dept-list"></div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">Computer Name <span class="req">*</span></div>
+            <input class="field-input" id="f-pc" placeholder="เช่น PC-IT-001" spellcheck="false">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <div class="field-label">หมายเลข SIP / EXT</div>
+            <input class="field-input" id="f-ext" placeholder="เช่น 1234" inputmode="numeric" maxlength="6">
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-next" onclick="goStep(2)">
+          ถัดไป <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ Step 2 ══ -->
+    <div class="step-panel" id="step-2">
+
+      <!-- Upgrade card - red tint -->
+      <div class="card upgrade-tint">
+        <div class="card-header">
+          <div class="card-icon"><svg viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg></div>
+          <span class="card-title">ข้อมูลการ Upgrade</span>
+        </div>
+        <div class="card-body">
+          <div class="field-label" style="margin-bottom:.5rem">OS ปัจจุบัน <span class="req">*</span></div>
+          <div class="os-toggle" id="cur-toggle">
+            <div class="os-btn win" onclick="selectOS('cur','windows')">
+              <svg viewBox="0 0 24 24"><path d="M3 5.5L11 4v8H3zM13 4l8-1.5V12h-8zM3 13h8v8L3 19.5zM13 13h8v6.5L13 21z"/></svg>Windows
+            </div>
+            <div class="os-btn ubu" onclick="selectOS('cur','ubuntu')">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Ubuntu
+            </div>
+          </div>
+          <div id="cur-sub" class="sub-opts" style="display:none"></div>
+
+          <div style="height:.75rem"></div>
+          <div class="field-label" style="margin-bottom:.5rem">Upgrade เป็น <span class="req">*</span></div>
+          <div class="os-toggle" id="up2-toggle">
+            <div class="os-btn win" onclick="selectOS('up2','windows')">
+              <svg viewBox="0 0 24 24"><path d="M3 5.5L11 4v8H3zM13 4l8-1.5V12h-8zM3 13h8v8L3 19.5zM13 13h8v6.5L13 21z"/></svg>Windows
+            </div>
+            <div class="os-btn ubu" onclick="selectOS('up2','ubuntu')">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Ubuntu
+            </div>
+          </div>
+          <div id="up2-sub" class="sub-opts" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- Status card - green tint -->
+      <div class="card status-tint">
+        <div class="card-header">
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <span class="card-title">สถานะงาน <span style="color:var(--red-1)">*</span></span>
+        </div>
+        <div class="card-body">
+          <div class="status-grid">
+            <div class="status-chip pass" onclick="selectStatus('pass','Pass')">
+              <span class="s-ico">✅</span>Pass
+            </div>
+            <div class="status-chip doi" onclick="selectStatus('doi','ด๋อย')">
+              <span class="s-ico">⚠️</span>ด๋อย
+            </div>
+            <div class="status-chip rej" onclick="selectStatus('reject_user','Reject')">
+              <span class="s-ico">🚫</span>Reject
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goStep(1)">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round"><polyline points="15 18 9 12 15 6"/></svg> กลับ
+        </button>
+        <button class="btn btn-save" id="btn-2-save" onclick="submitForm(false)">
+          <svg class="btn-sv-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>บันทึก
+        </button>
+      </div>
+
+      <!-- Neon Add Note btn — 4-span border trace -->
+      <button class="btn-note" onclick="goStep(3)">
+        <span class="n-line"></span>
+        <span class="n-line"></span>
+        <span class="n-line"></span>
+        <span class="n-line"></span>
+        <div class="btn-note-bg"></div>
+        <div class="btn-note-txt">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          + เพิ่มบันทึก / รูปภาพ
+        </div>
+      </button>
+    </div>
+
+    <!-- ══ Step 3 ══ -->
+    <div class="step-panel" id="step-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <span class="card-title">บันทึกอื่นๆ (ไม่บังคับ)</span>
+        </div>
+        <div class="card-body">
+
+          <!-- iPhone-style Emoji Editor -->
+          <div class="field">
+            <div class="field-label">บันทึกย่อ <span style="font-weight:400;color:var(--muted)">(สูงสุด 60 ตัวอักษร)</span></div>
+            <div class="emoji-editor-wrap">
+              <!-- Emoji picker bar -->
+              <div class="emoji-bar" id="emoji-bar"></div>
+              <!-- Text area -->
+              <textarea class="note-textarea" id="f-note" maxlength="60" placeholder="พิมพ์บันทึก... แตะ emoji ด้านบนเพื่อแทรก"></textarea>
+              <div class="note-footer">
+                <span class="note-char-count" id="note-count">0/60</span>
+                <span style="font-size:.62rem;color:var(--muted)">แตะ emoji เพื่อแทรกในข้อความ</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image upload -->
+          <div class="field" style="margin-bottom:0">
+            <div class="field-label">รูปภาพหลักฐาน <span style="font-weight:400;color:var(--muted)">(สูงสุด 2 รูป)</span></div>
+            <div class="img-area">
+              <div class="img-slot" id="slot-1">
+                <input type="file" accept="image/*" onchange="handleUpload(event,1)">
+                <div class="img-slot-ico">📷</div>
+                <div class="img-slot-lbl">รูปที่ 1</div>
+              </div>
+              <div class="img-slot" id="slot-2">
+                <input type="file" accept="image/*" onchange="handleUpload(event,2)">
+                <div class="img-slot-ico">📷</div>
+                <div class="img-slot-lbl">รูปที่ 2</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goStep(2)">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round"><polyline points="15 18 9 12 15 6"/></svg> กลับ
+        </button>
+        <button class="btn btn-save" id="btn-3-save" onclick="submitForm(true)">
+          <svg class="btn-sv-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>บันทึกทั้งหมด
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- IT Agent bar -->
+<div class="agent-bar">
+  <div class="agent-av" id="agent-av">?</div>
+  <div>
+    <div class="agent-name" id="agent-name">กำลังโหลด...</div>
+    <div class="agent-lbl">IT Agent ที่ดำเนินการ</div>
+  </div>
+  <span class="agent-badge" id="agent-badge">—</span>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <a class="nav-item active" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    <span class="nav-label">บันทึก</span><div class="nav-dot"></div>
+  </a>
+  <a class="nav-item" href="records.html">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span class="nav-label">รายการ</span>
+  </a>
+  <a class="nav-item" href="profile.html">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="nav-label">โปรไฟล์</span>
+  </a>
+  <a class="nav-item" href="azuadmin.html" id="nav-admin" style="display:none">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span class="nav-label">Admin</span>
+  </a>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="t-ico"></span><span id="t-msg"></span></div>
+
+<!-- Success sheet -->
+<div class="success-sheet" id="suc-sheet">
+  <div class="sheet-card">
+    <div class="sheet-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="sheet-title">บันทึกสำเร็จ! 🎉</div>
+    <div class="sheet-sub" id="suc-id">—</div>
+    <div class="sheet-info" id="suc-summary"></div>
+    <div class="sheet-btns">
+      <div class="s-btn" onclick="resetForm()">+ บันทึกใหม่</div>
+      <div class="s-btn primary" onclick="location.href='records.html'">ดูรายการ →</div>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/api.js"></script>
+<script>
+API.requireLogin();
+Theme.renderBtn(document.getElementById('theme-btn'));
+
+// ── 10 emoji iPhone-style ────────────────────────────────────
+const EMOJIS = [
+  {e:'✅',l:'OK'},   {e:'⚠️',l:'Warning'},{e:'🔧',l:'Fix'},
+  {e:'💻',l:'PC'},   {e:'🚫',l:'Block'},  {e:'🎉',l:'Done'},
+  {e:'👍',l:'Good'}, {e:'❌',l:'Fail'},   {e:'🔄',l:'Retry'},
+  {e:'📝',l:'Note'},
+];
+
+// ── State ─────────────────────────────────────────────────────
+let user=null, depts=[], osSettings={};
+let curStep=1, goingBack=false;
+let form={dept:'',pc:'',ext:'',curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:'',statusLabel:'',note:'',img1:'',img2:''};
+
+// ── Init ──────────────────────────────────────────────────────
+async function init(){
+  const [meR,deptR,setR]=await Promise.all([API.me(),API.getDepartments(),API.getSettings('')]);
+  user=meR?.user; depts=deptR||[];
+  const all=setR||[];
+  osSettings={
+    windows:all.filter(s=>s.category==='os'&&s.value.startsWith('win')),
+    ubuntu: all.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
+  };
+  if(user){
+    const ini=(user.first_name?.[0]||'')+(user.last_name?.[0]||'');
+    const full=`${user.first_name} ${user.last_name}`;
+    ['top-name','agent-name'].forEach(id=>document.getElementById(id).textContent=full);
+    document.getElementById('top-role').textContent=user.role==='admin'?'Admin':'IT';
+    document.getElementById('agent-badge').textContent=user.role==='admin'?'Admin':'IT Agent';
+    ['top-av','agent-av'].forEach(id=>{
+      const el=document.getElementById(id);el.textContent=ini;
+      if(user.avatar_url)el.innerHTML=`<img src="${user.avatar_url}">`;
+    });
+  }
+  renderEmojiBar();
+  initAutocomplete();
+}
+
+// ── Progress ─────────────────────────────────────────────────
+function goStep(n){
+  if(n>curStep&&!validateStep(curStep))return;
+  goingBack=n<curStep;
+  document.getElementById(`step-${curStep}`).classList.remove('active','back');
+  curStep=n;
+  const p=document.getElementById(`step-${n}`);
+  p.classList.add('active');
+  goingBack?p.classList.add('back'):p.classList.remove('back');
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById(`ps-${i}`);
+    el.classList.remove('active','done');
+    if(i<n)el.classList.add('done');
+    else if(i===n)el.classList.add('active');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function validateStep(s){
+  if(s===1){
+    form.dept=document.getElementById('f-dept').value.trim();
+    form.pc=document.getElementById('f-pc').value.trim();
+    if(!form.dept){toast('⚠️','กรุณาระบุส่วนงาน','error');return false;}
+    if(!form.pc){toast('⚠️','กรุณาระบุ Computer Name','error');return false;}
+    form.ext=document.getElementById('f-ext').value.trim();
+  }
+  if(s===2){
+    if(!form.curOS){toast('⚠️','กรุณาเลือก OS ปัจจุบัน','error');return false;}
+    if(!form.curOSDetail){toast('⚠️','กรุณาเลือกเวอร์ชัน OS ปัจจุบัน','error');return false;}
+    if(!form.up2OS){toast('⚠️','กรุณาเลือก OS ใหม่','error');return false;}
+    if(!form.up2OSDetail){toast('⚠️','กรุณาเลือกเวอร์ชัน OS ใหม่','error');return false;}
+    if(!form.status){toast('⚠️','กรุณาเลือกสถานะงาน','error');return false;}
+  }
+  return true;
+}
+
+// ── Autocomplete ──────────────────────────────────────────────
+function initAutocomplete(){
+  const inp=document.getElementById('f-dept'),lst=document.getElementById('dept-list');
+  function show(q){
+    const hits=q?depts.filter(d=>d.toLowerCase().includes(q.toLowerCase())):depts;
+    lst.innerHTML=hits.map(d=>`<div class="dept-item" onclick="pickDept('${d.replace(/'/g,"\\'")}')">${q?d.replace(new RegExp(`(${q})`,'gi'),'<mark>$1</mark>'):d}</div>`).join('');
+    lst.classList.toggle('show',hits.length>0);
+  }
+  inp.addEventListener('input',()=>{show(inp.value.trim());form.dept=inp.value.trim();});
+  inp.addEventListener('focus',()=>show(inp.value.trim()));
+  document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))lst.classList.remove('show');});
+}
+function pickDept(n){document.getElementById('f-dept').value=n;document.getElementById('dept-list').classList.remove('show');form.dept=n;}
+
+// ── OS ────────────────────────────────────────────────────────
+function selectOS(type,os){
+  const grps=document.querySelectorAll('#step-2 .os-toggle');
+  const grp=type==='cur'?grps[0]:grps[1];
+  grp.querySelectorAll('.os-btn').forEach(b=>b.classList.remove('active'));
+  grp.querySelector(os==='windows'?'.win':'.ubu').classList.add('active');
+  if(type==='cur'){form.curOS=os;form.curOSDetail='';}else{form.up2OS=os;form.up2OSDetail='';}
+  const sid=type==='cur'?'cur-sub':'up2-sub';
+  const sub=document.getElementById(sid);
+  const opts=osSettings[os]||[];
+  if(!opts.length){sub.style.display='none';return;}
+  const cls=os==='windows'?'win-sub':'ubu-sub';
+  sub.style.display='grid';
+  sub.innerHTML=opts.map(o=>`<div class="sub-btn ${cls}" data-v="${o.value}" onclick="selectOSDetail('${type}','${o.value}')">${o.label}</div>`).join('');
+}
+function selectOSDetail(type,val){
+  const sid=type==='cur'?'cur-sub':'up2-sub';
+  document.querySelectorAll(`#${sid} .sub-btn`).forEach(b=>b.classList.remove('active'));
+  document.querySelector(`#${sid} [data-v="${val}"]`).classList.add('active');
+  if(type==='cur')form.curOSDetail=val;else form.up2OSDetail=val;
+}
+
+// ── Status ────────────────────────────────────────────────────
+function selectStatus(val,label){
+  document.querySelectorAll('.status-chip').forEach(c=>c.classList.remove('active'));
+  const m={pass:'pass',doi:'doi',reject_user:'rej'};
+  document.querySelector(`.status-chip.${m[val]||val}`)?.classList.add('active');
+  form.status=val;form.statusLabel=label;
+}
+
+// ── iPhone Emoji Bar ─────────────────────────────────────────
+function renderEmojiBar(){
+  const bar=document.getElementById('emoji-bar');
+  bar.innerHTML=EMOJIS.map(({e,l})=>
+    `<div class="em-pick" data-label="${l}" onclick="insertEmoji('${e}')">${e}</div>`
+  ).join('');
+}
+
+function insertEmoji(emoji){
+  const ta=document.getElementById('f-note');
+  const start=ta.selectionStart, end=ta.selectionEnd;
+  const current=ta.value;
+  const newVal=current.slice(0,start)+emoji+current.slice(end);
+  if(newVal.length>60)return;
+  ta.value=newVal;
+  // restore cursor after emoji
+  const newPos=start+emoji.length;
+  ta.focus();
+  ta.setSelectionRange(newPos,newPos);
+  updateNoteCount();
+  form.note=ta.value;
+}
+
+document.getElementById('f-note').addEventListener('input',function(){
+  updateNoteCount();form.note=this.value;
+});
+function updateNoteCount(){
+  const n=document.getElementById('f-note').value.length;
+  const c=document.getElementById('note-count');
+  c.textContent=`${n}/60`;c.classList.toggle('warn',n>=55);
+}
+
+// ── Images ────────────────────────────────────────────────────
+async function handleUpload(ev,n){
+  const file=ev.target.files[0];if(!file)return;
+  const slot=document.getElementById(`slot-${n}`);
+  slot.innerHTML=`<div class="img-uploading"><div class="spin-img"></div></div><input type="file" accept="image/*" onchange="handleUpload(event,${n})" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">`;
+  try{
+    const r=await API.uploadImage(file);
+    if(n===1)form.img1=r.url;else form.img2=r.url;
+    slot.classList.add('has-img');
+    slot.innerHTML=`<img class="img-preview" src="${r.url}" referrerpolicy="no-referrer" onerror="this.style.display='none'"><button class="img-rm" onclick="removeImg(${n},event)">✕</button>`;
+    toast('✅',`อัปโหลดรูปที่ ${n} สำเร็จ`,'success');
+  }catch(err){
+    slot.innerHTML=`<input type="file" accept="image/*" onchange="handleUpload(event,${n})" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%"><div class="img-slot-ico">📷</div><div class="img-slot-lbl">รูปที่ ${n}</div>`;
+    toast('❌','อัปโหลดไม่สำเร็จ','error');
+  }
+}
+function removeImg(n,e){
+  e.stopPropagation();if(n===1)form.img1='';else form.img2='';
+  const s=document.getElementById(`slot-${n}`);s.classList.remove('has-img');
+  s.innerHTML=`<input type="file" accept="image/*" onchange="handleUpload(event,${n})" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%"><div class="img-slot-ico">📷</div><div class="img-slot-lbl">รูปที่ ${n}</div>`;
+}
+
+// ── Submit ────────────────────────────────────────────────────
+async function submitForm(withNote){
+  if(!validateStep(1)||!validateStep(2))return;
+  if(withNote)form.note=document.getElementById('f-note').value.trim();
+  const btnId=withNote?'btn-3-save':'btn-2-save';
+  const btn=document.getElementById(btnId);
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> บันทึก...';
+  try{
+    const res=await API.saveRecord({
+      department:form.dept,computer_name:form.pc,ext:form.ext,
+      current_os:form.curOS,current_os_detail:form.curOSDetail,
+      up2_os:form.up2OS,up2_os_detail:form.up2OSDetail,
+      status:form.status,note:form.note,emoji:'',
+      image1_url:form.img1,image2_url:form.img2,
+    });
+    showSuccess(res.id);
+    depts=await API.getDepartments();
+  }catch(err){toast('❌',err.message||'บันทึกไม่สำเร็จ','error');}
+  finally{
+    btn.disabled=false;
+    const svIco='<svg class="btn-sv-icon" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v14a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>';
+    btn.innerHTML=svIco+(withNote?'บันทึกทั้งหมด':'บันทึก');
+  }
+}
+
+function showSuccess(id){
+  const all=[...(osSettings.windows||[]),...(osSettings.ubuntu||[])];
+  const lbl=v=>all.find(o=>o.value===v)?.label||v;
+  document.getElementById('suc-id').textContent=`Record ID: ${id}`;
+  document.getElementById('suc-summary').innerHTML=`
+    <div class="srow"><span class="srow-k">ส่วนงาน</span><span class="srow-v">${form.dept}</span></div>
+    <div class="srow"><span class="srow-k">PC</span><span class="srow-v">${form.pc}</span></div>
+    <div class="srow"><span class="srow-k">จาก</span><span class="srow-v">${lbl(form.curOSDetail)}</span></div>
+    <div class="srow"><span class="srow-k">Upgrade เป็น</span><span class="srow-v">${lbl(form.up2OSDetail)}</span></div>
+    <div class="srow"><span class="srow-k">สถานะ</span><span class="srow-v">${form.statusLabel}</span></div>
+    ${form.note?`<div class="srow"><span class="srow-k">บันทึก</span><span class="srow-v">${form.note}</span></div>`:''}`;
+  document.getElementById('suc-sheet').classList.add('show');
+}
+
+function resetForm(){
+  document.getElementById('suc-sheet').classList.remove('show');
+  ['f-dept','f-pc','f-ext','f-note'].forEach(id=>document.getElementById(id).value='');
+  updateNoteCount();
+  document.querySelectorAll('.os-btn,.sub-btn,.status-chip').forEach(b=>b.classList.remove('active'));
+  ['cur-sub','up2-sub'].forEach(id=>{const el=document.getElementById(id);el.style.display='none';el.innerHTML='';});
+  form={dept:'',pc:'',ext:'',curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:'',statusLabel:'',note:'',img1:'',img2:''};
+  [1,2].forEach(n=>{
+    const s=document.getElementById(`slot-${n}`);s.classList.remove('has-img');
+    s.innerHTML=`<input type="file" accept="image/*" onchange="handleUpload(event,${n})" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%"><div class="img-slot-ico">📷</div><div class="img-slot-lbl">รูปที่ ${n}</div>`;
+  });
+  goStep(1);
+}
+
+let tTimer;
+function toast(ico,msg,type='success'){
+  const el=document.getElementById('toast');
+  document.getElementById('t-ico').textContent=ico;
+  document.getElementById('t-msg').textContent=msg;
+  el.className=`toast ${type} show`;
+  clearTimeout(tTimer);tTimer=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+init();
+</script>
+</body>
+</html>
