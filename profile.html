@@ -582,8 +582,14 @@ async function init() {
   user = meR?.user;
   if (!user) return;
 
-  // Avatar bg (card background image)
-  if (user.avatar_url) { setHeroBg(user.avatar_url); }
+  // Avatar: circle + background
+  const heroAv = document.getElementById('hero-avatar');
+  const ini = (user.first_name?.[0]||'') + (user.last_name?.[0]||'');
+  heroAv.textContent = ini;
+  if (user.avatar_url) {
+    heroAv.innerHTML = `<img src="${user.avatar_url}" referrerpolicy="no-referrer">`;
+    setHeroBg(user.avatar_url);
+  }
 
   // Hero card
   document.getElementById('hero-name').textContent  = `${user.first_name} ${user.last_name}`;
@@ -633,6 +639,8 @@ async function uploadAvatar(ev) {
     toast('📷','กำลังอัปโหลด avatar...','info');
     const res = await API.uploadImage(file);
     await API.updateAvatar(res.url);
+    const av2 = document.getElementById('hero-avatar');
+    av2.innerHTML = `<img src="${res.url}" referrerpolicy="no-referrer">`;
     setHeroBg(res.url);
     toast('✅','เปลี่ยน avatar สำเร็จ','success');
   } catch(err) {

@@ -16,6 +16,7 @@
   --topbar-bg:rgba(10,10,10,.93);--nav-bg:rgba(10,10,10,.95);
   --radius:13px;--topbar-h:54px;--nav-h:56px;
   --pass-text:#4ade80;--doi-text:#fb923c;--rej-text:#f87171;
+  --sidebar-w:220px;
 }
 [data-theme="light"]{
   --bg:#f0f0f5;--surface:#fff;--surface2:#f5f5f5;--surface3:#eaeaea;
@@ -198,6 +199,45 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .toast.error{border-color:rgba(239,68,68,.3);color:#f87171}
 .toast.info{border-color:rgba(14,165,233,.3);color:#38bdf8}
 
+/* ── Desktop layout ── */
+@media(min-width:768px){
+  .bottom-nav{display:none}
+  .admin-sidebar{display:flex}
+  .page{padding:calc(var(--topbar-h) + 1rem) 1.5rem 1.5rem calc(var(--sidebar-w) + 2rem);max-width:none}
+  .kpi-grid{grid-template-columns:repeat(4,1fr)}
+  .filter-row{flex-wrap:nowrap}
+  .user-add-grid{grid-template-columns:repeat(3,1fr)}
+  .data-table{min-width:auto}
+  .topbar{padding:0 1.5rem}
+}
+@media(max-width:767px){
+  .admin-sidebar{display:none}
+  .page{padding:calc(var(--topbar-h) + .85rem) 1rem calc(var(--nav-h) + 1rem) 1rem}
+}
+/* Sidebar */
+.admin-sidebar{
+  position:fixed;left:0;top:var(--topbar-h);bottom:0;width:var(--sidebar-w);
+  background:var(--surface);border-right:1px solid var(--border);
+  z-index:50;flex-direction:column;padding:.75rem 0;overflow-y:auto;
+  display:none;
+}
+.sidebar-item{
+  display:flex;align-items:center;gap:10px;padding:.72rem 1.25rem;
+  cursor:pointer;color:var(--muted);transition:all .15s;border:none;
+  background:none;font-family:'Bai Jamjuree',sans-serif;font-size:.85rem;font-weight:500;
+  width:100%;text-align:left;border-left:3px solid transparent;
+}
+.sidebar-item:hover{background:var(--surface2);color:var(--text)}
+.sidebar-item.active{background:rgba(255,45,45,.08);color:var(--red-1);border-left-color:var(--red-1);font-weight:700}
+.sidebar-item svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0}
+.sidebar-label{font-size:.85rem}
+.sidebar-divider{height:1px;background:var(--border);margin:.5rem .75rem}
+
+/* Dashboard time filter chips */
+.time-chips{display:flex;gap:6px;margin-bottom:.85rem}
+.time-chip{padding:.38rem .85rem;border-radius:20px;font-size:.73rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);white-space:nowrap;transition:all .18s;font-family:'Bai Jamjuree',sans-serif;-webkit-tap-highlight-color:transparent}
+.time-chip.active{background:rgba(255,45,45,.1);border-color:rgba(255,45,45,.4);color:var(--red-1)}
+
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
 .skel{background:var(--surface2);border-radius:6px;animation:pulse 1.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -216,10 +256,39 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
   <button class="theme-btn" id="theme-btn"></button>
 </div>
 
+<!-- Admin Sidebar (desktop) -->
+<nav class="admin-sidebar" id="admin-sidebar">
+  <button class="sidebar-item active" id="sb-dash" onclick="switchPage('dash')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span class="sidebar-label">Dashboard</span>
+  </button>
+  <button class="sidebar-item" id="sb-records" onclick="switchPage('records')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span class="sidebar-label">รายการทั้งหมด</span>
+  </button>
+  <div class="sidebar-divider"></div>
+  <button class="sidebar-item" id="sb-settings" onclick="switchPage('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span class="sidebar-label">ตั้งค่าระบบ</span>
+  </button>
+  <button class="sidebar-item" id="sb-users" onclick="switchPage('users')">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span class="sidebar-label">User Management</span>
+  </button>
+</nav>
+
 <!-- ══ PAGE: Dashboard ══ -->
 <div class="page active" id="page-dash">
   <div class="page-title">Dashboard</div>
   <div class="page-sub">ภาพรวมการทำงานทั้งหมด</div>
+
+  <!-- Time filter chips -->
+  <div class="time-chips">
+    <div class="time-chip active" data-period="all"  onclick="setTimePeriod(this,'all')">🗂 ทั้งหมด</div>
+    <div class="time-chip" data-period="today"       onclick="setTimePeriod(this,'today')">📅 วันนี้</div>
+    <div class="time-chip" data-period="week"        onclick="setTimePeriod(this,'week')">📆 สัปดาห์นี้</div>
+    <div class="time-chip" data-period="month"       onclick="setTimePeriod(this,'month')">🗓 เดือนนี้</div>
+  </div>
 
   <!-- KPI -->
   <div class="kpi-grid" id="kpi-grid">
@@ -336,7 +405,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
     <div class="card-header">
       <div class="card-icon green"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
       <span class="card-title">สถานะงาน</span>
-      <button class="card-action" onclick="openAddSetting('status')">+ เพิ่ม</button>
+
     </div>
     <div id="status-list"></div>
   </div>
@@ -388,7 +457,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
     <input type="hidden" id="s-category">
     <div class="e-field"><div class="e-label">Value (key เช่น win12)</div><input class="e-input" id="s-value" placeholder="เช่น win12"></div>
     <div class="e-field"><div class="e-label">Label (ชื่อที่แสดง)</div><input class="e-input" id="s-label" placeholder="เช่น Windows 12"></div>
-    <div class="e-field"><div class="e-label">ลำดับ (sort)</div><input class="e-input" id="s-sort" type="number" value="99"></div>
+    <div class="e-field"><div class="e-label">ลำดับ (อัตโนมัติ)</div><input class="e-input" id="s-sort" type="number" readonly style="opacity:.5;cursor:not-allowed"></div>
     <button class="save-btn" onclick="saveSetting()">บันทึก</button>
   </div>
 </div>
@@ -436,9 +505,10 @@ let recFiltered=[];
 function switchPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(`page-${id}`).classList.add('active');
-  document.getElementById(`nav-${id}`).classList.add('active');
-  // lazy load each page
+  document.getElementById(`nav-${id}`)?.classList.add('active');
+  document.getElementById(`sb-${id}`)?.classList.add('active');
   if(id==='records') renderRecords();
   if(id==='settings') renderSettings();
   if(id==='users') renderUsers();
@@ -463,11 +533,37 @@ async function init(){
 }
 
 // ── Dashboard ─────────────────────────────────────────────────
+let timePeriod = 'all';
+
+function setTimePeriod(el, period){
+  document.querySelectorAll('.time-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  timePeriod = period;
+  renderDash();
+}
+
+function filterByPeriod(recs){
+  if(timePeriod === 'all') return recs;
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+  const weekAgo  = new Date(now); weekAgo.setDate(now.getDate()-7);
+  const monthStr = now.toISOString().slice(0,7);
+  return recs.filter(r => {
+    const d = r.created_at?.slice(0,10);
+    if(!d) return false;
+    if(timePeriod==='today') return d === todayStr;
+    if(timePeriod==='week')  return new Date(d) >= weekAgo;
+    if(timePeriod==='month') return d.startsWith(monthStr);
+    return true;
+  });
+}
+
 function renderDash(){
-  const total = allRecs.length;
-  const pass  = allRecs.filter(r=>r.status==='pass').length;
-  const doi   = allRecs.filter(r=>r.status==='doi').length;
-  const rej   = allRecs.filter(r=>r.status==='reject_user').length;
+  const recs  = filterByPeriod(allRecs);
+  const total = recs.length;
+  const pass  = recs.filter(r=>r.status==='pass').length;
+  const doi   = recs.filter(r=>r.status==='doi').length;
+  const rej   = recs.filter(r=>r.status==='reject_user').length;
 
   // KPI cards
   document.getElementById('kpi-grid').innerHTML = `
@@ -495,7 +591,7 @@ function renderTrend(){
     const d=new Date(today);d.setDate(d.getDate()-i);
     const k=d.toISOString().slice(0,10);counts[k]=0;
   }
-  allRecs.forEach(r=>{
+  filterByPeriod(allRecs).forEach(r=>{
     const d=parseDate(r.created_at);
     if(!d)return;
     const k=d.toISOString().slice(0,10);
@@ -537,7 +633,7 @@ function renderDonut(pass,doi,rej){
 
 function renderKPITable(){
   const byAgent={};
-  allRecs.forEach(r=>{
+  filterByPeriod(allRecs).forEach(r=>{
     if(!r.it_agent)return;
     if(!byAgent[r.it_agent])byAgent[r.it_agent]={total:0,pass:0};
     byAgent[r.it_agent].total++;
@@ -661,8 +757,12 @@ function openAddSetting(cat){
   document.getElementById('setting-sheet-title').textContent = cat==='os'?'เพิ่ม OS':'เพิ่มสถานะ';
   document.getElementById('s-value').value = '';
   document.getElementById('s-label').value = '';
-  document.getElementById('s-sort').value  = '99';
+  // Auto sort_order = max existing + 1
+  const existing = allSettings.filter(s=>s.category===cat);
+  const maxSort  = existing.length ? Math.max(...existing.map(s=>+s.sort_order||0)) : 0;
+  document.getElementById('s-sort').value = maxSort + 1;
   document.getElementById('setting-sheet').classList.add('show');
+  setTimeout(()=>document.getElementById('s-value').focus(),350);
 }
 
 async function saveSetting(){
