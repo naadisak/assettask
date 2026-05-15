@@ -843,7 +843,9 @@ function openLineSheet() {
 function connectLINE() {
   if (!CONFIG.LINE_CHANNEL_ID) return;
   const state    = Math.random().toString(36).substr(2);
-  const callback = encodeURIComponent(window.location.origin + '/line_callback.html');
+  // Callback URL ต้องตรงกับที่ลงทะเบียนใน LINE Developers Console
+  const callbackUrl = 'https://naadisak.github.io/assettask/line_callback.html';
+  const callback = encodeURIComponent(callbackUrl);
   localStorage.setItem('assetsys_line_state', state);
   window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${CONFIG.LINE_CHANNEL_ID}&redirect_uri=${callback}&state=${state}&scope=profile%20openid`;
 }
