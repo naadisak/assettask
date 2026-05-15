@@ -266,6 +266,16 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .nav-label{font-size:.58rem;font-weight:600;letter-spacing:.3px}
 .nav-dot{width:4px;height:4px;border-radius:50%;background:var(--red-1);margin-top:-1px}
 
+.edit-img-area{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.35rem}
+.edit-img-slot{aspect-ratio:16/9;background:var(--surface2);border:1.5px dashed var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;transition:all .2s;font-family:'Bai Jamjuree',sans-serif}
+.edit-img-slot:hover{border-color:#555}
+.edit-img-slot.has-img{border-style:solid;border-color:rgba(255,45,45,.3)}
+.edit-img-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.edit-img-slot-ico{font-size:1.2rem;margin-bottom:3px}
+.edit-img-slot-lbl{font-size:.62rem;color:var(--muted);text-align:center;line-height:1.4}
+.edit-img-preview{position:absolute;inset:0;object-fit:cover;width:100%;height:100%}
+.edit-img-rm{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(0,0,0,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;cursor:pointer;color:#fff;z-index:5;border:none}
+.edit-uploading{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
 .spin-sm{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -416,6 +426,21 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
       </div>
     </div>
     <div class="e-field"><div class="e-label">บันทึกย่อ</div><input class="e-input" id="e-note" placeholder="บันทึกย่อ" maxlength="60"></div>
+    <div class="e-field">
+      <div class="e-label">รูปภาพหลักฐาน <span style="font-weight:400;color:var(--muted)">(แตะเพื่อเปลี่ยน)</span></div>
+      <div class="edit-img-area">
+        <div class="edit-img-slot" id="e-slot-1">
+          <input type="file" accept="image/*" onchange="editUploadImg(event,1)">
+          <div class="edit-img-slot-ico">📷</div>
+          <div class="edit-img-slot-lbl">รูปที่ 1</div>
+        </div>
+        <div class="edit-img-slot" id="e-slot-2">
+          <input type="file" accept="image/*" onchange="editUploadImg(event,2)">
+          <div class="edit-img-slot-ico">📷</div>
+          <div class="edit-img-slot-lbl">รูปที่ 2</div>
+        </div>
+      </div>
+    </div>
     <button class="edit-save-btn" id="edit-save-btn" onclick="confirmSaveEdit()">บันทึกการแก้ไข</button>
   </div>
 </div>
@@ -453,7 +478,7 @@ Theme.renderBtn(document.getElementById('theme-btn'));
 let user=null, allRecs=[], filtered=[], osSettings={};
 let curPage=1; const PER=10;
 let filterStatus='', filterDept='', searchQ='';
-let editRec=null, editState={curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:''};
+let editRec=null, editState={curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:'',img1:'',img2:''};
 let confirmAction=null;
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -528,7 +553,7 @@ function applyFilter(){
   const to=document.getElementById('f-to').value;
   updateDateLabel(from,to);
 
-  filtered=allRecs.filter(r=>{
+  filtered=allRecs.filter(r=>r.status!=='__deleted__').filter(r=>{
     if(filterStatus&&r.status!==filterStatus)return false;
     if(filterDept&&r.department!==filterDept)return false;
     if(from&&r.created_at&&r.created_at<from)return false;
@@ -728,7 +753,8 @@ function dupRecord(id){
   document.getElementById('e-pc').value=r.computer_name+' (copy)'||'';
   document.getElementById('e-ext').value=r.ext||'';
   document.getElementById('e-note').value=r.note||'';
-  prefillEditOS();prefillEditStatus();
+  editState.img1=r.image1_url||''; editState.img2=r.image2_url||'';
+  prefillEditOS();prefillEditStatus();prefillEditImgs();
   document.querySelector('.sheet-title span').textContent='📋 Duplicate รายการ';
   document.getElementById('edit-save-btn').textContent='บันทึกรายการใหม่';
   document.getElementById('edit-sheet').classList.add('show');
@@ -743,7 +769,7 @@ function openEdit(id){
   document.getElementById('e-pc').value=r.computer_name||'';
   document.getElementById('e-ext').value=r.ext||'';
   document.getElementById('e-note').value=r.note||'';
-  prefillEditOS();prefillEditStatus();
+  prefillEditOS();prefillEditStatus();prefillEditImgs();
   document.querySelector('.sheet-title span').textContent='✏️ แก้ไขรายการ';
   document.getElementById('edit-save-btn').textContent='บันทึกการแก้ไข';
   document.getElementById('edit-sheet').classList.add('show');
@@ -757,6 +783,19 @@ function prefillEditOS(){
     document.querySelectorAll(`#${tgId} .edit-os-btn`).forEach(b=>b.classList.remove('active'));
     if(os)document.querySelector(`#${tgId} .${os==='windows'?'win':'ubu'}`)?.classList.add('active');
     renderEditSub(type,os,det);
+  });
+}
+function prefillEditImgs(){
+  [1,2].forEach(n=>{
+    const url=n===1?editState.img1:editState.img2;
+    const slot=document.getElementById(`e-slot-${n}`);
+    if(url){
+      slot.classList.add('has-img');
+      slot.innerHTML=`<img class="edit-img-preview" src="${url}" referrerpolicy="no-referrer"><button class="edit-img-rm" onclick="editRemoveImg(${n},event)">✕</button>`;
+    }else{
+      slot.classList.remove('has-img');
+      slot.innerHTML=`<input type="file" accept="image/*" onchange="editUploadImg(event,${n})"><div class="edit-img-slot-ico">📷</div><div class="edit-img-slot-lbl">รูปที่ ${n}</div>`;
+    }
   });
 }
 function prefillEditStatus(){
@@ -791,12 +830,39 @@ function editStatus(val){
   document.querySelector(`.edit-sc.${m[val]||val}`)?.classList.add('active');
   editState.status=val;
 }
-function closeEdit(){document.getElementById('edit-sheet').classList.remove('show');}
+function closeEdit(){
+  document.getElementById('edit-sheet').classList.remove('show');
+  editState.img1=''; editState.img2='';
+}
 
 // ── Confirm: Save edit ────────────────────────────────────────
 function confirmSaveEdit(){
   showConfirm('💾','ยืนยันการบันทึก','ต้องการบันทึกการเปลี่ยนแปลงนี้ใช่หรือไม่?','ok',doSaveEdit);
 }
+async function editUploadImg(ev,n){
+  const file=ev.target.files[0]; if(!file) return;
+  const slot=document.getElementById(`e-slot-${n}`);
+  slot.innerHTML=`<div class="edit-uploading"><div class="spin-sm" style="border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;width:18px;height:18px"></div></div>`;
+  try{
+    const r=await API.uploadImage(file);
+    if(n===1) editState.img1=r.url; else editState.img2=r.url;
+    slot.classList.add('has-img');
+    slot.innerHTML=`<img class="edit-img-preview" src="${r.url}" referrerpolicy="no-referrer"><button class="edit-img-rm" onclick="editRemoveImg(${n},event)">✕</button>`;
+    toast('✅',`อัปโหลดรูปที่ ${n} สำเร็จ`,'success');
+  }catch(err){
+    slot.classList.remove('has-img');
+    slot.innerHTML=`<input type="file" accept="image/*" onchange="editUploadImg(event,${n})"><div class="edit-img-slot-ico">📷</div><div class="edit-img-slot-lbl">รูปที่ ${n}</div>`;
+    toast('❌','อัปโหลดไม่สำเร็จ: '+err.message,'error');
+  }
+}
+function editRemoveImg(n,e){
+  e.stopPropagation();
+  if(n===1) editState.img1=''; else editState.img2='';
+  const slot=document.getElementById(`e-slot-${n}`);
+  slot.classList.remove('has-img');
+  slot.innerHTML=`<input type="file" accept="image/*" onchange="editUploadImg(event,${n})"><div class="edit-img-slot-ico">📷</div><div class="edit-img-slot-lbl">รูปที่ ${n}</div>`;
+}
+
 async function doSaveEdit(){
   closeConfirm();
   const dept=document.getElementById('e-dept').value.trim();
@@ -807,11 +873,11 @@ async function doSaveEdit(){
   try{
     if(editRec){
       // update existing
-      await API.updateRecord({id:editRec.id,department:dept,computer_name:pc,ext:document.getElementById('e-ext').value.trim(),current_os:editState.curOS,current_os_detail:editState.curOSDetail,up2_os:editState.up2OS,up2_os_detail:editState.up2OSDetail,status:editState.status,note:document.getElementById('e-note').value.trim()});
+      await API.updateRecord({id:editRec.id,department:dept,computer_name:pc,ext:document.getElementById('e-ext').value.trim(),current_os:editState.curOS,current_os_detail:editState.curOSDetail,up2_os:editState.up2OS,up2_os_detail:editState.up2OSDetail,status:editState.status,note:document.getElementById('e-note').value.trim(),image1_url:editState.img1,image2_url:editState.img2});
       toast('✅','แก้ไขสำเร็จ','success');
     }else{
       // duplicate → save new
-      await API.saveRecord({department:dept,computer_name:pc,ext:document.getElementById('e-ext').value.trim(),current_os:editState.curOS,current_os_detail:editState.curOSDetail,up2_os:editState.up2OS,up2_os_detail:editState.up2OSDetail,status:editState.status,note:document.getElementById('e-note').value.trim(),emoji:'',image1_url:'',image2_url:''});
+      await API.saveRecord({department:dept,computer_name:pc,ext:document.getElementById('e-ext').value.trim(),current_os:editState.curOS,current_os_detail:editState.curOSDetail,up2_os:editState.up2OS,up2_os_detail:editState.up2OSDetail,status:editState.status,note:document.getElementById('e-note').value.trim(),emoji:'',image1_url:editState.img1,image2_url:editState.img2});
       toast('✅','Duplicate สำเร็จ','success');
     }
     closeEdit();

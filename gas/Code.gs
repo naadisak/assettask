@@ -237,6 +237,8 @@ function safeUser(u) { const {password_hash, ...safe} = u; return safe; }
 function handleGetRecords(p, user) {
   let rows = getRows(SHEET.RECORDS, COL.RECORDS);
   rows.sort((a,b) => b.created_at.localeCompare(a.created_at));
+  // ไม่แสดงรายการที่ถูกลบ
+  rows = rows.filter(r => r.status !== '__deleted__');
   if (p.department) rows = rows.filter(r => r.department === p.department);
   if (p.status)     rows = rows.filter(r => r.status     === p.status);
   if (p.date_from)  rows = rows.filter(r => r.created_at >= p.date_from);
