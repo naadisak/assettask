@@ -63,6 +63,9 @@ function doGet(e) {
     if (action === 'update_setting')   return handleUpdateSetting(p);
     if (action === 'get_stats')        return handleGetStats();
 
+    if (action === 'connect_line')     return handleConnectLine(p, user);
+    if (action === 'line_login')        return handleLineLogin(p);
+
     return fail('Unknown action: ' + action, 404);
 
   } catch(err) {
@@ -233,6 +236,62 @@ function verifyPin(pin, hash) {
 
 function requireAdmin(user) { if (user.role !== 'admin') throw new Error('Access denied'); }
 function safeUser(u) { const {password_hash, ...safe} = u; return safe; }
+
+
+// ── LINE OAuth ────────────────────────────────────────────────
+function handleConnectLine(p, user) {
+  if (!p.code) return fail('ไม่พบ code จาก LINE');
+  try {
+    const lineUserId = getLineUserId(p.code);
+    if (!lineUserId) return fail('ไม่สามารถดึงข้อมูล LINE ได้');
+    updateRowById(SHEET.USERS, COL.USERS, user.id, { line_user_id: lineUserId });
+    return ok({ line_user_id: lineUserId });
+  } catch(e) {
+    return fail('LINE connect error: ' + e.message);
+  }
+}
+
+function handleLineLogin(p) {
+  if (!p.code) return fail('ไม่พบ code จาก LINE');
+  try {
+    const lineUserId = getLineUserId(p.code);
+    if (!lineUserId) return fail('ไม่สามารถดึงข้อมูล LINE ได้');
+    const user = findRow(SHEET.USERS, COL.USERS, 'line_user_id', lineUserId);
+    if (!user) return fail('ไม่พบบัญชีที่เชื่อมต่อกับ LINE นี้');
+    if (user.status !== 'active') return fail('บัญชีถูกระงับ');
+    const token = Utilities.getUuid();
+    updateRowById(SHEET.USERS, COL.USERS, user.id, { token });
+    return ok({ token, must_change_pw: false, user: safeUser({ ...user, token }) });
+  } catch(e) {
+    return fail('LINE login error: ' + e.message);
+  }
+}
+
+function getLineUserId(code) {
+  // Exchange code for access token
+  const scriptProps = PropertiesService.getScriptProperties();
+  const channelId     = scriptProps.getProperty('LINE_CHANNEL_ID')     || '';
+  const channelSecret = scriptProps.getProperty('LINE_CHANNEL_SECRET') || '';
+  const callbackUrl   = scriptProps.getProperty('LINE_CALLBACK_URL')   || '';
+  if (!channelId || !channelSecret) return null;
+
+  const tokenRes = UrlFetchApp.fetch('https://api.line.me/oauth2/v2.1/token', {
+    method: 'post',
+    contentType: 'application/x-www-form-urlencoded',
+    payload: `grant_type=authorization_code&code=${code}&redirect_uri=${encodeURIComponent(callbackUrl)}&client_id=${channelId}&client_secret=${channelSecret}`,
+    muteHttpExceptions: true,
+  });
+  const tokenJson = JSON.parse(tokenRes.getContentText());
+  if (!tokenJson.access_token) return null;
+
+  // Get LINE profile
+  const profileRes = UrlFetchApp.fetch('https://api.line.me/v2/profile', {
+    headers: { Authorization: 'Bearer ' + tokenJson.access_token },
+    muteHttpExceptions: true,
+  });
+  const profile = JSON.parse(profileRes.getContentText());
+  return profile.userId || null;
+}
 
 // ── RECORDS ───────────────────────────────────────────────────
 function handleGetRecords(p, user) {

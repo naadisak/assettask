@@ -1,0 +1,27 @@
+{
+  "name": "AssetSys — PC Upgrade Tracker",
+  "short_name": "AssetSys",
+  "description": "ระบบบันทึกการ Upgrade PC Client",
+  "start_url": "./login.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#c00000",
+  "background_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/xSpNYB3j/technology.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/xSpNYB3j/technology.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "th"
+}

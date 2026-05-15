@@ -98,3 +98,32 @@ GitHub repo → **Settings** → **Pages**
 - [ ] **Step 5** — Admin Dashboard (azuadmin)
 - [ ] **Step 6** — Settings & User Management
 - [ ] **Step 7** — Line OAuth (optional)
+
+---
+
+## 🟢 LINE OAuth Setup
+
+ตั้งค่าใน Google Apps Script:
+
+1. Apps Script → Project Settings → **Script Properties** → เพิ่ม:
+
+| Key | Value |
+|-----|-------|
+| `LINE_CHANNEL_ID` | Channel ID จาก LINE Developers |
+| `LINE_CHANNEL_SECRET` | Channel Secret |
+| `LINE_CALLBACK_URL` | `https://naadisak.github.io/assettask/line_callback.html` |
+
+2. ใน `js/config.js` ใส่:
+```js
+LINE_CHANNEL_ID: 'YOUR_CHANNEL_ID'
+```
+
+3. LINE Developers → Messaging API → **Callback URL**:
+```
+https://naadisak.github.io/assettask/line_callback.html
+```
+
+## 📱 PWA — Add to Home Screen
+
+ทุกหน้ามี manifest.json แล้ว — เปิดใน mobile browser แล้วกด "Add to Home Screen" ได้เลย
+

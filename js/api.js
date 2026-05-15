@@ -7,7 +7,7 @@
 
 const API = (() => {
   const getToken   = ()  => localStorage.getItem(CONFIG.SESSION_KEY) || '';
-  const setToken   = (t) => localStorage.setItem(CONFIG.SESSION_KEY, t);
+  const setToken   = (t) => { localStorage.setItem(CONFIG.SESSION_KEY, t); sessionStorage.setItem(CONFIG.SESSION_KEY, t); };
   const clearToken = ()  => localStorage.removeItem(CONFIG.SESSION_KEY);
   const isLoggedIn = ()  => !!getToken();
 

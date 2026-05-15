@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AssetSys">
+<meta name="theme-color" content="#c00000">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AssetSys — LINE Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--text:#f0f0f0;--muted:#666;--surface:#141414;--border:#2a2a2a;--red-1:#ff2d2d;--red-2:#c00}
+[data-theme="light"]{--bg:#f0f0f5;--text:#111;--muted:#999;--surface:#fff;--border:#e0e0e0}
+body{min-height:100dvh;background:var(--bg);color:var(--text);font-family:'Bai Jamjuree',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;gap:1.25rem}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(6,199,85,.12) 0%,transparent 65%);pointer-events:none}
+
+.logo-icon{width:58px;height:58px;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.logo-icon img{width:100%;height:100%;object-fit:cover;display:block}
+
+.status-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem 1.5rem;width:100%;max-width:340px;text-align:center}
+
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:#06C755;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem}
+.check-circle{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;animation:popIn .5s ease}
+.check-circle svg{width:26px;height:26px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.error-circle{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;animation:popIn .4s ease}
+.error-circle svg{width:24px;height:24px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+
+.status-title{font-size:1rem;font-weight:700;margin-bottom:.35rem}
+.status-msg{font-size:.78rem;color:var(--muted);line-height:1.55}
+
+.line-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(6,199,85,.1);border:1px solid rgba(6,199,85,.3);border-radius:20px;padding:.3rem .85rem;font-size:.75rem;font-weight:700;color:#06C755;margin-bottom:.85rem}
+
+.countdown{font-size:.72rem;color:var(--muted);margin-top:.75rem}
+.countdown span{color:var(--text);font-weight:700}
+
+.go-btn{display:inline-flex;align-items:center;gap:6px;margin-top:.85rem;padding:.72rem 1.35rem;background:linear-gradient(135deg,var(--red-1),var(--red-2));border:none;border-radius:12px;color:#fff;font-size:.88rem;font-weight:700;font-family:'Bai Jamjuree',sans-serif;cursor:pointer;text-decoration:none;transition:opacity .2s}
+.go-btn:active{opacity:.8}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="logo-icon"><img src="https://i.ibb.co/xSpNYB3j/technology.png" alt="AssetSys"></div>
+
+<div class="status-card" id="status-card">
+  <div class="spinner" id="spinner"></div>
+  <div class="status-title" id="s-title">กำลังยืนยัน LINE...</div>
+  <div class="status-msg" id="s-msg">กรุณารอสักครู่</div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+// ── Parse callback URL ────────────────────────────────────────
+const params  = new URLSearchParams(window.location.search);
+const code    = params.get('code');
+const state   = params.get('state');
+const errParam= params.get('error');
+const savedState = localStorage.getItem('assetsys_line_state');
+
+function showError(msg) {
+  document.getElementById('spinner').remove();
+  document.getElementById('status-card').innerHTML = `
+    <div class="error-circle"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    <div class="status-title">เชื่อมต่อไม่สำเร็จ</div>
+    <div class="status-msg">${msg}</div>
+    <a href="profile.html" class="go-btn">← กลับไปโปรไฟล์</a>`;
+}
+
+function showSuccess(isNewLogin) {
+  document.getElementById('status-card').innerHTML = `
+    <div class="line-badge">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2C6.48 2 2 5.92 2 10.76c0 3.66 2.44 6.86 6.12 8.61-.27 1-.96 3.65-.96 3.65s-.04.18.09.25c.14.07.29-.01.29-.01l4.25-2.81c.68.09 1.38.14 2.11.14 5.52 0 10-3.92 10-8.76C22 5.92 17.52 2 12 2z"/></svg>
+      LINE Connected
+    </div>
+    <div class="check-circle"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="status-title">${isNewLogin ? 'เข้าสู่ระบบสำเร็จ!' : 'เชื่อมต่อ LINE แล้ว!'}</div>
+    <div class="status-msg">${isNewLogin ? 'กำลังพาไปหน้าหลัก...' : 'บันทึกการเชื่อมต่อ LINE เรียบร้อย'}</div>
+    <div class="countdown">ไปอัตโนมัติใน <span id="ct">3</span> วินาที</div>
+    <a href="${isNewLogin ? 'index.html' : 'profile.html'}" class="go-btn">ไปเลย →</a>`;
+
+  // Countdown
+  let n = 3;
+  const iv = setInterval(() => {
+    n--;
+    const el = document.getElementById('ct');
+    if (el) el.textContent = n;
+    if (n <= 0) {
+      clearInterval(iv);
+      window.location.replace(isNewLogin ? 'index.html' : 'profile.html');
+    }
+  }, 1000);
+}
+
+async function handleCallback() {
+  // Error from LINE
+  if (errParam) {
+    showError(`LINE ปฏิเสธการเชื่อมต่อ: ${errParam}`);
+    return;
+  }
+
+  // No code
+  if (!code) {
+    showError('ไม่พบ authorization code จาก LINE');
+    return;
+  }
+
+  // State mismatch (CSRF protection)
+  if (state !== savedState) {
+    showError('State ไม่ตรงกัน — อาจเป็นการโจมตี CSRF');
+    return;
+  }
+
+  // Clear state
+  localStorage.removeItem('assetsys_line_state');
+
+  try {
+    const isLoggedIn = API.isLoggedIn();
+
+    if (isLoggedIn) {
+      // ── Connect LINE to existing account ───────────────────
+      document.getElementById('s-title').textContent = 'กำลังเชื่อมต่อ LINE...';
+      const res = await API.request?.('connect_line', { code }) ||
+                  await callGAS('connect_line', { code });
+      if (!res?.success) throw new Error(res?.error || 'เชื่อมต่อไม่สำเร็จ');
+      localStorage.setItem('assetsys_line_linked', '1');
+      showSuccess(false);
+
+    } else {
+      // ── LINE Login (no existing session) ───────────────────
+      document.getElementById('s-title').textContent = 'กำลัง login ด้วย LINE...';
+      const res = await callGAS('line_login', { code });
+      if (!res?.success || !res?.token) throw new Error(res?.error || 'Login ไม่สำเร็จ');
+      localStorage.setItem(CONFIG.SESSION_KEY, res.token);
+      localStorage.setItem('assetsys_line_linked', '1');
+      showSuccess(true);
+    }
+
+  } catch(err) {
+    showError(err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
+}
+
+// Direct GAS call helper (bypass api.js for special line actions)
+async function callGAS(action, data) {
+  const token = localStorage.getItem(CONFIG.SESSION_KEY) || '';
+  const qs = new URLSearchParams({ action, token, data: JSON.stringify(data) }).toString();
+  const res = await fetch(`${CONFIG.GAS_URL}?${qs}`, { redirect: 'follow' });
+  return res.json();
+}
+
+handleCallback();
+</script>
+</body>
+</html>
