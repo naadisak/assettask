@@ -69,7 +69,9 @@ const API = (() => {
     const res  = await fetch(CONFIG.IMGBB_URL, { method: 'POST', body: formData });
     const json = await res.json();
     if (!json.success) throw new Error(json.error?.message || 'Upload failed');
-    return { url: json.data.url, thumb_url: json.data.thumb?.url || json.data.url };
+    // display_url = direct i.ibb.co link (ใช้ได้กับ <img src> ตรงๆ)
+    const imgUrl = json.data.display_url || json.data.url || '';
+    return { url: imgUrl, thumb_url: json.data.thumb?.url || imgUrl };
   }
 
   // ── Admin ────────────────────────────────────────────────────

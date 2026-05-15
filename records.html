@@ -177,6 +177,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .d-btn-del.show{display:flex}
 .d-btn.locked{opacity:.3;pointer-events:none}
 
+.img-broken{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-size:.75rem;color:var(--muted);gap:4px;background:var(--surface3);cursor:default}
 /* ── Skeleton ── */
 .skel-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem;margin-bottom:.65rem}
 .skel{background:var(--surface2);border-radius:6px;animation:pulse 1.4s ease-in-out infinite}
@@ -659,7 +660,7 @@ function cardHTML(r){
         <div><div class="d-key">บันทึกเมื่อ</div><div class="d-val mono">${fmtDT(r.created_at)}</div></div>
         <div><div class="d-key">บันทึกโดย</div><div class="d-val mono">${r.created_by}</div></div>
       </div>
-      ${noteHTML}${imgs}
+      ${r.image1_url||r.image2_url ? `<div style="font-size:.6rem;color:var(--muted);margin-bottom:.35rem;word-break:break-all;font-family:monospace;padding:0 2px">${r.image1_url?'📎 '+r.image1_url:''}${r.image2_url?'<br>📎 '+r.image2_url:''}</div>` : ''}${noteHTML}${imgs}
       <div class="detail-actions">
         <button class="d-btn d-btn-edit ${canEdit?'':'locked'}" onclick="event.stopPropagation();${canEdit?`openEdit('${r.id}')`:''}">
           <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>

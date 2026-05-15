@@ -709,7 +709,7 @@ async function handleUpload(ev,n){
     const r=await API.uploadImage(file);
     if(n===1)form.img1=r.url;else form.img2=r.url;
     slot.classList.add('has-img');
-    slot.innerHTML=`<img class="img-preview" src="${r.url}"><button class="img-rm" onclick="removeImg(${n},event)">✕</button>`;
+    slot.innerHTML=`<img class="img-preview" src="${r.url}" onerror="this.style.display='none'"><button class="img-rm" onclick="removeImg(${n},event)">✕</button>`;
     toast('✅',`อัปโหลดรูปที่ ${n} สำเร็จ`,'success');
   }catch(err){
     slot.innerHTML=`<input type="file" accept="image/*" onchange="handleUpload(event,${n})" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%"><div class="img-slot-ico">📷</div><div class="img-slot-lbl">รูปที่ ${n}</div>`;
