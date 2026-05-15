@@ -8,7 +8,5 @@ const CONFIG = {
   // ── App ─────────────────────────────────────────────────────
   NOTE_EMOJIS:     ['✅', '⚠️', '🔧', '💻', '🚫', '🎉', '👍', '❌', '🔄', '📝'],
   APP_NAME:        'AssetSys',
-  LINE_CHANNEL_ID: '',   // ← LINE Channel ID (optional)
+  LINE_CHANNEL_ID: '',
 };
-// หมายเหตุ: รูปภาพอัปโหลดผ่าน Google Drive (ไม่หมดอายุ)
-// GAS จะสร้าง folder "AssetSys_Images" ใน Drive ของ account ที่ deploy อัตโนมัติ

@@ -62,28 +62,37 @@ const API = (() => {
   async function updateRecord(data)       { return request('update_record', data); }
 
 
-  // ── Image Upload — Google Drive via GAS (ไม่หมดอายุ 100%) ─────
+  // ── Image Upload — imgbb (direct from browser, no GAS) ─────────
+  // upload ตรงจาก browser ไป imgbb ไม่ผ่าน GAS
+  // เพราะ base64 รูปใหญ่เกิน URL limit ที่ GAS รับได้
   async function uploadImage(file) {
-    // ตรวจสอบขนาด ≤ 5MB
-    if (file.size > 5 * 1024 * 1024) throw new Error('ขนาดไฟล์ต้องไม่เกิน 5MB');
+    if (file.size > 10 * 1024 * 1024) throw new Error('ขนาดไฟล์ต้องไม่เกิน 10MB');
 
-    // แปลงเป็น base64
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload  = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = () => reject(new Error('อ่านไฟล์ไม่ได้'));
-      reader.readAsDataURL(file);
+    const allowed = ['image/jpeg','image/jpg','image/png','image/gif','image/webp'];
+    if (!allowed.includes(file.type)) throw new Error('รองรับเฉพาะ JPG, PNG, GIF, WEBP');
+
+    const formData = new FormData();
+    formData.append('key',        'b37889052f6fd7b7143ff017d07914df');
+    formData.append('image',      file);
+    formData.append('expiration', '0'); // 0 = ไม่หมดอายุ
+
+    const res  = await fetch('https://api.imgbb.com/1/upload', {
+      method: 'POST',
+      body:   formData,
     });
 
-    // ส่งไป GAS → อัปโหลดขึ้น Google Drive
-    const res = await request('upload_image', {
-      base64:   base64,
-      filename: file.name,
-      mimeType: file.type,
-    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error?.message || 'อัปโหลดไม่สำเร็จ');
 
-    if (!res) throw new Error('อัปโหลดไม่สำเร็จ');
-    return { url: res.url, thumb_url: res.thumb_url };
+    // ใช้ image.url = direct link ที่เสถียรที่สุด
+    const url = json.data?.image?.url || json.data?.display_url || json.data?.url;
+    if (!url) throw new Error('ไม่ได้รับ URL จาก imgbb');
+
+    return {
+      url,
+      thumb_url: json.data?.thumb?.url || url,
+    };
   }
 
   // ── Admin ────────────────────────────────────────────────────
