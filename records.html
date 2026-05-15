@@ -518,14 +518,13 @@ async function init(){
     const ini=(user.first_name?.[0]||'')+(user.last_name?.[0]||'');
     document.getElementById('top-name').textContent=`${user.first_name} ${user.last_name}`;
     document.getElementById('top-role').textContent=user.role==='admin'?'Admin':'IT';
-
-  // แสดง Admin nav เฉพาะ admin role
-  if(user?.role === 'admin'){
-    const adminNav = document.getElementById('nav-admin');
-    if(adminNav) adminNav.style.display = '';
-  }
     const av=document.getElementById('top-av');av.textContent=ini;
     if(user.avatar_url)av.innerHTML=`<img src="${user.avatar_url}" referrerpolicy="no-referrer">`;
+    // แสดง Admin nav เฉพาะ admin role
+    if(user.role === 'admin'){
+      const an = document.getElementById('nav-admin');
+      if(an){ an.style.display='flex'; an.style.flexDirection='column'; }
+    }
   }
 
   // แสดงรายการทันที

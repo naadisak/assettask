@@ -41,7 +41,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
   border-radius:20px;margin-bottom:.85rem;overflow:hidden;
   position:relative;cursor:default;
   /* Card ratio ~1.586:1 */
-  aspect-ratio:1.45;
+  aspect-ratio:1.42;
   background:linear-gradient(135deg,#1a0000 0%,#5a0000 35%,#c00 65%,#ff2d2d 100%);
   box-shadow:0 8px 32px rgba(192,0,0,.35),0 2px 8px rgba(0,0,0,.4);
 }
@@ -61,21 +61,21 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 }
 /* Avatar as background — right side, transparent */
 .hero-avatar-bg{
-  position:absolute;right:0;top:0;bottom:0;width:58%;
+  position:absolute;left:0;top:0;bottom:0;width:55%;
   overflow:hidden;pointer-events:none;
-  /* fade ซ้าย — ค่อยๆ เฟดเข้า */
-  -webkit-mask-image:linear-gradient(to right,
+  /* fade ขวา — ซ้ายชัด ขวาค่อยๆ หาย */
+  -webkit-mask-image:linear-gradient(to left,
     transparent 0%,
-    rgba(0,0,0,.08) 20%,
-    rgba(0,0,0,.35) 45%,
-    rgba(0,0,0,.75) 70%,
+    rgba(0,0,0,.06) 18%,
+    rgba(0,0,0,.3) 42%,
+    rgba(0,0,0,.72) 68%,
     rgba(0,0,0,.9) 100%
   );
-  mask-image:linear-gradient(to right,
+  mask-image:linear-gradient(to left,
     transparent 0%,
-    rgba(0,0,0,.08) 20%,
-    rgba(0,0,0,.35) 45%,
-    rgba(0,0,0,.75) 70%,
+    rgba(0,0,0,.06) 18%,
+    rgba(0,0,0,.3) 42%,
+    rgba(0,0,0,.72) 68%,
     rgba(0,0,0,.9) 100%
   );
 }
@@ -83,7 +83,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
   width:100%;height:100%;
   object-fit:cover;object-position:top center;
   display:block;
-  filter:saturate(.55) brightness(.65) contrast(1.05);
+  filter:saturate(.5) brightness(.6) contrast(1.05);
 }
 .hero-avatar-bg .no-img{display:none}
 .hero-avatar-bg.empty .no-img{display:block}
@@ -103,26 +103,27 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 
 /* Avatar on card */
 .avatar-wrap{
-  position:absolute;right:1.1rem;top:50%;transform:translateY(-50%);
-  cursor:pointer;
+  position:absolute;right:.9rem;top:50%;transform:translateY(-50%);
+  cursor:pointer;z-index:3;
 }
 .avatar-img{
-  width:68px;height:68px;border-radius:12px;
-  background:rgba(0,0,0,.3);
-  border:2px solid rgba(255,255,255,.25);
+  width:96px;height:96px;border-radius:50%;
+  background:rgba(0,0,0,.45);
+  border:3px solid rgba(255,255,255,.4);
   display:flex;align-items:center;justify-content:center;
-  font-size:1.4rem;font-weight:700;color:rgba(255,255,255,.9);
+  font-size:2rem;font-weight:700;color:rgba(255,255,255,.85);
   overflow:hidden;
-  box-shadow:0 4px 16px rgba(0,0,0,.4);
+  box-shadow:0 0 0 5px rgba(255,255,255,.08),0 6px 24px rgba(0,0,0,.6);
 }
 .avatar-img img{width:100%;height:100%;object-fit:cover;display:block}
 .avatar-edit{
-  position:absolute;bottom:-6px;right:-6px;width:22px;height:22px;
-  border-radius:50%;background:rgba(255,255,255,.15);
-  backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,.3);
+  position:absolute;bottom:-2px;right:-2px;width:28px;height:28px;
+  border-radius:50%;background:var(--red-1);
+  border:2.5px solid rgba(15,0,0,.85);
   display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.5);
 }
-.avatar-edit svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.avatar-edit svg{width:13px;height:13px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
 .avatar-input{display:none}
 
 /* Middle: card numbers */
@@ -590,11 +591,6 @@ async function init() {
   document.getElementById('hero-empid').textContent = user.employee_id || '';
   document.getElementById('hero-phone').textContent = user.phone_ext || '';
   
-  // แสดง Admin nav เฉพาะ admin role
-  if(user?.role === 'admin'){
-    const adminNav = document.getElementById('nav-admin');
-    if(adminNav) adminNav.style.display = '';
-  }
   document.getElementById('hero-role-badge').innerHTML = `<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:rgba(255,255,255,.6);stroke-width:2;fill:none;stroke-linecap:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>${user.role==='admin'?'Administrator':'IT Department'}`;
 
   // Tags (info card)
@@ -622,6 +618,12 @@ async function init() {
 
   // LINE status
   updateLineStatus();
+
+  // แสดง Admin nav — ต้องทำหลัง user set แล้วเท่านั้น
+  if(user.role === 'admin'){
+    const adminNav = document.getElementById('nav-admin');
+    if(adminNav){ adminNav.style.display = 'flex'; adminNav.style.flexDirection = 'column'; }
+  }
 }
 
 // ── Avatar upload ─────────────────────────────────────────────

@@ -583,12 +583,6 @@ async function init(){
     const full=`${user.first_name} ${user.last_name}`;
     ['top-name','agent-name'].forEach(id=>document.getElementById(id).textContent=full);
     document.getElementById('top-role').textContent=user.role==='admin'?'Admin':'IT';
-
-  // แสดง Admin nav เฉพาะ admin role
-  if(user?.role === 'admin'){
-    const adminNav = document.getElementById('nav-admin');
-    if(adminNav) adminNav.style.display = '';
-  }
     document.getElementById('agent-badge').textContent=user.role==='admin'?'Admin':'IT Agent';
     ['top-av','agent-av'].forEach(id=>{
       const el=document.getElementById(id);el.textContent=ini;
