@@ -203,6 +203,7 @@ function handleLogin(p) {
 function validateToken(token) {
   if (!token) return null;
   const user = findRow(SHEET.USERS, COL.USERS, 'token', token);
+  // Token ไม่มีวันหมดอายุ — valid ตลอดไปจนกว่าจะ logout หรือ login ใหม่
   return (user && user.status === 'active') ? user : null;
 }
 

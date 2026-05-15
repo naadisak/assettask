@@ -28,6 +28,17 @@ const API = (() => {
 
       if (!json.success) {
         if (json.code === 401) {
+          // ลอง restore จาก sessionStorage ก่อน redirect
+          const sess = sessionStorage.getItem(CONFIG.SESSION_KEY);
+          if (sess && sess !== localStorage.getItem(CONFIG.SESSION_KEY)) {
+            localStorage.setItem(CONFIG.SESSION_KEY, sess);
+            // retry ครั้งเดียว
+            try {
+              const r2   = await fetch(url, options);
+              const j2   = await r2.json();
+              if (j2.success) return j2;
+            } catch(_) {}
+          }
           clearToken();
           window.location.href = 'login.html';
           return null;

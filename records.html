@@ -505,32 +505,67 @@ function pillHTML(v){const c=PILL_MAP[v]||'';const l=PILL_LBL[v]||v;const i=PILL
 
 // ── Init ──────────────────────────────────────────────────────
 async function init(){
-  const [meR,setR,deptR]=await Promise.all([API.me(),API.getSettings(''),API.getDepartments()]);
-  user=meR?.user;
-  const all=setR||[];
-  osSettings={
-    windows:all.filter(s=>s.category==='os'&&s.value.startsWith('win')),
-    ubuntu: all.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
-  };
+  // โหลด user + records พร้อมกันก่อน (สำคัญที่สุด)
+  // settings + depts โหลดเป็น background ไม่บล็อก UI
+  const [meR, recsRes] = await Promise.all([API.me(), API.getRecords()]);
+
+  user = meR?.user;
   if(user){
     const ini=(user.first_name?.[0]||'')+(user.last_name?.[0]||'');
     document.getElementById('top-name').textContent=`${user.first_name} ${user.last_name}`;
     document.getElementById('top-role').textContent=user.role==='admin'?'Admin':'IT';
     const av=document.getElementById('top-av');av.textContent=ini;
-    if(user.avatar_url)av.innerHTML=`<img src="${user.avatar_url}">`;
+    if(user.avatar_url)av.innerHTML=`<img src="${user.avatar_url}" referrerpolicy="no-referrer">`;
   }
-  const sel=document.getElementById('f-dept');
-  (deptR||[]).forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
-  await loadRecs();
+
+  // แสดงรายการทันที
+  allRecs = recsRes || [];
+  applyFilter();
+
+  // โหลด settings + depts หลังจากแสดงผลแล้ว (background)
+  API.getSettings('').then(setR => {
+    const all = setR || [];
+    osSettings = {
+      windows: all.filter(s=>s.category==='os'&&s.value.startsWith('win')),
+      ubuntu:  all.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
+    };
+  });
+  API.getDepartments().then(deptR => {
+    const sel = document.getElementById('f-dept');
+    (deptR||[]).forEach(d=>{
+      const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);
+    });
+  });
 }
 
+const CACHE_KEY = 'assetsys_recs_cache';
+
 async function loadRecs(){
+  // ── โหลด cache ก่อน (render ทันที ไม่ต้องรอ GAS) ──────────
+  try {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      allRecs = JSON.parse(cached);
+      applyFilter(); // แสดงข้อมูลจาก cache ก่อน
+    }
+  } catch(_) {}
+
+  // ── Fetch จริงใน background ────────────────────────────────
   try{
-    allRecs=await API.getRecords();
-    applyFilter();
+    const fresh = await API.getRecords();
+    const cacheStr = JSON.stringify(fresh);
+    // update เฉพาะถ้าข้อมูลเปลี่ยน
+    if (cacheStr !== sessionStorage.getItem(CACHE_KEY)) {
+      sessionStorage.setItem(CACHE_KEY, cacheStr);
+      allRecs = fresh;
+      applyFilter();
+    }
+    ['sk1','sk2','sk3'].forEach(id=>document.getElementById(id)?.remove());
   }catch(err){
     ['sk1','sk2','sk3'].forEach(id=>document.getElementById(id)?.remove());
-    document.getElementById('rec-list').innerHTML=`<div class="empty"><div class="empty-ico">⚠️</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>${err.message}</p></div>`;
+    if(!allRecs.length) {
+      document.getElementById('rec-list').innerHTML=`<div class="empty"><div class="empty-ico">⚠️</div><h3>โหลดข้อมูลไม่สำเร็จ</h3><p>${err.message}</p></div>`;
+    }
   }
 }
 
@@ -881,7 +916,9 @@ async function doSaveEdit(){
       toast('✅','Duplicate สำเร็จ','success');
     }
     closeEdit();
+    sessionStorage.removeItem(CACHE_KEY);
     allRecs=await API.getRecords();
+    sessionStorage.setItem(CACHE_KEY,JSON.stringify(allRecs));
     applyFilter();
   }catch(err){toast('❌',err.message||'ไม่สำเร็จ','error');}
   finally{btn.disabled=false;btn.textContent=editRec?'บันทึกการแก้ไข':'บันทึกรายการใหม่';}
