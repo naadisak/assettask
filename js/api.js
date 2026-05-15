@@ -61,41 +61,29 @@ const API = (() => {
   async function saveRecord(data)         { return request('save_record', data); }
   async function updateRecord(data)       { return request('update_record', data); }
 
-  // [uploadImage ย้ายไปใช้ smart upload ด้านล่างแล้ว]
 
-  // ── Cloudinary upload (alternative to imgbb — ไม่หมดอายุ) ─────
-  // วิธีใช้: เปลี่ยน CONFIG.IMAGE_PROVIDER = 'cloudinary' + ใส่ค่าใน config.js
-  async function uploadImageCloudinary(file) {
-    const formData = new FormData();
-    formData.append('file',           file);
-    formData.append('upload_preset',  CONFIG.CLOUDINARY_PRESET); // unsigned preset
-    const res  = await fetch(
-      `https://api.cloudinary.com/v1_1/${CONFIG.CLOUDINARY_CLOUD}/image/upload`,
-      { method: 'POST', body: formData }
-    );
-    const json = await res.json();
-    if (json.error) throw new Error(json.error.message);
-    return {
-      url:       json.secure_url,          // https://res.cloudinary.com/...
-      thumb_url: json.secure_url.replace('/upload/', '/upload/w_400,q_auto/'),
-    };
-  }
-
-  // ── Smart upload — เลือก provider จาก config ─────────────────
+  // ── Image Upload — Google Drive via GAS (ไม่หมดอายุ 100%) ─────
   async function uploadImage(file) {
-    if (CONFIG.IMAGE_PROVIDER === 'cloudinary') {
-      return uploadImageCloudinary(file);
-    }
-    // default: imgbb
-    const formData = new FormData();
-    formData.append('key',        CONFIG.IMGBB_KEY);
-    formData.append('image',      file);
-    formData.append('expiration', '0');
-    const res  = await fetch(CONFIG.IMGBB_URL, { method: 'POST', body: formData });
-    const json = await res.json();
-    if (!json.success) throw new Error(json.error?.message || 'Upload failed');
-    const imgUrl = json.data.display_url || json.data.url || '';
-    return { url: imgUrl, thumb_url: json.data.thumb?.url || imgUrl };
+    // ตรวจสอบขนาด ≤ 5MB
+    if (file.size > 5 * 1024 * 1024) throw new Error('ขนาดไฟล์ต้องไม่เกิน 5MB');
+
+    // แปลงเป็น base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = () => reject(new Error('อ่านไฟล์ไม่ได้'));
+      reader.readAsDataURL(file);
+    });
+
+    // ส่งไป GAS → อัปโหลดขึ้น Google Drive
+    const res = await request('upload_image', {
+      base64:   base64,
+      filename: file.name,
+      mimeType: file.type,
+    });
+
+    if (!res) throw new Error('อัปโหลดไม่สำเร็จ');
+    return { url: res.url, thumb_url: res.thumb_url };
   }
 
   // ── Admin ────────────────────────────────────────────────────

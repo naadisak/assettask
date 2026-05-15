@@ -50,6 +50,7 @@ function doGet(e) {
     if (action === 'get_departments')  return ok({ departments: getDepartments() });
     if (action === 'get_settings')     return ok({ settings: getSettings(p.category||'') });
     if (action === 'get_records')      return handleGetRecords(p, user);
+    if (action === 'upload_image')     return handleUploadImage(p);
     if (action === 'save_record')      return handleSaveRecord(p, user);
     if (action === 'update_record')    return handleUpdateRecord(p, user);
 
@@ -120,6 +121,52 @@ function findRow(sheet, cols, key, val) {
 function generateId() {
   const d = new Date();
   return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${Math.random().toString(36).substr(2,5).toUpperCase()}`;
+}
+
+// ── Google Drive Image Upload ──────────────────────────────────
+// สร้าง folder "AssetSys_Images" ใน Drive อัตโนมัติ
+function getOrCreateFolder() {
+  const name = 'AssetSys_Images';
+  const folders = DriveApp.getFoldersByName(name);
+  if (folders.hasNext()) return folders.next();
+  const folder = DriveApp.createFolder(name);
+  // ทำให้ anyone with link สามารถดูได้
+  folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return folder;
+}
+
+function handleUploadImage(p) {
+  try {
+    if (!p.base64 || !p.filename || !p.mimeType) {
+      return fail('กรุณาระบุข้อมูลรูปภาพให้ครบ');
+    }
+
+    // ขนาดไม่เกิน 5MB (base64 ~= 4/3 ของขนาดจริง)
+    if (p.base64.length > 7 * 1024 * 1024) {
+      return fail('ขนาดไฟล์ต้องไม่เกิน 5MB');
+    }
+
+    const folder   = getOrCreateFolder();
+    const blob     = Utilities.newBlob(
+      Utilities.base64Decode(p.base64),
+      p.mimeType,
+      p.filename
+    );
+    const file     = folder.createFile(blob);
+    // Share: anyone with link can view
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    const fileId   = file.getId();
+    // Direct image URL ที่ใช้ใน <img src> ได้เลย
+    const directUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+    // Thumbnail (ขนาดเล็ก)
+    const thumbUrl  = `https://lh3.googleusercontent.com/d/${fileId}=w400`;
+
+    return ok({ url: directUrl, thumb_url: thumbUrl, file_id: fileId });
+
+  } catch(err) {
+    return fail('อัปโหลดไม่สำเร็จ: ' + err.message);
+  }
 }
 
 function now() {

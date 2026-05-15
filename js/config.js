@@ -5,20 +5,10 @@ const CONFIG = {
   // ── Session ─────────────────────────────────────────────────
   SESSION_KEY: 'assetsys_7769',
 
-  // ── Image Provider ──────────────────────────────────────────
-  // เปลี่ยนเป็น 'cloudinary' ถ้าต้องการใช้ Cloudinary แทน imgbb
-  IMAGE_PROVIDER: 'imgbb',   // 'imgbb' | 'cloudinary'
-
-  // imgbb (ปัจจุบัน)
-  IMGBB_KEY: 'b37889052f6fd7b7143ff017d07914df',
-  IMGBB_URL: 'https://api.imgbb.com/1/upload',
-
-  // Cloudinary (สำรอง — กรอกเมื่อสมัครแล้ว)
-  CLOUDINARY_CLOUD:  '',     // ← cloud name จาก cloudinary.com/console
-  CLOUDINARY_PRESET: '',     // ← unsigned upload preset
-
   // ── App ─────────────────────────────────────────────────────
   NOTE_EMOJIS:     ['✅', '⚠️', '🔧', '💻', '🚫', '🎉', '👍', '❌', '🔄', '📝'],
   APP_NAME:        'AssetSys',
-  LINE_CHANNEL_ID: '',        // ← LINE Channel ID (optional)
+  LINE_CHANNEL_ID: '',   // ← LINE Channel ID (optional)
 };
+// หมายเหตุ: รูปภาพอัปโหลดผ่าน Google Drive (ไม่หมดอายุ)
+// GAS จะสร้าง folder "AssetSys_Images" ใน Drive ของ account ที่ deploy อัตโนมัติ
