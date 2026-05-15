@@ -388,6 +388,10 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <span class="nav-label">โปรไฟล์</span>
   </a>
+  <a class="nav-item" href="azuadmin.html" id="nav-admin" style="display:none">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span class="nav-label">Admin</span>
+  </a>
 </nav>
 
 <!-- Edit sheet -->
@@ -514,6 +518,12 @@ async function init(){
     const ini=(user.first_name?.[0]||'')+(user.last_name?.[0]||'');
     document.getElementById('top-name').textContent=`${user.first_name} ${user.last_name}`;
     document.getElementById('top-role').textContent=user.role==='admin'?'Admin':'IT';
+
+  // แสดง Admin nav เฉพาะ admin role
+  if(user?.role === 'admin'){
+    const adminNav = document.getElementById('nav-admin');
+    if(adminNav) adminNav.style.display = '';
+  }
     const av=document.getElementById('top-av');av.textContent=ini;
     if(user.avatar_url)av.innerHTML=`<img src="${user.avatar_url}" referrerpolicy="no-referrer">`;
   }
