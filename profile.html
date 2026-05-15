@@ -36,45 +36,117 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .page{padding:calc(var(--topbar-h) + 1rem) 1rem calc(var(--nav-h) + 1.5rem);max-width:480px;margin:0 auto}
 
 /* ── Profile hero card ── */
+/* ── ID Card style ── */
 .profile-hero{
-  background:var(--card-bg);border:1px solid var(--border);border-radius:18px;
-  overflow:hidden;margin-bottom:.85rem;position:relative;
-  transition:background .25s,border-color .25s;
+  border-radius:20px;margin-bottom:.85rem;overflow:hidden;
+  position:relative;cursor:default;
+  /* Card ratio ~1.586:1 */
+  aspect-ratio:1.586;
+  background:linear-gradient(135deg,#1a0000 0%,#5a0000 35%,#c00 65%,#ff2d2d 100%);
+  box-shadow:0 8px 32px rgba(192,0,0,.35),0 2px 8px rgba(0,0,0,.4);
 }
-.hero-bg{
-  height:90px;
-  background:linear-gradient(135deg,var(--red-3) 0%,var(--red-2) 40%,var(--red-1) 100%);
-  position:relative;
+/* Mesh overlay */
+.hero-mesh{
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0px,transparent 1px,transparent 28px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0px,transparent 1px,transparent 28px);
+  pointer-events:none;
 }
-.hero-bg::after{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0px,rgba(255,255,255,.03) 1px,transparent 1px,transparent 12px);
+/* Glow orb */
+.hero-orb{
+  position:absolute;top:-20%;right:-5%;width:50%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(255,60,60,.15) 0%,transparent 65%);
+  pointer-events:none;
 }
-.hero-body{padding:0 1.25rem 1.25rem;position:relative}
+/* Avatar as background — right side, transparent */
+.hero-avatar-bg{
+  position:absolute;right:0;top:0;bottom:0;width:62%;
+  overflow:hidden;pointer-events:none;
+  /* fade ซ้าย — ค่อยๆ เฟดเข้า */
+  -webkit-mask-image:linear-gradient(to right,
+    transparent 0%,
+    rgba(0,0,0,.08) 20%,
+    rgba(0,0,0,.35) 45%,
+    rgba(0,0,0,.75) 70%,
+    rgba(0,0,0,.9) 100%
+  );
+  mask-image:linear-gradient(to right,
+    transparent 0%,
+    rgba(0,0,0,.08) 20%,
+    rgba(0,0,0,.35) 45%,
+    rgba(0,0,0,.75) 70%,
+    rgba(0,0,0,.9) 100%
+  );
+}
+.hero-avatar-bg img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:top center;
+  display:block;
+  filter:saturate(.55) brightness(.65) contrast(1.05);
+}
+.hero-avatar-bg .no-img{display:none}
+.hero-avatar-bg.empty .no-img{display:block}
+/* Card content */
+.hero-body{position:absolute;inset:0;padding:1.1rem 1.25rem;display:flex;flex-direction:column;justify-content:space-between}
 
-/* Avatar */
-.avatar-wrap{position:relative;width:80px;margin-top:-40px;margin-bottom:.75rem;cursor:pointer}
+/* Top row: logo + chip */
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between}
+.hero-logo-txt{font-size:.7rem;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:2px}
+.hero-chip{
+  width:34px;height:26px;border-radius:4px;
+  background:linear-gradient(135deg,#d4a843,#f5d06a,#b8892e);
+  position:relative;overflow:hidden;flex-shrink:0;
+}
+.hero-chip::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(0,0,0,.2);}
+.hero-chip::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:1px;background:rgba(0,0,0,.2);}
+
+/* Avatar on card */
+.avatar-wrap{
+  position:absolute;right:1.1rem;top:50%;transform:translateY(-50%);
+  cursor:pointer;
+}
 .avatar-img{
-  width:80px;height:80px;border-radius:50%;
-  background:linear-gradient(135deg,var(--red-2),var(--red-3));
-  border:3px solid var(--card-bg);display:flex;align-items:center;
-  justify-content:center;font-size:1.5rem;font-weight:700;color:#fff;
-  overflow:hidden;transition:border-color .25s;
+  width:68px;height:68px;border-radius:12px;
+  background:rgba(0,0,0,.3);
+  border:2px solid rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:700;color:rgba(255,255,255,.9);
+  overflow:hidden;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
 }
 .avatar-img img{width:100%;height:100%;object-fit:cover;display:block}
 .avatar-edit{
-  position:absolute;bottom:2px;right:2px;width:24px;height:24px;
-  border-radius:50%;background:var(--red-1);border:2px solid var(--card-bg);
+  position:absolute;bottom:-6px;right:-6px;width:22px;height:22px;
+  border-radius:50%;background:rgba(255,255,255,.15);
+  backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,.3);
   display:flex;align-items:center;justify-content:center;
-  font-size:.6rem;color:#fff;cursor:pointer;
 }
-.avatar-edit svg{width:11px;height:11px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.avatar-edit svg{width:10px;height:10px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
 .avatar-input{display:none}
 
-/* User info */
-.user-fullname{font-size:1.15rem;font-weight:700;letter-spacing:-.2px;margin-bottom:.25rem}
-.user-email{font-size:.75rem;color:var(--muted);margin-bottom:.6rem}
-.user-tags{display:flex;gap:6px;flex-wrap:wrap}
+/* Middle: card numbers */
+.hero-mid{padding-right:90px}
+.hero-empid{
+  font-size:1.05rem;font-weight:700;color:#fff;
+  font-family:'Bai Jamjuree',monospace;letter-spacing:3px;
+  margin-bottom:.25rem;text-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+.hero-phone-row{display:flex;gap:12px;align-items:center}
+.hero-phone{font-size:.72rem;color:rgba(255,255,255,.65);font-family:'Bai Jamjuree',monospace;letter-spacing:1.5px}
+.hero-ext{font-size:.72rem;color:rgba(255,255,255,.65);font-family:'Bai Jamjuree',monospace;letter-spacing:1.5px}
+
+/* Bottom: name + role */
+.hero-bottom{padding-right:90px}
+.user-fullname{font-size:.95rem;font-weight:700;color:#fff;letter-spacing:.3px;margin-bottom:.2rem;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+.user-email{font-size:.62rem;color:rgba(255,255,255,.55);letter-spacing:.3px;margin-bottom:.3rem;word-break:break-all}
+.hero-role-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.6rem;font-weight:700;
+  color:rgba(255,255,255,.7);letter-spacing:.5px;
+}
+/* tags ยังคงอยู่แต่ hidden ใน card */
+.user-tags{display:none}
 .tag{display:inline-flex;align-items:center;gap:4px;padding:.22rem .6rem;border-radius:20px;font-size:.68rem;font-weight:700;border:1.5px solid}
 .tag-admin{background:rgba(255,45,45,.1);border-color:rgba(255,45,45,.3);color:var(--red-1)}
 .tag-user{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.25);color:#38bdf8}
@@ -84,7 +156,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .tag-line{background:rgba(6,199,85,.1);border-color:rgba(6,199,85,.3);color:#06C755}
 
 /* ── Stat row ── */
-.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);margin-top:.85rem}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
 .stat-item{background:var(--card-bg);padding:.75rem .5rem;text-align:center;transition:background .25s}
 .stat-num{font-size:1.3rem;font-weight:700;letter-spacing:-.5px;color:var(--red-1)}
 .stat-lbl{font-size:.62rem;color:var(--muted);margin-top:.15rem;font-weight:500}
@@ -243,28 +315,67 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 
 <div class="page">
 
-  <!-- Profile hero -->
+  <!-- Profile ID Card -->
   <div class="profile-hero" id="hero-card">
-    <div class="hero-bg"></div>
+    <div class="hero-mesh"></div>
+    <div class="hero-orb"></div>
+    <!-- Avatar background — right side transparent -->
+    <div class="hero-avatar-bg empty" id="hero-bg-wrap">
+      <img id="hero-bg-img" src="" referrerpolicy="no-referrer" style="display:none">
+      <div class="no-img"></div>
+    </div>
     <div class="hero-body">
+      <!-- Top -->
+      <div class="hero-top">
+        <div>
+          <div class="hero-logo-txt">ASSETSYS</div>
+          <div style="font-size:.52rem;color:rgba(255,255,255,.35);letter-spacing:1.5px;margin-top:2px">PC UPGRADE TRACKING</div>
+        </div>
+        <div class="hero-chip"></div>
+      </div>
+
+      <!-- Avatar (absolute right) -->
       <div class="avatar-wrap" onclick="document.getElementById('avatar-input').click()">
         <div class="avatar-img" id="hero-avatar">
-          <div class="skel" style="width:100%;height:100%;border-radius:50%"></div>
+          <div class="skel" style="width:100%;height:100%;border-radius:10px"></div>
         </div>
         <div class="avatar-edit">
           <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
         <input type="file" id="avatar-input" class="avatar-input" accept="image/*" onchange="uploadAvatar(event)">
       </div>
-      <div class="user-fullname" id="hero-name"><div class="skel" style="width:140px;height:18px;margin-bottom:6px"></div></div>
-      <div class="user-email" id="hero-email"><div class="skel" style="width:180px;height:13px"></div></div>
-      <div class="user-tags" id="hero-tags"></div>
+
+      <!-- Mid: IDs -->
+      <div class="hero-mid">
+        <div class="hero-empid" id="hero-empid">••••••</div>
+        <div class="hero-phone-row">
+          <span class="hero-phone" id="hero-phone">——————</span>
+          <span class="hero-ext" id="hero-ext"></span>
+        </div>
+      </div>
+
+      <!-- Bottom: name + role -->
+      <div class="hero-bottom">
+        <div class="user-fullname" id="hero-name">
+          <div class="skel" style="width:130px;height:14px;margin-bottom:5px;background:rgba(255,255,255,.12)"></div>
+        </div>
+        <div class="user-email" id="hero-email">
+          <div class="skel" style="width:160px;height:10px;background:rgba(255,255,255,.08)"></div>
+        </div>
+        <div class="hero-role-badge" id="hero-role-badge">
+          <svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:rgba(255,255,255,.6);stroke-width:2;fill:none;stroke-linecap:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          IT Department
+        </div>
+        <div class="user-tags" id="hero-tags"></div>
+      </div>
     </div>
-    <div class="stat-row" id="stat-row">
-      <div class="stat-item"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">บันทึกทั้งหมด</div></div>
-      <div class="stat-item"><div class="stat-num" id="s-pass" style="color:#4ade80">—</div><div class="stat-lbl">Pass</div></div>
-      <div class="stat-item"><div class="stat-num" id="s-this" style="color:#38bdf8">—</div><div class="stat-lbl">เดือนนี้</div></div>
-    </div>
+  </div>
+
+  <!-- Stats row (below card) -->
+  <div class="stat-row" id="stat-row" style="background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.85rem;overflow:hidden">
+    <div class="stat-item"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">บันทึกทั้งหมด</div></div>
+    <div class="stat-item"><div class="stat-num" id="s-pass" style="color:#4ade80">—</div><div class="stat-lbl">Pass</div></div>
+    <div class="stat-item"><div class="stat-num" id="s-this" style="color:#38bdf8">—</div><div class="stat-lbl">เดือนนี้</div></div>
   </div>
 
   <!-- ข้อมูลส่วนตัว -->
@@ -478,13 +589,20 @@ async function init() {
   const av = document.getElementById('hero-avatar');
   const ini = (user.first_name?.[0]||'') + (user.last_name?.[0]||'');
   av.textContent = ini;
-  if (user.avatar_url) av.innerHTML = `<img src="${user.avatar_url}" referrerpolicy="no-referrer">`;
+  if (user.avatar_url) {
+    av.innerHTML = `<img src="${user.avatar_url}" referrerpolicy="no-referrer">`;
+    setHeroBg(user.avatar_url);
+  }
 
-  // Hero info
+  // Hero card
   document.getElementById('hero-name').textContent  = `${user.first_name} ${user.last_name}`;
-  document.getElementById('hero-email').textContent = user.email || '—';
+  document.getElementById('hero-email').textContent = user.email || '';
+  document.getElementById('hero-empid').textContent = user.employee_id || '';
+  document.getElementById('hero-phone').textContent = user.phone_ext || '';
+  if(user.phone_ext) document.getElementById('hero-ext').textContent = `EXT ${user.phone_ext}`;
+  document.getElementById('hero-role-badge').innerHTML = `<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:rgba(255,255,255,.6);stroke-width:2;fill:none;stroke-linecap:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>${user.role==='admin'?'Administrator':'IT Department'}`;
 
-  // Tags
+  // Tags (info card)
   const tags = document.getElementById('hero-tags');
   tags.innerHTML = `<span class="tag ${user.role==='admin'?'tag-admin':'tag-user'}">${user.role==='admin'?'👑 Admin':'👤 User'}</span>
     <span class="tag tag-active">● Active</span>
@@ -520,11 +638,22 @@ async function uploadAvatar(ev) {
     await API.updateAvatar(res.url);
     const av = document.getElementById('hero-avatar');
     av.innerHTML = `<img src="${res.url}" referrerpolicy="no-referrer">`;
+    setHeroBg(res.url);
     toast('✅','เปลี่ยน avatar สำเร็จ','success');
   } catch(err) {
     toast('❌', err.message || 'อัปโหลดไม่สำเร็จ', 'error');
   }
   ev.target.value = '';
+}
+
+// ── Set hero background avatar ───────────────────────────────
+function setHeroBg(url) {
+  const wrap = document.getElementById('hero-bg-wrap');
+  const img  = document.getElementById('hero-bg-img');
+  if (!url) { wrap.classList.add('empty'); img.style.display='none'; return; }
+  img.src = url;
+  img.style.display = 'block';
+  wrap.classList.remove('empty');
 }
 
 // ── Change PIN ────────────────────────────────────────────────
