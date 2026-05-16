@@ -115,26 +115,23 @@ async function handleCallback() {
   localStorage.removeItem('assetsys_line_state');
 
   try {
-    const isLoggedIn = API.isLoggedIn();
+    document.getElementById('s-title').textContent = 'กำลังเชื่อมต่อ LINE...';
 
-    if (isLoggedIn) {
-      // ── Connect LINE to existing account ───────────────────
-      document.getElementById('s-title').textContent = 'กำลังเชื่อมต่อ LINE...';
-      const res = await API.request?.('connect_line', { code }) ||
-                  await callGAS('connect_line', { code });
-      if (!res?.success) throw new Error(res?.error || 'เชื่อมต่อไม่สำเร็จ');
-      localStorage.setItem('assetsys_line_linked', '1');
-      showSuccess(false);
+    // ส่ง token ไปด้วยถ้ามี (Safari มี session), ถ้าไม่มีก็ไม่เป็นไร
+    const token = localStorage.getItem(CONFIG.SESSION_KEY) || '';
+    const res = await callGAS('connect_line', { code, token });
 
-    } else {
-      // ── LINE Login (no existing session) ───────────────────
-      document.getElementById('s-title').textContent = 'กำลัง login ด้วย LINE...';
-      const res = await callGAS('line_login', { code });
-      if (!res?.success || !res?.token) throw new Error(res?.error || 'Login ไม่สำเร็จ');
+    if (!res?.success) throw new Error(res?.error || 'เชื่อมต่อไม่สำเร็จ');
+
+    // กรณี login อัตโนมัติ (มี LINE account ผูกไว้แล้ว)
+    if (res.token) {
       localStorage.setItem(CONFIG.SESSION_KEY, res.token);
-      localStorage.setItem('assetsys_line_linked', '1');
-      showSuccess(true);
+      sessionStorage.setItem(CONFIG.SESSION_KEY, res.token);
     }
+    localStorage.setItem('assetsys_line_linked', '1');
+
+    const isNewLogin = !!res.token && !token;
+    showSuccess(isNewLogin);
 
   } catch(err) {
     showError(err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
