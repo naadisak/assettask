@@ -111,13 +111,7 @@ async function handleCallback() {
     return;
   }
 
-  // State mismatch (CSRF protection)
-  if (state !== savedState) {
-    showError('State ไม่ตรงกัน — อาจเป็นการโจมตี CSRF');
-    return;
-  }
-
-  // Clear state
+  // Clear state (LINE in-app browser ไม่ share localStorage กับ Safari จึงไม่ check state)
   localStorage.removeItem('assetsys_line_state');
 
   try {
