@@ -36,9 +36,12 @@ function doGet(e) {
     p.action = action;
     p.token  = e.parameter.token || '';
 
-    // Public endpoints
-    if (action === 'login') return handleLogin(p);
-    if (action === 'init')  return handleInit();
+    // Public endpoints — ไม่ต้องการ token
+    if (action === 'login')      return handleLogin(p);
+    if (action === 'init')       return handleInit();
+    // if (action === 'line_login') return handleLineLogin(p); // disabled
+
+    // LINE connect disabled
 
     // Protected — ต้องมี token
     const user = validateToken(p.token);
@@ -63,8 +66,6 @@ function doGet(e) {
     if (action === 'update_setting')   return handleUpdateSetting(p);
     if (action === 'get_stats')        return handleGetStats();
 
-    if (action === 'connect_line')     return handleConnectLine(p, user);
-    if (action === 'line_login')        return handleLineLogin(p);
 
     return fail('Unknown action: ' + action, 404);
 
@@ -244,8 +245,23 @@ function handleConnectLine(p, user) {
   try {
     const lineUserId = getLineUserId(p.code);
     if (!lineUserId) return fail('ไม่สามารถดึงข้อมูล LINE ได้');
-    updateRowById(SHEET.USERS, COL.USERS, user.id, { line_user_id: lineUserId });
-    return ok({ line_user_id: lineUserId });
+
+    if (user) {
+      // มี session token → link กับ account นี้
+      updateRowById(SHEET.USERS, COL.USERS, user.id, { line_user_id: lineUserId });
+      return ok({ line_user_id: lineUserId });
+    } else {
+      // ไม่มี session (เปิดใน LINE in-app browser) → ลอง login ด้วย LINE UID
+      const existing = findRow(SHEET.USERS, COL.USERS, 'line_user_id', lineUserId);
+      if (existing && existing.status === 'active') {
+        // มี account ที่ผูก LINE นี้แล้ว → login
+        const token = Utilities.getUuid();
+        updateRowById(SHEET.USERS, COL.USERS, existing.id, { token });
+        return ok({ token, mode: 'login', user: safeUser({ ...existing, token }) });
+      }
+      // ยังไม่มี account ผูก → แจ้งว่าต้อง login ด้วย PIN ก่อน
+      return fail('ยังไม่ได้ผูก LINE กับ account — กรุณา login ด้วย PIN ก่อน แล้วค่อยเชื่อมต่อ LINE ใน Profile');
+    }
   } catch(e) {
     return fail('LINE connect error: ' + e.message);
   }

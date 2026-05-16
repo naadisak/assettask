@@ -466,8 +466,8 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
       <div class="menu-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>
 
-    <!-- LINE -->
-    <div class="menu-item" onclick="openLineSheet()">
+    <!-- LINE — ถูกปิดใช้งาน (browser compatibility) -->
+    <div class="menu-item" onclick="openLineSheet()" style="display:none">
       <div class="menu-icon green">
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 5.92 2 10.76c0 3.66 2.44 6.86 6.12 8.61-.27 1-.96 3.65-.96 3.65s-.04.18.09.25c.14.07.29-.01.29-.01l4.25-2.81c.68.09 1.38.14 2.11.14 5.52 0 10-3.92 10-8.76C22 5.92 17.52 2 12 2z" fill="currentColor" stroke="none"/></svg>
       </div>

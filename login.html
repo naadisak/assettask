@@ -83,21 +83,21 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
     <div class="field">
       <div class="field-label">รหัสพนักงาน</div>
-      <input class="field-input" type="text" id="emp-id" placeholder="เช่น admin001" autocomplete="username" spellcheck="false">
+      <input class="field-input" type="text" id="emp-id" placeholder="เช่น admin001" autocomplete="username" spellcheck="false" id="username">
     </div>
     <div class="pin-head">
       <label>PIN 6 หลัก</label>
       <button class="pin-show" id="pin-show">แสดง</button>
     </div>
     <div class="pin-boxes" id="pin-boxes">
-      <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="0">
+      <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" data-i="0">
       <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="1">
       <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="2">
       <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="3">
       <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="4">
       <input class="pin-box" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" data-i="5">
     </div>
-    <div class="line-wrap" id="line-wrap">
+    <div class="line-wrap" id="line-wrap" style="display:none!important">
       <div class="divider">หรือ</div>
       <button class="line-btn" id="line-btn">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.92 2 10.76c0 3.66 2.44 6.86 6.12 8.61-.27 1-.96 3.65-.96 3.65s-.04.18.09.25c.14.07.29-.01.29-.01l4.25-2.81c.68.09 1.38.14 2.11.14 5.52 0 10-3.92 10-8.76C22 5.92 17.52 2 12 2z"/></svg>
