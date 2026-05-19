@@ -41,143 +41,100 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 /* ── Page ── */
 .page{padding:calc(var(--topbar-h) + 1rem) 1rem calc(var(--nav-h) + 1.5rem);max-width:480px;margin:0 auto}
 
-/* ── Profile hero card ── */
-/* ── ID Card style ── */
+/* ── Profile hero card — photo-forward ── */
 .profile-hero{
-  border-radius:20px;margin-bottom:.85rem;overflow:hidden;
-  position:relative;cursor:default;
-  /* Card ratio ~1.586:1 */
-  aspect-ratio:1.42;
-  background:linear-gradient(135deg,#1a0000 0%,#5a0000 35%,#c00 65%,#ff2d2d 100%);
-  box-shadow:0 8px 32px rgba(192,0,0,.35),0 2px 8px rgba(0,0,0,.4);
+  border-radius:22px;margin-bottom:.85rem;
+  overflow:hidden;position:relative;
+  aspect-ratio:1.0;          /* square-ish */
+  background:var(--surface2);
+  box-shadow:0 8px 32px rgba(0,0,0,.45);
+  cursor:pointer;
+  transition:transform .2s;
 }
-/* ══ Premium Card Design ══════════════════════════════════ */
+.profile-hero:active{transform:scale(.99)}
 
-/* Outer card shine border */
-.profile-hero::before{
-  content:'';position:absolute;inset:0;border-radius:20px;
-  background:linear-gradient(135deg,
-    rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 40%,
-    rgba(255,255,255,.0) 60%,rgba(255,255,255,.1) 100%);
-  pointer-events:none;z-index:4;
+/* Full-card avatar background */
+.hero-photo{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center top;
+  display:block;
+  transition:transform .4s ease;
 }
-/* Inner glow top-left */
-.hero-mesh{
-  position:absolute;inset:0;border-radius:20px;
-  background:radial-gradient(ellipse 80% 60% at -10% -10%,rgba(255,120,80,.22) 0%,transparent 65%);
-  pointer-events:none;z-index:1;
-}
-/* Subtle grid texture */
-.hero-orb{
+.profile-hero:hover .hero-photo{transform:scale(1.03)}
+
+/* Placeholder when no photo */
+.hero-photo-placeholder{
   position:absolute;inset:0;
-  background-image:repeating-linear-gradient(
-    0deg,rgba(255,255,255,.022) 0px,transparent 1px,transparent 30px),
-    repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0px,transparent 1px,transparent 30px);
-  pointer-events:none;z-index:1;
-}
-
-/* Avatar bg — LEFT, fades right */
-.hero-avatar-bg{
-  position:absolute;left:0;top:0;bottom:0;width:50%;
-  overflow:hidden;pointer-events:none;z-index:2;
-  -webkit-mask-image:linear-gradient(to right,
-    rgba(0,0,0,.85) 0%,rgba(0,0,0,.55) 40%,rgba(0,0,0,.18) 70%,transparent 100%);
-  mask-image:linear-gradient(to right,
-    rgba(0,0,0,.85) 0%,rgba(0,0,0,.55) 40%,rgba(0,0,0,.18) 70%,transparent 100%);
-}
-.hero-avatar-bg img{
-  width:100%;height:100%;object-fit:cover;object-position:center top;
-  display:block;filter:saturate(.45) brightness(.55) contrast(1.1);
-}
-.hero-avatar-bg .no-img{display:none}
-.hero-avatar-bg.empty .no-img{display:block}
-
-/* Card body */
-.hero-body{
-  position:absolute;inset:0;z-index:3;
-  padding:1.1rem 1rem 1rem 1.1rem;
-  display:flex;flex-direction:column;justify-content:space-between;
-}
-
-/* ── Top row ── */
-.hero-top{display:flex;align-items:flex-start;justify-content:space-between}
-.hero-logo-txt{
-  font-size:.72rem;font-weight:700;color:rgba(255,255,255,.7);
-  letter-spacing:2.5px;line-height:1;
-}
-.hero-logo-sub{font-size:.56rem;color:rgba(255,255,255,.35);letter-spacing:1.5px;margin-top:3px}
-/* Gold chip */
-.hero-chip{
-  width:38px;height:28px;border-radius:5px;
-  background:linear-gradient(160deg,#e8c04a 0%,#f7da6e 35%,#c9961e 65%,#e8c04a 100%);
-  position:relative;overflow:hidden;flex-shrink:0;
-  box-shadow:0 2px 8px rgba(0,0,0,.35);
-}
-.hero-chip::before{content:'';position:absolute;top:50%;left:0;right:0;height:1.5px;background:rgba(0,0,0,.22);}
-.hero-chip::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:1.5px;background:rgba(0,0,0,.22);}
-
-/* ── Avatar circle — right center ── */
-.avatar-wrap{
-  position:absolute;right:.85rem;top:50%;transform:translateY(-52%);
-  cursor:pointer;z-index:5;
-}
-.avatar-img{
-  width:100px;height:100px;border-radius:50%;
-  background:rgba(0,0,0,.4);
-  border:2.5px solid rgba(255,255,255,.5);
+  background:linear-gradient(155deg,#1a0000 0%,#3d0000 30%,#7a0000 60%,#c00 100%);
   display:flex;align-items:center;justify-content:center;
-  font-size:1.9rem;font-weight:700;color:rgba(255,255,255,.9);
-  overflow:hidden;
-  box-shadow:
-    0 0 0 4px rgba(255,45,45,.25),
-    0 0 0 7px rgba(255,255,255,.06),
-    0 8px 28px rgba(0,0,0,.55);
-  transition:box-shadow .2s;
+  font-size:4rem;font-weight:700;color:rgba(255,255,255,.25);
+  letter-spacing:-2px;
 }
-.avatar-wrap:hover .avatar-img{box-shadow:0 0 0 4px rgba(255,45,45,.5),0 0 0 7px rgba(255,255,255,.08),0 8px 28px rgba(0,0,0,.55);}
-.avatar-img img{width:100%;height:100%;object-fit:cover;display:block}
-.avatar-edit{
-  position:absolute;bottom:0;right:0;width:26px;height:26px;
-  border-radius:50%;background:var(--red-1);
-  border:2px solid rgba(10,0,0,.9);
+
+/* Gradient overlay — bottom fade */
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(
+    to bottom,
+    transparent 30%,
+    rgba(0,0,0,.15) 50%,
+    rgba(0,0,0,.6) 72%,
+    rgba(0,0,0,.88) 100%
+  );
+  pointer-events:none;
+}
+
+/* Edit photo button — top-right */
+.hero-edit-btn{
+  position:absolute;top:.85rem;right:.85rem;
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(6px);
+  border:1.5px solid rgba(255,255,255,.25);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 8px rgba(0,0,0,.5);
-  transition:transform .15s;
+  cursor:pointer;z-index:5;transition:background .2s;
+  -webkit-tap-highlight-color:transparent;
 }
-.avatar-wrap:hover .avatar-edit{transform:scale(1.1)}
-.avatar-edit svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
+.hero-edit-btn:hover{background:rgba(255,45,45,.55)}
+.hero-edit-btn svg{width:14px;height:14px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round}
 .avatar-input{display:none}
 
-/* ── Mid: IDs ── */
-.hero-mid{padding-right:108px}
-.hero-empid{
-  font-size:1rem;font-weight:700;color:#fff;
-  font-family:'Bai Jamjuree',monospace;letter-spacing:4px;
-  text-shadow:0 1px 6px rgba(0,0,0,.4);margin-bottom:.2rem;
+/* Bottom content */
+.hero-content{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:1.1rem 1.15rem .95rem;
+  z-index:3;
 }
-.hero-phone-row{display:flex;gap:10px;align-items:center}
-.hero-phone{font-size:.7rem;color:rgba(255,255,255,.6);font-family:'Bai Jamjuree',monospace;letter-spacing:2px}
-.hero-ext{display:none}
-
-/* ── Bottom: name + role ── */
-.hero-bottom{padding-right:108px}
-.user-fullname{
-  font-size:.92rem;font-weight:700;color:#fff;
-  letter-spacing:.4px;margin-bottom:.18rem;
-  text-shadow:0 1px 6px rgba(0,0,0,.4);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.user-email{font-size:.6rem;color:rgba(255,255,255,.5);letter-spacing:.2px;margin-bottom:.3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero-name-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.3rem}
+.hero-fullname{font-size:1.2rem;font-weight:700;color:#fff;letter-spacing:-.2px;text-shadow:0 1px 6px rgba(0,0,0,.4);line-height:1.2}
 .hero-role-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:.58rem;font-weight:700;
-  color:rgba(255,255,255,.65);letter-spacing:.8px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:20px;padding:.22rem .65rem;
+  display:inline-flex;align-items:center;gap:4px;margin-top:.2rem;
+  font-size:.65rem;font-weight:700;color:rgba(255,255,255,.75);
+  letter-spacing:.8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+  border-radius:20px;padding:.22rem .7rem;backdrop-filter:blur(4px);
 }
-.hero-role-badge svg{width:9px;height:9px;stroke:rgba(255,200,200,.8);stroke-width:2;fill:none;stroke-linecap:round}
-/* tags hidden in card */
+.hero-email{font-size:.68rem;color:rgba(255,255,255,.55);margin:.28rem 0 .7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Stats row */
+.hero-stats{
+  display:flex;align-items:center;gap:0;
+  background:rgba(0,0,0,.3);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;overflow:hidden;
+}
+.h-stat{flex:1;padding:.6rem .4rem;text-align:center;border-right:1px solid rgba(255,255,255,.08)}
+.h-stat:last-child{border-right:none}
+.h-stat-num{font-size:1.15rem;font-weight:700;line-height:1;color:#fff}
+.h-stat-num.g{color:#4ade80}
+.h-stat-num.b{color:#38bdf8}
+.h-stat-lbl{font-size:.58rem;color:rgba(255,255,255,.45);margin-top:.2rem;font-weight:500}
+
+/* empid row */
+.hero-empid-row{display:flex;align-items:center;gap:.55rem;margin-bottom:.55rem}
+.hero-empid{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.7);font-family:'Bai Jamjuree',monospace;letter-spacing:2px;background:rgba(255,255,255,.1);border-radius:6px;padding:.2rem .55rem}
+.hero-phone{font-size:.72rem;color:rgba(255,255,255,.5);font-family:'Bai Jamjuree',monospace;letter-spacing:1.5px}
+
+/* user-tags hidden */
 .user-tags{display:none}
 .tag{display:inline-flex;align-items:center;gap:4px;padding:.22rem .6rem;border-radius:20px;font-size:.68rem;font-weight:700;border:1.5px solid}
 .tag-admin{background:rgba(255,45,45,.1);border-color:rgba(255,45,45,.3);color:var(--red-1)}
@@ -347,70 +304,50 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 
 <div class="page">
 
-  <!-- Profile ID Card -->
+  <!-- Profile Hero — photo-forward card -->
   <div class="profile-hero" id="hero-card">
-    <!-- Layers -->
-    <div class="hero-mesh"></div>
-    <div class="hero-orb"></div>
-    <!-- Credit card curved layers -->
-    <div class="hero-curve-1"></div>
-    <div class="hero-curve-2"></div>
-    <div class="hero-curve-3"></div>
-    <div class="hero-curve-4"></div>
-    <!-- Avatar as transparent bg — LEFT -->
-    <div class="hero-avatar-bg empty" id="hero-bg-wrap">
-      <img id="hero-bg-img" src="" referrerpolicy="no-referrer" style="display:none">
+
+    <!-- Full photo background -->
+    <div class="hero-photo-placeholder" id="hero-placeholder">?</div>
+    <img class="hero-photo" id="hero-photo" src="" referrerpolicy="no-referrer" style="display:none" alt="">
+
+    <!-- Gradient overlay -->
+    <div class="hero-overlay"></div>
+
+    <!-- Edit photo button -->
+    <div class="hero-edit-btn" onclick="document.getElementById('avatar-input').click()" title="เปลี่ยนรูปโปรไฟล์">
+      <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 0 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
     </div>
-    <!-- Card body -->
-    <div class="hero-body">
-      <!-- Top: logo + chip -->
-      <div class="hero-top">
+    <input type="file" id="avatar-input" class="avatar-input" accept="image/*" onchange="uploadAvatar(event)">
+
+    <!-- Bottom content -->
+    <div class="hero-content">
+      <!-- Name + role -->
+      <div class="hero-name-row">
         <div>
-          <div class="hero-logo-txt">ASSETSYS</div>
-          <div class="hero-logo-sub">PC UPGRADE TRACKING</div>
-        </div>
-        <div class="hero-chip"></div>
-      </div>
-
-      <!-- Avatar circle — RIGHT center, clickable -->
-      <div class="avatar-wrap" onclick="document.getElementById('avatar-input').click()">
-        <div class="avatar-img" id="hero-avatar">?</div>
-        <div class="avatar-edit" title="เปลี่ยนรูปโปรไฟล์">
-          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </div>
-      </div>
-      <input type="file" id="avatar-input" class="avatar-input" accept="image/*" onchange="uploadAvatar(event)">
-
-      <!-- Mid: Employee ID + phone -->
-      <div class="hero-mid">
-        <div class="hero-empid" id="hero-empid">••••••</div>
-        <div class="hero-phone-row">
-          <span class="hero-phone" id="hero-phone">— — — — — —</span>
+          <div class="hero-fullname" id="hero-name">กำลังโหลด...</div>
+          <div class="hero-role-badge" id="hero-role-badge">IT Department</div>
         </div>
       </div>
 
-      <!-- Bottom: name + email + role badge -->
-      <div class="hero-bottom">
-        <div class="user-fullname" id="hero-name">
-          <div class="skel" style="width:120px;height:13px;margin-bottom:5px;background:rgba(255,255,255,.1);border-radius:4px"></div>
-        </div>
-        <div class="user-email" id="hero-email">
-          <div class="skel" style="width:150px;height:9px;background:rgba(255,255,255,.07);border-radius:4px"></div>
-        </div>
-        <div class="hero-role-badge" id="hero-role-badge">
-          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          IT Department
-        </div>
-        <div class="user-tags" id="hero-tags"></div>
+      <!-- Emp ID + phone -->
+      <div class="hero-empid-row">
+        <span class="hero-empid" id="hero-empid">——</span>
+        <span class="hero-phone" id="hero-phone"></span>
+      </div>
+
+      <!-- email -->
+      <div class="hero-email" id="hero-email"></div>
+
+      <!-- Stats inline -->
+      <div class="hero-stats">
+        <div class="h-stat"><div class="h-stat-num" id="s-total">—</div><div class="h-stat-lbl">บันทึก</div></div>
+        <div class="h-stat"><div class="h-stat-num g" id="s-pass">—</div><div class="h-stat-lbl">Pass</div></div>
+        <div class="h-stat"><div class="h-stat-num b" id="s-this">—</div><div class="h-stat-lbl">เดือนนี้</div></div>
       </div>
     </div>
-  </div>
 
-  <!-- Stats row (below card) -->
-  <div class="stat-row" id="stat-row" style="background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.85rem;overflow:hidden">
-    <div class="stat-item"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">บันทึกทั้งหมด</div></div>
-    <div class="stat-item"><div class="stat-num" id="s-pass" style="color:#4ade80">—</div><div class="stat-lbl">Pass</div></div>
-    <div class="stat-item"><div class="stat-num" id="s-this" style="color:#38bdf8">—</div><div class="stat-lbl">เดือนนี้</div></div>
+    <div class="user-tags" id="hero-tags"></div>
   </div>
 
   <!-- ข้อมูลส่วนตัว -->
@@ -625,22 +562,18 @@ async function init() {
   user = meR?.user;
   if (!user) return;
 
-  // Avatar: circle + background
-  const heroAv = document.getElementById('hero-avatar');
+  // Avatar photo card
   const ini = (user.first_name?.[0]||'') + (user.last_name?.[0]||'');
-  heroAv.textContent = ini;
-  if (user.avatar_url) {
-    heroAv.innerHTML = `<img src="${user.avatar_url}" referrerpolicy="no-referrer">`;
-    setHeroBg(user.avatar_url);
-  }
+  document.getElementById('hero-placeholder').textContent = ini;
+  if (user.avatar_url) setHeroPhoto(user.avatar_url);
 
   // Hero card
-  document.getElementById('hero-name').textContent  = `${user.first_name} ${user.last_name}`;
+  document.getElementById('hero-name').textContent = `${user.first_name} ${user.last_name}`;
   document.getElementById('hero-email').textContent = user.email || '';
   document.getElementById('hero-empid').textContent = user.employee_id || '';
   document.getElementById('hero-phone').textContent = user.phone_ext || '';
   
-  document.getElementById('hero-role-badge').innerHTML = `<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:rgba(255,255,255,.6);stroke-width:2;fill:none;stroke-linecap:round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>${user.role==='admin'?'Administrator':'IT Department'}`;
+  document.getElementById('hero-role-badge').textContent = user.role==='admin' ? '👑 Administrator' : '✏️ IT Department';
 
   // Tags (info card)
   const tags = document.getElementById('hero-tags');
@@ -682,9 +615,7 @@ async function uploadAvatar(ev) {
     toast('📷','กำลังอัปโหลด avatar...','info');
     const res = await API.uploadImage(file);
     await API.updateAvatar(res.url);
-    const av2 = document.getElementById('hero-avatar');
-    av2.innerHTML = `<img src="${res.url}" referrerpolicy="no-referrer">`;
-    setHeroBg(res.url);
+    setHeroPhoto(res.url);
     toast('✅','เปลี่ยน avatar สำเร็จ','success');
   } catch(err) {
     toast('❌', err.message || 'อัปโหลดไม่สำเร็จ', 'error');
@@ -693,13 +624,17 @@ async function uploadAvatar(ev) {
 }
 
 // ── Set hero background avatar ───────────────────────────────
-function setHeroBg(url) {
-  const wrap = document.getElementById('hero-bg-wrap');
-  const img  = document.getElementById('hero-bg-img');
-  if (!url) { wrap.classList.add('empty'); img.style.display='none'; return; }
-  img.src = url;
-  img.style.display = 'block';
-  wrap.classList.remove('empty');
+function setHeroPhoto(url) {
+  const photo = document.getElementById('hero-photo');
+  const ph    = document.getElementById('hero-placeholder');
+  if(url){
+    photo.src = url;
+    photo.style.display = 'block';
+    ph.style.display = 'none';
+  } else {
+    photo.style.display = 'none';
+    ph.style.display = 'flex';
+  }
 }
 
 // ── Change PIN ────────────────────────────────────────────────
