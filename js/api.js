@@ -6,16 +6,37 @@
  */
 
 const API = (() => {
-  const getToken   = ()  => localStorage.getItem(CONFIG.SESSION_KEY) || '';
-  const setToken   = (t) => { localStorage.setItem(CONFIG.SESSION_KEY, t); sessionStorage.setItem(CONFIG.SESSION_KEY, t); };
-  const clearToken = ()  => localStorage.removeItem(CONFIG.SESSION_KEY);
-  const isLoggedIn = ()  => !!getToken();
+  const KEY = CONFIG.SESSION_KEY;
+  // ── Token helpers ─────────────────────────────────────────
+  const getToken   = ()  => localStorage.getItem(KEY) ||
+                             sessionStorage.getItem(KEY) || '';
+  const setToken   = (t) => {
+    localStorage.setItem(KEY, t);
+    sessionStorage.setItem(KEY, t);
+    // backup ใน cookie (path=/) เพื่อกันกรณี localStorage ถูก clear
+    try { document.cookie = `${KEY}=${t};path=/;max-age=31536000;SameSite=Lax`; } catch(_){}
+  };
+  const clearToken = ()  => {
+    localStorage.removeItem(KEY);
+    sessionStorage.removeItem(KEY);
+    try { document.cookie = `${KEY}=;path=/;max-age=0`; } catch(_){}
+  };
+  // อ่าน token จาก cookie ด้วย (fallback)
+  const getCookieToken = () => {
+    try {
+      const m = document.cookie.match(new RegExp(`(?:^|;\s*)${KEY}=([^;]+)`));
+      return m ? m[1] : '';
+    } catch(_){ return ''; }
+  };
+  const isLoggedIn = ()  => !!(getToken() || getCookieToken());
+  // Restore จาก cookie ถ้า localStorage ว่าง
+  (()=>{ if(!getToken()){const ck=getCookieToken();if(ck){localStorage.setItem(KEY,ck);sessionStorage.setItem(KEY,ck);}} })();
 
   // ── Core: ทุก request ใช้ GET + ส่ง data เป็น JSON ใน param ──
   async function request(action, data = {}) {
     const payload = {
       action,
-      token:  getToken(),
+      token:  getToken() || getCookieToken(),
       data:   JSON.stringify(data),
     };
 
@@ -28,17 +49,20 @@ const API = (() => {
 
       if (!json.success) {
         if (json.code === 401) {
-          // ลอง restore จาก sessionStorage ก่อน redirect
-          const sess = sessionStorage.getItem(CONFIG.SESSION_KEY);
-          if (sess && sess !== localStorage.getItem(CONFIG.SESSION_KEY)) {
-            localStorage.setItem(CONFIG.SESSION_KEY, sess);
-            // retry ครั้งเดียว
+          // ลอง restore จาก cookie หรือ sessionStorage ก่อน redirect
+          const backup = getCookieToken() || sessionStorage.getItem(KEY) || '';
+          if (backup && backup !== localStorage.getItem(KEY)) {
+            localStorage.setItem(KEY, backup);
+            // Retry once
             try {
-              const r2   = await fetch(url, options);
-              const j2   = await r2.json();
+              const retryQs = new URLSearchParams({...Object.fromEntries(new URLSearchParams(url.split('?')[1]||'')), token: backup}).toString();
+              const retryUrl = CONFIG.GAS_URL + '?' + retryQs;
+              const r2 = await fetch(retryUrl, { redirect:'follow' });
+              const j2 = await r2.json();
               if (j2.success) return j2;
             } catch(_) {}
           }
+          // ยังไม่ redirect ทันที — เก็บ current URL แล้วถามก่อน
           clearToken();
           window.location.href = 'login.html';
           return null;
