@@ -357,7 +357,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
           </div>
           <div class="field">
             <div class="field-label">Computer Name <span class="req">*</span></div>
-            <input class="field-input" id="f-pc" placeholder="เช่น PC-IT-001" spellcheck="false">
+            <input class="field-input" id="f-pc" placeholder="เช่น PC-IT-001" spellcheck="false" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
           </div>
           <div class="field" style="margin-bottom:0">
             <div class="field-label">หมายเลข SIP / EXT</div>
@@ -659,7 +659,11 @@ function selectOS(type,os){
   const sid=type==='cur'?'cur-sub':'up2-sub';
   const sub=document.getElementById(sid);
   const opts=osSettings[os]||[];
-  if(!opts.length){sub.style.display='none';return;}
+  if(!opts.length){
+    sub.style.display='block';
+    sub.innerHTML='<div style="font-size:.72rem;color:var(--muted);padding:.3rem">— ไม่มีตัวเลือก (ตั้งค่าใน Admin)</div>';
+    return;
+  }
   const cls=os==='windows'?'win-sub':'ubu-sub';
   sub.style.display='grid';
   sub.innerHTML=opts.map(o=>`<div class="sub-btn ${cls}" data-v="${o.value}" onclick="selectOSDetail('${type}','${o.value}')">${o.label}</div>`).join('');

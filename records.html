@@ -350,7 +350,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
       <button class="sheet-close" onclick="closeEdit()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="e-field"><div class="e-label">ส่วนงาน *</div><input class="e-input" id="e-dept" placeholder="ส่วนงาน"></div>
-    <div class="e-field"><div class="e-label">Computer Name *</div><input class="e-input" id="e-pc" placeholder="Computer Name"></div>
+    <div class="e-field"><div class="e-label">Computer Name *</div><input class="e-input" id="e-pc" placeholder="Computer Name" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
     <div class="e-field"><div class="e-label">SIP / EXT</div><input class="e-input" id="e-ext" placeholder="เช่น 1234" inputmode="numeric" maxlength="6"></div>
     <div class="e-field">
       <div class="e-label">OS ปัจจุบัน</div>
@@ -446,7 +446,11 @@ const PLBL={pass:'✅ Pass',doi:'⚠️ ด๋อย',reject_user:'🚫 Reject'}
 
 // ── Init ──────────────────────────────────────────────────────
 async function init(){
-  const [meR, recsRes] = await Promise.all([API.me(), API.getRecords()]);
+  // โหลด settings พร้อมกันทุกอย่าง — osSettings ต้องพร้อมก่อน edit sheet เปิด
+  const [meR, recsRes, setR, deptR] = await Promise.all([
+    API.me(), API.getRecords(), API.getSettings(''), API.getDepartments()
+  ]);
+
   user=meR?.user;
   if(user){
     const ini=(user.first_name?.[0]||'')+(user.last_name?.[0]||'');
@@ -459,21 +463,20 @@ async function init(){
       if(an){an.style.display='flex';an.style.flexDirection='column';}
     }
   }
+
+  // osSettings ต้องพร้อมก่อนเปิด edit sheet
+  const allSet=setR||[];
+  osSettings={
+    windows:allSet.filter(s=>s.category==='os'&&s.value.startsWith('win')),
+    ubuntu: allSet.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
+  };
+
+  // Dept filter
+  const sel=document.getElementById('f-dept');
+  (deptR||[]).forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+
   allRecs=recsRes||[];
   applyFilter();
-
-  // Background loads
-  API.getSettings('').then(setR=>{
-    const all=setR||[];
-    osSettings={
-      windows:all.filter(s=>s.category==='os'&&s.value.startsWith('win')),
-      ubuntu: all.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
-    };
-  });
-  API.getDepartments().then(deptR=>{
-    const sel=document.getElementById('f-dept');
-    (deptR||[]).forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
-  });
 }
 
 // ── Filter ────────────────────────────────────────────────────
@@ -678,17 +681,20 @@ function editOS(type,os){
 }
 function renderSub(type,os,sel){
   const sub=document.getElementById(`e-${type}-sub`);
+  if(!os){sub.innerHTML='';return;}
   const opts=osSettings[os]||[];
+  if(!opts.length){
+    sub.innerHTML=`<div style="font-size:.72rem;color:var(--muted);padding:.35rem">— ไม่มีตัวเลือก (ตั้งค่าใน Admin → Settings)</div>`;
+    return;
+  }
   const cls=os==='windows'?'win':'ubu';
-  sub.innerHTML=opts.map(o=>`<div class="edit-sub-btn ${cls}${o.value===sel?' active':''}" onclick="editSubOS('${type}','${o.value}')">${o.label}</div>`).join('');
+  sub.innerHTML=opts.map(o=>`<div class="edit-sub-btn ${cls}${o.value===sel?' active':''}" data-val="${o.value}" onclick="editSubOS('${type}','${o.value}')">${o.label}</div>`).join('');
 }
 function editSubOS(type,val){
   const sid=`e-${type}-sub`;
-  document.querySelectorAll(`#${sid} .edit-sub-btn`).forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll(`#${sid} .edit-sub-btn`).forEach(b=>{if(b.textContent===osSettings.windows?.find(o=>o.value===val)?.label||b.textContent===osSettings.ubuntu?.find(o=>o.value===val)?.label)b.classList.add('active');});
-  // simpler: re-render with active
-  const sid2=`e-${type}-sub`;
-  document.querySelectorAll(`#${sid2} .edit-sub-btn`).forEach(b=>b.classList.toggle('active',b.onclick?.toString().includes(`'${val}'`)));
+  document.querySelectorAll(`#${sid} .edit-sub-btn`).forEach(b=>
+    b.classList.toggle('active', b.getAttribute('data-val')===val)
+  );
   if(type==='cur')editState.curOSDetail=val;else editState.up2OSDetail=val;
 }
 function editStatus(val){
