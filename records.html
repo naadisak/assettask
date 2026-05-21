@@ -596,7 +596,8 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
     </div>
     <div class="e-field">
       <div class="e-label">สถานะ</div>
-      <div class="edit-status-grid">
+      <div class="edit-status-grid" id="edit-status-grid">
+        <!-- rendered dynamically from settings -->
         <div class="edit-sc pass" onclick="editStatus('pass')">✅ Pass</div>
         <div class="edit-sc doi" onclick="editStatus('doi')">⚠️ ด๋อย</div>
         <div class="edit-sc rej" onclick="editStatus('reject_user')">🚫 Reject</div>
@@ -839,7 +840,14 @@ function osLbl(v){
   return all.find(o=>o.value===v)?.label||v||'—';
 }
 const PCLS={pass:'pass',doi:'doi',reject_user:'rej'};
-const PLBL={pass:'✅ Pass',doi:'⚠️ ด๋อย',reject_user:'🚫 Reject'};
+// PLBL ดึงจาก settings จริง — fallback ค่า default ถ้ายังไม่โหลด
+const PLBL_DEFAULT={pass:'✅ Pass',doi:'⚠️ ด๋อย',reject_user:'🚫 Reject'};
+function getStatusLabel(val){
+  // หา label จาก settings sheet ก่อน
+  const setting = allSettings.find(s=>s.category==='status'&&s.value===val);
+  if(setting?.label) return setting.label;
+  return PLBL_DEFAULT[val]||val;
+}
 
 // ── Init ──────────────────────────────────────────────────────
 async function init(){
@@ -867,6 +875,21 @@ async function init(){
     windows:allSet.filter(s=>s.category==='os'&&s.value.startsWith('win')),
     ubuntu: allSet.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
   };
+
+  // Render status chips from settings
+  const statusSettings = allSet.filter(s=>s.category==='status'&&s.active==='1')
+    .sort((a,b)=>+a.sort_order-+b.sort_order);
+  if(statusSettings.length){
+    const ICON={pass:'✅',doi:'⚠️',reject_user:'🚫'};
+    const CLS={pass:'pass',doi:'doi',reject_user:'rej'};
+    const grid = document.getElementById('edit-status-grid');
+    if(grid){
+      grid.innerHTML = statusSettings.map(s=>`
+        <div class="edit-sc ${CLS[s.value]||''}" onclick="editStatus('${s.value}')">
+          ${ICON[s.value]||''} ${s.label}
+        </div>`).join('');
+    }
+  }
 
   // Dept filter
   const sel=document.getElementById('f-dept');
@@ -986,7 +1009,7 @@ function renderPage(){
           <span class="os-b ${osCls(r.up2_os_detail||r.up2_os)}">${up2L}</span>
         </div>
       </td>
-      <td><span class="pill ${PCLS[r.status]||''}">${PLBL[r.status]||r.status}</span></td>
+      <td><span class="pill ${PCLS[r.status]||''}">${getStatusLabel(r.status)}</span></td>
       <td><div class="cell-agent">${r.it_agent}</div></td>
       <td><div class="cell-date">${fmtDate(r.created_at)}</div></td>
     </tr>`;

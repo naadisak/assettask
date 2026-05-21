@@ -748,9 +748,24 @@ async function init(){
   user=meR?.user; depts=deptR||[];
   const all=setR||[];
   osSettings={
-    windows:all.filter(s=>s.category==='os'&&s.value.startsWith('win')),
-    ubuntu: all.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
+    windows: all.filter(s=>s.category==='os'&&s.value.startsWith('win')),
+    ubuntu:  all.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
+    _status: all.filter(s=>s.category==='status'&&s.active==='1'),
   };
+
+  // อัปเดต status chip labels จาก settings
+  const statusSets = osSettings._status.sort((a,b)=>+a.sort_order-+b.sort_order);
+  if(statusSets.length){
+    const ICON={pass:'✅',doi:'⚠️',reject_user:'🚫'};
+    const CLS ={pass:'pass',doi:'doi',reject_user:'rej'};
+    const grid = document.querySelector('.status-grid');
+    if(grid){
+      grid.innerHTML = statusSets.map(s=>`
+        <div class="status-chip ${CLS[s.value]||''}" onclick="selectStatus('${s.value}','${s.label}')">
+          <span class="s-ico">${ICON[s.value]||'●'}</span>${s.label}
+        </div>`).join('');
+    }
+  }
   if(user){
     const ini=(user.first_name?.[0]||'')+(user.last_name?.[0]||'');
     const full=`${user.first_name} ${user.last_name}`;
@@ -847,7 +862,10 @@ function selectStatus(val,label){
   document.querySelectorAll('.status-chip').forEach(c=>c.classList.remove('active'));
   const m={pass:'pass',doi:'doi',reject_user:'rej'};
   document.querySelector(`.status-chip.${m[val]||val}`)?.classList.add('active');
-  form.status=val;form.statusLabel=label;
+  form.status=val;
+  // ดึง label จาก settings ถ้ามี
+  const setting = (osSettings._status||[]).find(s=>s.value===val);
+  form.statusLabel = setting?.label || label || val;
 }
 
 // ── iPhone Emoji Bar ─────────────────────────────────────────
