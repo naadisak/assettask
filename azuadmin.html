@@ -221,7 +221,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 
 /* ── Desktop layout ── */
 @media(min-width:768px){
-  .bottom-nav{display:none}
+  .bottom-nav{display:none!important}
   .admin-sidebar{display:flex}
   .page{padding:calc(var(--topbar-h) + 1rem) 1.5rem 1.5rem calc(var(--sidebar-w) + 2rem);max-width:none}
   .kpi-grid{grid-template-columns:repeat(4,1fr)}
@@ -495,8 +495,25 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
       <button class="sheet-close" onclick="closeSheet('setting-sheet')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <input type="hidden" id="s-category">
-    <div class="e-field"><div class="e-label">Value (key เช่น win12)</div><input class="e-input" id="s-value" placeholder="เช่น win12"></div>
-    <div class="e-field"><div class="e-label">Label (ชื่อที่แสดง)</div><input class="e-input" id="s-label" placeholder="เช่น Windows 12"></div>
+    <!-- OS parent selector (แสดงเฉพาะ category=os) -->
+    <div class="e-field" id="s-parent-wrap" style="display:none">
+      <div class="e-label">อยู่ภายใต้ OS <span style="color:var(--red-1)">*</span></div>
+      <div class="edit-os-wrap" id="s-parent-toggle">
+        <div class="edit-os-btn win" onclick="setOSParent('windows')">
+          <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0;margin-right:4px"><path d="M3 5.5L11 4v8H3zM13 4l8-1.5V12h-8zM3 13h8v8L3 19.5zM13 13h8v6.5L13 21z"/></svg>
+          Windows
+        </div>
+        <div class="edit-os-btn ubu" onclick="setOSParent('ubuntu')">
+          <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0;margin-right:4px"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+          Ubuntu
+        </div>
+      </div>
+    </div>
+    <div class="e-field"><div class="e-label">Version / Label (ชื่อที่แสดง) <span style="color:var(--red-1)">*</span></div><input class="e-input" id="s-label" placeholder="เช่น Windows 11, Ubuntu 22.04"></div>
+    <div class="e-field" id="s-value-wrap">
+      <div class="e-label">Value key <span style="font-weight:400;color:var(--muted)">(ระบบสร้างให้อัตโนมัติ)</span></div>
+      <input class="e-input" id="s-value" placeholder="จะถูก generate อัตโนมัติ" readonly style="opacity:.55;cursor:not-allowed">
+    </div>
     <div class="e-field"><div class="e-label">ลำดับ (อัตโนมัติ)</div><input class="e-input" id="s-sort" type="number" readonly style="opacity:.5;cursor:not-allowed"></div>
     <button class="save-btn" onclick="saveSetting()">บันทึก</button>
   </div>
@@ -864,25 +881,68 @@ function renderSettings(){
   document.getElementById('status-list').innerHTML= stat.map(itemHTML).join('')||'<div style="padding:.85rem;text-align:center;font-size:.78rem;color:var(--muted)">ยังไม่มีข้อมูล</div>';
 }
 
+let osParent = 'windows'; // default
+
+function setOSParent(p){
+  osParent = p;
+  document.querySelectorAll('#s-parent-toggle .edit-os-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`#s-parent-toggle .${p==='windows'?'win':'ubu'}`).classList.add('active');
+  // Auto-generate value key preview
+  updateSValuePreview();
+}
+
+function updateSValuePreview(){
+  const lbl = document.getElementById('s-label').value.trim();
+  if(!lbl) return;
+  const prefix = osParent === 'windows' ? 'win' : 'ubuntu';
+  const slug = lbl.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  document.getElementById('s-value').value = `${prefix}_${slug}`;
+}
+
 function openAddSetting(cat){
-  document.getElementById('s-category').value  = cat;
-  document.getElementById('setting-sheet-title').textContent = cat==='os'?'เพิ่ม OS':'เพิ่มสถานะ';
+  document.getElementById('s-category').value = cat;
+  document.getElementById('setting-sheet-title').textContent = cat==='os'?'เพิ่ม OS Version':'เพิ่มสถานะ';
   document.getElementById('s-value').value = '';
   document.getElementById('s-label').value = '';
-  // Auto sort_order = max existing + 1
+
+  // Show/hide OS parent selector
+  const parentWrap = document.getElementById('s-parent-wrap');
+  parentWrap.style.display = cat==='os' ? '' : 'none';
+
+  // Reset parent toggle
+  if(cat==='os'){
+    osParent='windows';
+    document.querySelectorAll('#s-parent-toggle .edit-os-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector('#s-parent-toggle .win').classList.add('active');
+  }
+
+  // Auto sort_order
   const existing = allSettings.filter(s=>s.category===cat);
   const maxSort  = existing.length ? Math.max(...existing.map(s=>+s.sort_order||0)) : 0;
   document.getElementById('s-sort').value = maxSort + 1;
+
   document.getElementById('setting-sheet').classList.add('show');
-  setTimeout(()=>document.getElementById('s-value').focus(),350);
+  setTimeout(()=>document.getElementById('s-label').focus(),350);
 }
+
+// Auto-generate value key when label changes
+document.getElementById('s-label').addEventListener('input', ()=>{
+  if(document.getElementById('s-category').value==='os') updateSValuePreview();
+});
 
 async function saveSetting(){
   const cat  = document.getElementById('s-category').value;
-  const value= document.getElementById('s-value').value.trim();
   const label= document.getElementById('s-label').value.trim();
   const sort = document.getElementById('s-sort').value||'99';
-  if(!value||!label){toast('⚠️','กรุณากรอกข้อมูลให้ครบ','error');return;}
+
+  // For OS: use osParent to set correct value prefix
+  let value = document.getElementById('s-value').value.trim();
+  if(cat==='os'){
+    if(!osParent){toast('⚠️','กรุณาเลือก OS (Windows/Ubuntu)','error');return;}
+    if(!value) updateSValuePreview();
+    value = document.getElementById('s-value').value.trim();
+  }
+  if(!value||!label){toast('⚠️','กรุณากรอก Label ให้ครบ','error');return;}
   try{
     await API.saveSetting({category:cat,value,label,sort_order:sort});
     const setR=await API.getSettings(''); allSettings=setR||[];
