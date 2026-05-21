@@ -54,6 +54,7 @@ function doGet(e) {
     if (action === 'get_settings')     return ok({ settings: getSettings(p.category||'') });
     if (action === 'get_records')      return handleGetRecords(p, user);
     if (action === 'upload_image')     return handleUploadImage(p);
+    if (action === 'get_notify')        return handleGetNotify(p, user);
     if (action === 'save_record')      return handleSaveRecord(p, user);
     if (action === 'update_record')    return handleUpdateRecord(p, user);
 
@@ -171,6 +172,24 @@ function handleUploadImage(p) {
   } catch(err) {
     return fail('อัปโหลดไม่สำเร็จ: ' + err.message);
   }
+}
+
+// ── Notifications (polling) ─────────────────────────────────
+// คืน records ที่ created_at หรือ updated_at หลัง since timestamp
+function handleGetNotify(p, user) {
+  const since = p.since || '';
+  let rows = getRows(SHEET.RECORDS, COL.RECORDS);
+  rows = rows.filter(r => r.status !== '__deleted__');
+  if (since) {
+    rows = rows.filter(r => {
+      // เอา record ที่ created หรือ updated หลัง since
+      const ts = r.updated_at || r.created_at || '';
+      return ts > since;
+    });
+  }
+  // เรียง newest first
+  rows.sort((a,b) => (b.updated_at||b.created_at||'').localeCompare(a.updated_at||a.created_at||''));
+  return ok({ notifications: rows.slice(0, 20) });
 }
 
 function now() {

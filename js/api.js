@@ -150,6 +150,7 @@ const API = (() => {
     getDepartments, getSettings,
     getRecords, saveRecord, updateRecord,
     uploadImage,
+    getNotify: (since='') => request('get_notify', { since }),
     getUsers, saveUser, updateUser,
     saveSetting, updateSetting, getStats,
     updateAvatar, requireLogin, clearToken,

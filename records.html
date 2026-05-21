@@ -343,6 +343,62 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 }
 .nav-fab-label{font-size:.56rem;font-weight:700;color:var(--red-1);letter-spacing:.2px}
 
+/* ── Notification Bell ── */
+.notif-bell{
+  position:relative;width:36px;height:36px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;flex-shrink:0;
+}
+.notif-bell:hover{background:rgba(255,45,45,.1);border-color:rgba(255,45,45,.3)}
+.notif-bell svg{width:16px;height:16px;stroke:var(--text);stroke-width:2;fill:none;stroke-linecap:round}
+.notif-badge{
+  position:absolute;top:-3px;right:-3px;
+  min-width:17px;height:17px;border-radius:999px;
+  background:var(--red-1);color:#fff;
+  font-size:.58rem;font-weight:700;
+  display:none;align-items:center;justify-content:center;
+  border:2px solid var(--bg);padding:0 3px;
+  animation:badgePop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.notif-badge.show{display:flex}
+@keyframes badgePop{from{transform:scale(0)}to{transform:scale(1)}}
+
+/* Notification panel */
+.notif-panel{
+  position:fixed;top:calc(var(--topbar-h) + 6px);right:.85rem;
+  width:min(340px, calc(100vw - 1.5rem));
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;z-index:200;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+  display:none;animation:slideDown .25s ease;
+  max-height:70dvh;overflow:hidden;
+  flex-direction:column;
+}
+.notif-panel.show{display:flex}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.notif-head{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+.notif-head-title{font-size:.85rem;font-weight:700}
+.notif-clear{font-size:.72rem;color:var(--red-1);font-weight:600;cursor:pointer;background:none;border:none;font-family:'Bai Jamjuree',sans-serif;padding:0}
+.notif-list{overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.notif-item{
+  display:flex;align-items:flex-start;gap:.75rem;
+  padding:.75rem 1rem;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:var(--surface2)}
+.notif-item.unread{background:rgba(255,45,45,.04)}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--red-1);flex-shrink:0;margin-top:4px}
+.notif-item.unread .notif-dot{display:block}
+.notif-item:not(.unread) .notif-dot{background:transparent}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:.8rem;font-weight:600;margin-bottom:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.notif-sub{font-size:.7rem;color:var(--muted);line-height:1.4}
+.notif-time{font-size:.62rem;color:var(--muted);white-space:nowrap;margin-top:.2rem;font-family:'Bai Jamjuree',monospace}
+.notif-empty{text-align:center;padding:2rem 1rem;color:var(--muted);font-size:.8rem}
+
 .spin-sm{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -356,6 +412,10 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
   <div class="tb-logo"><img src="https://i.ibb.co/xSpNYB3j/technology.png" alt=""></div>
   <span class="tb-name">รายการ ASSET</span>
   <button class="theme-btn" id="theme-btn"></button>
+  <div class="notif-bell" id="notif-bell" onclick="toggleNotif()">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <div class="notif-badge" id="notif-badge">0</div>
+  </div>
   <div class="av-wrap" onclick="location.href='profile.html'">
     <div style="text-align:right"><div class="u-name" id="top-name">—</div><div class="u-role" id="top-role">—</div></div>
     <div class="avatar" id="top-av">?</div>
@@ -530,10 +590,154 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 <!-- Toast -->
 <div class="toast" id="toast"><span id="t-ico"></span><span id="t-msg"></span></div>
 
+<!-- Notification Panel -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-head">
+    <span class="notif-head-title">🔔 การแจ้งเตือน</span>
+    <button class="notif-clear" onclick="clearNotifs()">ล้างทั้งหมด</button>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="notif-empty">ไม่มีการแจ้งเตือน</div>
+  </div>
+</div>
+
 <script src="js/config.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/api.js"></script>
 <script>
+API.requireLogin();
+
+// ── Notification System ──────────────────────────────────────
+const NOTIFY_KEY = CONFIG.SESSION_KEY + '_notify_seen';
+const POLL_MS    = 30000; // poll ทุก 30 วินาที
+let notifications = [];   // {id, title, sub, time, seen, recId}
+let notifOpen = false;
+let pollTimer  = null;
+let lastSince  = localStorage.getItem(NOTIFY_KEY + '_since') || '';
+
+function fmtTimeAgo(s){
+  const d=parseDate(s); if(!d) return '';
+  const diff=Math.floor((Date.now()-d.getTime())/1000);
+  if(diff<60) return 'เมื่อกี้';
+  if(diff<3600) return `${Math.floor(diff/60)} นาทีที่แล้ว`;
+  if(diff<86400) return `${Math.floor(diff/3600)} ชั่วโมงที่แล้ว`;
+  return fmtDate(s);
+}
+
+async function pollNotifications(){
+  try{
+    const res = await API.getNotify(lastSince);
+    if(!res?.notifications?.length) return;
+
+    const newItems = res.notifications.map(r => {
+      const isNew = !lastSince || (r.updated_at||r.created_at||'') > lastSince;
+      const isEdit = r.updated_at && r.updated_at !== r.created_at && r.updated_at > (lastSince||'');
+      return {
+        id:    r.id,
+        recId: r.id,
+        title: `${isEdit ? '✏️ แก้ไข' : '🆕 บันทึกใหม่'}: ${r.computer_name}`,
+        sub:   `${r.department} · ${r.it_agent}`,
+        time:  r.updated_at || r.created_at || '',
+        seen:  false,
+      };
+    }).filter(n => !notifications.find(x => x.id===n.id && x.seen));
+
+    if(!newItems.length) return;
+
+    // Prepend new items
+    notifications = [...newItems, ...notifications.filter(x=>!newItems.find(n=>n.id===x.id))];
+    // Keep max 50
+    notifications = notifications.slice(0,50);
+
+    // Update since
+    const latestTs = res.notifications[0]?.updated_at || res.notifications[0]?.created_at || '';
+    if(latestTs > lastSince){
+      lastSince = latestTs;
+      localStorage.setItem(NOTIFY_KEY+'_since', lastSince);
+    }
+
+    updateBadge();
+    renderNotifList();
+
+    // Flash bell
+    const bell = document.getElementById('notif-bell');
+    bell.style.background='rgba(255,45,45,.2)';
+    bell.style.borderColor='rgba(255,45,45,.5)';
+    setTimeout(()=>{bell.style.background='';bell.style.borderColor='';},2000);
+
+  }catch(_){}
+}
+
+function unreadCount(){ return notifications.filter(n=>!n.seen).length; }
+
+function updateBadge(){
+  const n = unreadCount();
+  const badge = document.getElementById('notif-badge');
+  badge.textContent = n>99?'99+':n;
+  badge.classList.toggle('show', n>0);
+}
+
+function renderNotifList(){
+  const list = document.getElementById('notif-list');
+  if(!notifications.length){
+    list.innerHTML='<div class="notif-empty">ไม่มีการแจ้งเตือน</div>';
+    return;
+  }
+  list.innerHTML = notifications.map(n=>`
+    <div class="notif-item${n.seen?'':' unread'}" onclick="openNotif('${n.recId}')">
+      <div class="notif-dot"></div>
+      <div class="notif-body">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-sub">${n.sub}</div>
+        <div class="notif-time">${fmtTimeAgo(n.time)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleNotif(){
+  notifOpen = !notifOpen;
+  document.getElementById('notif-panel').classList.toggle('show', notifOpen);
+  if(notifOpen){
+    // Mark all as seen
+    notifications.forEach(n=>n.seen=true);
+    updateBadge();
+    renderNotifList();
+  }
+}
+
+function openNotif(recId){
+  // Mark seen
+  notifications.forEach(n=>{ if(n.recId===recId) n.seen=true; });
+  updateBadge();
+  renderNotifList();
+  // Close panel and open edit
+  toggleNotif();
+  // Scroll to record and highlight
+  const row = document.getElementById(`row-${recId}`);
+  if(row){
+    row.scrollIntoView({behavior:'smooth',block:'center'});
+    row.classList.add('selected');
+    setTimeout(()=>openEdit(recId),400);
+  }else{
+    // Record might not be on current page — find it and open
+    openEdit(recId);
+  }
+}
+
+function clearNotifs(){
+  notifications=[];
+  updateBadge();
+  renderNotifList();
+}
+
+// Close notif panel when clicking outside
+document.addEventListener('click',e=>{
+  if(notifOpen && !e.target.closest('#notif-panel') && !e.target.closest('#notif-bell')){
+    notifOpen=false;
+    document.getElementById('notif-panel').classList.remove('show');
+  }
+});
+
 API.requireLogin();
 Theme.renderBtn(document.getElementById('theme-btn'));
 
@@ -596,6 +800,10 @@ async function init(){
 
   allRecs=recsRes||[];
   applyFilter();
+
+  // Start notification polling every 30s
+  pollNotifications(); // immediate first check
+  pollTimer = setInterval(pollNotifications, POLL_MS);
 }
 
 // ── Filter ────────────────────────────────────────────────────
