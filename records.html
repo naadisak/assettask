@@ -343,6 +343,37 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 }
 .nav-fab-label{font-size:.56rem;font-weight:700;color:var(--red-1);letter-spacing:.2px}
 
+/* ── NEW badge ── */
+.badge-new{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--red-1);color:#fff;
+  font-size:.58rem;font-weight:800;letter-spacing:.8px;
+  padding:.18rem .45rem;border-radius:6px;
+  line-height:1;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(255,45,45,.4);
+  font-family:'Bai Jamjuree',sans-serif;
+}
+.badge-edit{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(249,115,22,.15);color:#fb923c;
+  border:1px solid rgba(249,115,22,.35);
+  font-size:.58rem;font-weight:800;letter-spacing:.5px;
+  padding:.18rem .45rem;border-radius:6px;
+  line-height:1;flex-shrink:0;
+  font-family:'Bai Jamjuree',sans-serif;
+}
+/* ── Dept badge ── */
+.dept-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  background:rgba(255,45,45,.1);
+  border:1px solid rgba(255,45,45,.22);
+  color:var(--red-1);
+  font-size:.64rem;font-weight:700;letter-spacing:.4px;
+  padding:.18rem .55rem;border-radius:20px;
+  line-height:1;
+}
+[data-theme="light"] .dept-pill{background:rgba(192,0,0,.06);border-color:rgba(192,0,0,.18);color:var(--red-2)}
+
 /* ── Notification Bell ── */
 .notif-bell{
   position:relative;width:36px;height:36px;border-radius:50%;
@@ -629,16 +660,24 @@ async function pollNotifications(){
     const res = await API.getNotify(lastSince);
     if(!res?.notifications?.length) return;
 
+    // Build user name map from allUsers if available
+    const userMap = {};
+    (typeof allUsers !== 'undefined' ? allUsers : []).forEach(u => {
+      userMap[u.employee_id] = `${u.first_name} ${u.last_name}`;
+    });
+
     const newItems = res.notifications.map(r => {
-      const isNew = !lastSince || (r.updated_at||r.created_at||'') > lastSince;
-      const isEdit = r.updated_at && r.updated_at !== r.created_at && r.updated_at > (lastSince||'');
+      const isEdit = !!(r.updated_at && r.updated_at !== r.created_at && r.updated_at > (lastSince||''));
+      const agentName = userMap[r.it_agent] || r.it_agent;
       return {
-        id:    r.id,
-        recId: r.id,
-        title: `${isEdit ? '✏️ แก้ไข' : '🆕 บันทึกใหม่'}: ${r.computer_name}`,
-        sub:   `${r.department} · ${r.it_agent}`,
-        time:  r.updated_at || r.created_at || '',
-        seen:  false,
+        id:        r.id,
+        recId:     r.id,
+        pcName:    r.computer_name,
+        dept:      r.department,
+        agentName: agentName,
+        isEdit:    isEdit,
+        time:      r.updated_at || r.created_at || '',
+        seen:      false,
       };
     }).filter(n => !notifications.find(x => x.id===n.id && x.seen));
 
@@ -687,8 +726,16 @@ function renderNotifList(){
     <div class="notif-item${n.seen?'':' unread'}" onclick="openNotif('${n.recId}')">
       <div class="notif-dot"></div>
       <div class="notif-body">
-        <div class="notif-title">${n.title}</div>
-        <div class="notif-sub">${n.sub}</div>
+        <div class="notif-title-row" style="display:flex;align-items:center;gap:5px;margin-bottom:.25rem;flex-wrap:wrap">
+          ${n.isEdit
+            ? '<span class="badge-edit">EDIT</span>'
+            : '<span class="badge-new">NEW</span>'}
+          <span style="font-size:.82rem;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n.pcName}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:.2rem">
+          <span class="dept-pill">🏢 ${n.dept}</span>
+          <span style="font-size:.7rem;color:var(--red-1);font-weight:600">${n.agentName}</span>
+        </div>
         <div class="notif-time">${fmtTimeAgo(n.time)}</div>
       </div>
     </div>`).join('');
@@ -742,7 +789,7 @@ API.requireLogin();
 Theme.renderBtn(document.getElementById('theme-btn'));
 
 // ── State ─────────────────────────────────────────────────────
-let user=null, allRecs=[], filtered=[], osSettings={};
+let user=null, allRecs=[], filtered=[], osSettings={}, allUsers=[];
 let curPage=1; const PER=15;
 let filterStatus='', filterDept='', searchQ='';
 let editRec=null, editState={curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:'',img1:'',img2:''};
@@ -800,6 +847,11 @@ async function init(){
 
   allRecs=recsRes||[];
   applyFilter();
+
+  // Load users for name lookup in notifications
+  if(user?.role==='admin'){
+    API.getUsers?.().then(u=>{ if(u) allUsers=u; }).catch(()=>{});
+  }
 
   // Start notification polling every 30s
   pollNotifications(); // immediate first check
