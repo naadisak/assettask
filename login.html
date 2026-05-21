@@ -175,7 +175,7 @@ async function tryLogin(){
   try{
     const res=await API.login(emp,pin);
     if(!res||!res.token){showError('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');return;}
-    window.location.replace(res.must_change_pw?'change_pin.html':'index.html');
+    window.location.replace(res.must_change_pw?'change_pin.html':'records.html');
   }catch(err){showError(err.message||'เข้าสู่ระบบไม่สำเร็จ');}
   finally{loginBtn.innerHTML='เข้าสู่ระบบ';loginBtn.disabled=!(getPin().length===6&&empInput.value.trim());}
 }

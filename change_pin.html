@@ -188,7 +188,7 @@ saveBtn.addEventListener('click',async()=>{
   try{
     await API.changePin(getPin(b1));
     document.getElementById('success').classList.add('show');
-    setTimeout(()=>window.location.replace('index.html'),1800);
+    setTimeout(()=>window.location.replace('records.html'),1800);
   }catch(err){showError(err.message||'บันทึกไม่สำเร็จ');saveBtn.innerHTML='บันทึก PIN';saveBtn.disabled=false;}
 });
 </script>
