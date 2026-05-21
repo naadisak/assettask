@@ -430,6 +430,22 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .notif-time{font-size:.62rem;color:var(--muted);white-space:nowrap;margin-top:.2rem;font-family:'Bai Jamjuree',monospace}
 .notif-empty{text-align:center;padding:2rem 1rem;color:var(--muted);font-size:.8rem}
 
+/* ── History ── */
+.history-list{max-height:200px;overflow-y:auto;margin-top:.5rem}
+.history-item{display:flex;align-items:flex-start;gap:.65rem;padding:.6rem .9rem;border-bottom:1px solid var(--border);font-size:.75rem}
+.history-item:last-child{border-bottom:none}
+.h-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.h-dot.create{background:var(--pass-text)}
+.h-dot.update{background:var(--doi-text)}
+.h-body{flex:1;min-width:0}
+.h-action{font-weight:700;margin-bottom:.12rem}
+.h-action.create{color:var(--pass-text)}
+.h-action.update{color:var(--doi-text)}
+.h-detail{color:var(--muted);font-size:.68rem;line-height:1.45;word-break:break-all}
+.h-meta{font-size:.62rem;color:var(--muted);margin-top:.18rem;font-family:'Bai Jamjuree',monospace}
+.history-empty{text-align:center;padding:1rem;color:var(--muted);font-size:.78rem}
+.hist-loading{text-align:center;padding:.75rem;color:var(--muted);font-size:.75rem}
+
 .spin-sm{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -594,6 +610,17 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
         <div class="edit-img-slot" id="e-slot-2"><input type="file" accept="image/*" onchange="editUploadImg(event,2)"><div class="edit-img-slot-ico">📷</div><div class="edit-img-slot-lbl">รูปที่ 2</div></div>
       </div>
     </div>
+    <!-- History section -->
+    <div class="e-field" style="margin-top:.5rem">
+      <div class="e-label" style="display:flex;align-items:center;justify-content:space-between">
+        <span>📋 ประวัติการเปลี่ยนแปลง</span>
+        <span id="hist-count" style="font-size:.65rem;color:var(--muted)"></span>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="hist-loading">กำลังโหลด...</div>
+      </div>
+    </div>
+
     <button class="save-btn" id="edit-save-btn" onclick="confirmSave()">บันทึกการแก้ไข</button>
     <button class="del-btn" id="del-btn" onclick="confirmDeleteRec()">🗑️ ลบรายการนี้</button>
   </div>
@@ -1015,7 +1042,42 @@ function openEdit(id){
 
   prefillOS();prefillStatus();prefillImgs();
   document.getElementById('edit-sheet').classList.add('show');
+  // Load history
+  loadHistory(r.id, r.computer_name);
 }
+async function loadHistory(recordId, pcName){
+  const list = document.getElementById('history-list');
+  const cnt  = document.getElementById('hist-count');
+  list.innerHTML = '<div class="hist-loading">⏳ กำลังโหลด...</div>';
+  try{
+    const res = await API.getHistory({ record_id: recordId });
+    const rows = res?.history || [];
+    cnt.textContent = rows.length ? `${rows.length} รายการ` : '';
+    if(!rows.length){
+      list.innerHTML = '<div class="history-empty">ยังไม่มีประวัติ</div>';
+      return;
+    }
+    const MONTHS=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    list.innerHTML = rows.map(h => {
+      const isCreate = h.action==='CREATE';
+      const d = parseDate(h.changed_at);
+      const timeStr = d ? `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()+543} ${d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}` : h.changed_at||'—';
+      // Clean up detail text
+      const detail = (h.detail||'').replace(/\|/g,' · ').replace(/=/g,' : ');
+      return `<div class="history-item">
+        <div class="h-dot ${isCreate?'create':'update'}"></div>
+        <div class="h-body">
+          <div class="h-action ${isCreate?'create':'update'}">${isCreate?'🆕 สร้างรายการ':'✏️ แก้ไขข้อมูล'}</div>
+          <div class="h-detail">${detail}</div>
+          <div class="h-meta">${h.changed_by} · ${timeStr}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(_){
+    list.innerHTML = '<div class="history-empty">โหลดประวัติไม่ได้</div>';
+  }
+}
+
 function closeEdit(){
   document.getElementById('edit-sheet').classList.remove('show');
   document.querySelectorAll('.data-tbl tbody tr').forEach(tr=>tr.classList.remove('selected'));

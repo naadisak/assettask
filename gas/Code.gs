@@ -9,7 +9,8 @@
 const SPREADSHEET_ID = '1PJbsnOWp_OBFAmgft6lVyn4G0ta__pp7gngaDyUNS3g';
 const SHEET = { RECORDS:'records', USERS:'users', SETTINGS:'settings', DEPARTMENTS:'departments' };
 const COL = {
-  RECORDS:     ['id','timestamp','department','computer_name','ext','current_os','current_os_detail','up2_os','up2_os_detail','status','it_agent','note','image1_url','image2_url','emoji','created_by','created_at'],
+  RECORDS:     ['id','timestamp','department','computer_name','ext','current_os','current_os_detail','up2_os','up2_os_detail','status','it_agent','note','image1_url','image2_url','emoji','created_by','created_at','updated_at'],
+  HISTORY:     ['id','record_id','computer_name','action','changed_by','changed_at','detail'],
   USERS:       ['id','employee_id','first_name','last_name','email','phone_ext','role','password_hash','avatar_url','line_user_id','status','must_change_pw','token','created_at'],
   SETTINGS:    ['id','category','value','label','sort_order','active'],
   DEPARTMENTS: ['id','name','created_at'],
@@ -55,6 +56,7 @@ function doGet(e) {
     if (action === 'get_records')      return handleGetRecords(p, user);
     if (action === 'upload_image')     return handleUploadImage(p);
     if (action === 'get_notify')        return handleGetNotify(p, user);
+    if (action === 'get_history')       return handleGetHistory(p, user);
     if (action === 'save_record')      return handleSaveRecord(p, user);
     if (action === 'update_record')    return handleUpdateRecord(p, user);
 
@@ -172,6 +174,21 @@ function handleUploadImage(p) {
   } catch(err) {
     return fail('อัปโหลดไม่สำเร็จ: ' + err.message);
   }
+}
+
+// ── History ─────────────────────────────────────────────────
+function handleGetHistory(p, user) {
+  if (!p.computer_name && !p.record_id) return fail('กรุณาระบุ computer_name หรือ record_id');
+  let rows = getRows(SHEET.HISTORY, COL.HISTORY);
+  if (p.computer_name) {
+    const pc = p.computer_name.trim().toUpperCase();
+    rows = rows.filter(r => (r.computer_name||'').toUpperCase() === pc);
+  }
+  if (p.record_id) {
+    rows = rows.filter(r => r.record_id === p.record_id);
+  }
+  rows.sort((a,b) => (b.changed_at||'').localeCompare(a.changed_at||''));
+  return ok({ history: rows.slice(0,50) });
 }
 
 // ── Notifications (polling) ─────────────────────────────────

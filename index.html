@@ -422,6 +422,21 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 .s-btn{padding:.68rem;border-radius:11px;text-align:center;font-size:.82rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Bai Jamjuree',sans-serif}
 .s-btn.primary{background:linear-gradient(135deg,var(--red-1),var(--red-2));border-color:transparent;color:#fff}
 
+/* ── Duplicate warning dialog ── */
+.dup-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .25s}
+.dup-overlay.show{opacity:1;pointer-events:all}
+.dup-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.5rem 1.35rem 1.25rem;width:100%;max-width:340px;text-align:center;animation:popIn .3s ease}
+.dup-ico{font-size:2.2rem;margin-bottom:.65rem}
+.dup-title{font-size:1rem;font-weight:700;margin-bottom:.35rem}
+.dup-msg{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:.65rem}
+.dup-last{background:var(--surface2);border-radius:10px;padding:.65rem .85rem;font-size:.75rem;margin-bottom:1rem;text-align:left;border:1px solid var(--border)}
+.dup-last .dl-key{color:var(--muted);font-size:.65rem;font-weight:600;letter-spacing:.4px;margin-bottom:.15rem}
+.dup-last .dl-val{font-weight:600}
+.dup-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dup-btn{padding:.72rem;border-radius:11px;font-size:.85rem;font-weight:700;font-family:'Bai Jamjuree',sans-serif;cursor:pointer;border:none}
+.dup-cancel{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.dup-confirm{background:linear-gradient(135deg,var(--red-1),var(--red-2));color:#fff}
+
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -675,6 +690,20 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
   </div>
 </div>
 
+<!-- Duplicate warning -->
+<div class="dup-overlay" id="dup-overlay">
+  <div class="dup-box">
+    <div class="dup-ico">⚠️</div>
+    <div class="dup-title" id="dup-title">พบรายการซ้ำ</div>
+    <div class="dup-msg" id="dup-msg"></div>
+    <div class="dup-last" id="dup-last"></div>
+    <div class="dup-btns">
+      <button class="dup-btn dup-cancel" onclick="document.getElementById('dup-overlay').classList.remove('show')">ยกเลิก</button>
+      <button class="dup-btn dup-confirm" onclick="forceSave()">บันทึกทับ</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/config.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/api.js"></script>
@@ -696,6 +725,24 @@ let curStep=1, goingBack=false;
 let form={dept:'',pc:'',ext:'',curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:'',statusLabel:'',note:'',img1:'',img2:''};
 
 // ── Init ──────────────────────────────────────────────────────
+async function forceSave(){
+  document.getElementById('dup-overlay').classList.remove('show');
+  const payload = {...window._pendingPayload, force_save: true};
+  const withNote = window._pendingWithNote;
+  const btnId = withNote?'btn-3-save':'btn-2-save';
+  const btn = document.getElementById(btnId);
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังบันทึก...';
+  try{
+    const res = await API.saveRecord(payload);
+    showSuccess(res.id);
+    depts = await API.getDepartments();
+  }catch(err){ toast('❌',err.message||'บันทึกไม่สำเร็จ','error'); }
+  finally{
+    btn.disabled=false;
+    btn.innerHTML=withNote?'บันทึกทั้งหมด':'บันทึก';
+  }
+}
+
 async function init(){
   const [meR,deptR,setR]=await Promise.all([API.me(),API.getDepartments(),API.getSettings('')]);
   user=meR?.user; depts=deptR||[];
