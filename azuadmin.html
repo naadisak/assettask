@@ -830,7 +830,12 @@ function renderRecPage(){
   const osLbl=v=>{const a=[...allSettings.filter(s=>s.category==='os')];return a.find(o=>o.value===v)?.label||v||'—'};
   const fmtD=s=>{const d=parseDate(s);return d?d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'—'};
   const pillCls={pass:'pass',doi:'doi',reject_user:'rej'};
-  const pillLbl={pass:'✅ Pass',doi:'⚠️ ด๋อย',reject_user:'🚫 Reject'};
+  const getStatusLbl = (val) => {
+    const s = allSettings.find(x=>x.category==='status'&&x.value===val);
+    return s?.label
+      ? `${({pass:'✅',doi:'⚠️',reject_user:'🚫'}[val]||'')} ${s.label}`.trim()
+      : ({pass:'✅ Pass',doi:'⚠️ ด๋อย',reject_user:'🚫 Reject'}[val]||val);
+  };
 
   document.getElementById('rec-tbody').innerHTML = page.map(r=>`
     <tr>
@@ -840,7 +845,7 @@ function renderRecPage(){
         <span style="color:var(--muted);font-size:.65rem;margin:0 3px">→</span>
         <span class="os-badge ${osCls(r.up2_os_detail||r.up2_os)}">${osLbl(r.up2_os_detail)}</span>
       </td>
-      <td><span class="pill ${pillCls[r.status]||''}">${pillLbl[r.status]||r.status}</span></td>
+      <td><span class="pill ${pillCls[r.status]||''}">${getStatusLbl(r.status)}</span></td>
       <td style="font-size:.75rem">${r.it_agent}</td>
       <td style="font-size:.72rem;color:var(--muted);font-family:monospace">${fmtD(r.created_at)}</td>
     </tr>`).join('');

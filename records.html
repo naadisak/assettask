@@ -75,6 +75,9 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 /* ── Dept + Date filters ── */
 .filter-bar{display:flex;gap:7px;margin-bottom:.65rem}
 .f-select{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.58rem .8rem;font-size:.8rem;color:var(--text);font-family:'Bai Jamjuree',sans-serif;outline:none;-webkit-appearance:none;transition:border-color .2s}
+/* Dept dropdown max 10 rows */
+#f-dept{max-height:none}
+#f-dept option{padding:.35rem .6rem}
 .f-select:focus{border-color:var(--red-1)}
 .f-select.active{border-color:rgba(255,45,45,.4);background:rgba(255,45,45,.05);color:var(--red-1)}
 .date-toggle{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.58rem .85rem;cursor:pointer;transition:all .2s;margin-bottom:.65rem}
@@ -495,7 +498,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
 
   <!-- Dept + Date -->
   <div class="filter-bar">
-    <select class="f-select" id="f-dept" onchange="applyFilter()"><option value="">ทุกส่วนงาน</option></select>
+    <select class="f-select" id="f-dept" size="1" onchange="applyFilter()"><option value="">ทุกส่วนงาน</option></select>
   </div>
   <div class="date-toggle" id="date-head" onclick="toggleDate()">
     <span class="date-lbl"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>ช่วงวันที่</span>
@@ -817,7 +820,7 @@ API.requireLogin();
 Theme.renderBtn(document.getElementById('theme-btn'));
 
 // ── State ─────────────────────────────────────────────────────
-let user=null, allRecs=[], filtered=[], osSettings={}, allUsers=[];
+let user=null, allRecs=[], filtered=[], osSettings={}, allSettings=[], allUsers=[];
 let curPage=1; const PER=15;
 let filterStatus='', filterDept='', searchQ='';
 let editRec=null, editState={curOS:'',curOSDetail:'',up2OS:'',up2OSDetail:'',status:'',img1:'',img2:''};
@@ -843,18 +846,17 @@ const PCLS={pass:'pass',doi:'doi',reject_user:'rej'};
 // PLBL ดึงจาก settings จริง — fallback ค่า default ถ้ายังไม่โหลด
 const PLBL_DEFAULT={pass:'✅ Pass',doi:'⚠️ ด๋อย',reject_user:'🚫 Reject'};
 function getStatusLabel(val){
-  // หา label จาก settings sheet ก่อน
-  const setting = allSettings.find(s=>s.category==='status'&&s.value===val);
-  if(setting?.label) return setting.label;
+  if(allSettings.length){
+    const s=allSettings.find(x=>x.category==='status'&&x.value===val);
+    if(s?.label) return `${({pass:'✅',doi:'⚠️',reject_user:'🚫'}[val]||'')} ${s.label}`.trim();
+  }
   return PLBL_DEFAULT[val]||val;
 }
 
 // ── Init ──────────────────────────────────────────────────────
 async function init(){
-  // โหลด settings พร้อมกันทุกอย่าง — osSettings ต้องพร้อมก่อน edit sheet เปิด
-  const [meR, recsRes, setR, deptR] = await Promise.all([
-    API.me(), API.getRecords(), API.getSettings(''), API.getDepartments()
-  ]);
+  // โหลด me + records ก่อน แสดงผลทันที
+  const [meR, recsRes] = await Promise.all([API.me(), API.getRecords()]);
 
   user=meR?.user;
   if(user){
@@ -869,34 +871,52 @@ async function init(){
     }
   }
 
-  // osSettings ต้องพร้อมก่อนเปิด edit sheet
-  const allSet=setR||[];
-  osSettings={
-    windows:allSet.filter(s=>s.category==='os'&&s.value.startsWith('win')),
-    ubuntu: allSet.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
-  };
-
-  // Render status chips from settings
-  const statusSettings = allSet.filter(s=>s.category==='status'&&s.active==='1')
-    .sort((a,b)=>+a.sort_order-+b.sort_order);
-  if(statusSettings.length){
-    const ICON={pass:'✅',doi:'⚠️',reject_user:'🚫'};
-    const CLS={pass:'pass',doi:'doi',reject_user:'rej'};
-    const grid = document.getElementById('edit-status-grid');
-    if(grid){
-      grid.innerHTML = statusSettings.map(s=>`
-        <div class="edit-sc ${CLS[s.value]||''}" onclick="editStatus('${s.value}')">
-          ${ICON[s.value]||''} ${s.label}
-        </div>`).join('');
-    }
-  }
-
-  // Dept filter
-  const sel=document.getElementById('f-dept');
-  (deptR||[]).forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
-
+  // แสดง records ทันที
   allRecs=recsRes||[];
   applyFilter();
+
+  // โหลด settings + dept ใน background (ไม่บล็อก UI)
+  Promise.all([API.getSettings(''), API.getDepartments()]).then(([setR, deptR])=>{
+    allSettings = setR||[];
+    osSettings={
+      windows: allSettings.filter(s=>s.category==='os'&&s.value.startsWith('win')),
+      ubuntu:  allSettings.filter(s=>s.category==='os'&&s.value.startsWith('ubuntu')),
+    };
+
+    // Re-render table เพื่ออัปเดต status label
+    renderPage();
+
+    // Status filter chips — label จาก settings
+    const statusSets = allSettings.filter(s=>s.category==='status'&&s.active==='1')
+      .sort((a,b)=>+a.sort_order-+b.sort_order);
+    if(statusSets.length){
+      const ICON={pass:'✅',doi:'⚠️',reject_user:'🚫'};
+      const CLS ={pass:'pass',doi:'doi',reject_user:'rej'};
+      // Update status filter chips label
+      document.querySelectorAll('.chips .chip[onclick*="setChip"]').forEach(chip=>{
+        const val=chip.getAttribute('onclick').match(/'([^']+)'\)$/)?.[1];
+        if(!val) return;
+        const s=statusSets.find(x=>x.value===val);
+        if(s) chip.textContent=`${ICON[s.value]||''} ${s.label}`;
+      });
+      // Edit status grid
+      const grid=document.getElementById('edit-status-grid');
+      if(grid){
+        grid.innerHTML=statusSets.map(s=>`
+          <div class="edit-sc ${CLS[s.value]||''}" onclick="editStatus('${s.value}')">
+            ${ICON[s.value]||''} ${s.label}
+          </div>`).join('');
+      }
+    }
+
+    // Dept filter select — max 10 visible + scrollbar
+    const sel=document.getElementById('f-dept');
+    // clear old except first
+    while(sel.options.length>1) sel.remove(1);
+    (deptR||[]).forEach(d=>{
+      const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);
+    });
+  });
 
   // Load users for name lookup in notifications
   if(user?.role==='admin'){
