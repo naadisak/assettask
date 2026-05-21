@@ -778,6 +778,7 @@ async function init(){
     });
   }
   renderEmojiBar();
+  renderNameBadges();
   initAutocomplete();
 }
 
@@ -869,6 +870,45 @@ function selectStatus(val,label){
 }
 
 // ── iPhone Emoji Bar ─────────────────────────────────────────
+// ── Name quick-insert badges ─────────────────────────────────
+const NAMES = [
+  { name:'ต้น',     color:'#38bdf8', bg:'rgba(14,165,233,.12)',  border:'rgba(14,165,233,.35)'  },
+  { name:'ต่อ',     color:'#4ade80', bg:'rgba(34,197,94,.12)',   border:'rgba(34,197,94,.35)'   },
+  { name:'เอกคุง',  color:'#f472b6', bg:'rgba(244,114,182,.12)', border:'rgba(244,114,182,.35)' },
+  { name:'ฟิล์ม',   color:'#fb923c', bg:'rgba(249,115,22,.12)',  border:'rgba(249,115,22,.35)'  },
+  { name:'เอ็ม',    color:'#a78bfa', bg:'rgba(167,139,250,.12)', border:'rgba(167,139,250,.35)' },
+  { name:'โด่ง',    color:'#fbbf24', bg:'rgba(251,191,36,.12)',  border:'rgba(251,191,36,.35)'  },
+  { name:'ปู',      color:'#86efac', bg:'rgba(134,239,172,.12)', border:'rgba(134,239,172,.35)' },
+];
+
+function renderNameBadges(){
+  const wrap = document.getElementById('name-badges');
+  if(!wrap) return;
+  wrap.innerHTML = NAMES.map(n =>
+    `<div class="name-badge" onclick="insertName('${n.name}')"
+      style="color:${n.color};background:${n.bg};border-color:${n.border}">
+      ${n.name}
+    </div>`
+  ).join('');
+}
+
+function insertName(name){
+  const ta = document.getElementById('f-note');
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const cur = ta.value;
+  // เว้นวรรคหน้าถ้ามีข้อความอยู่แล้ว
+  const prefix = (start > 0 && cur[start-1] !== ' ' && cur[start-1] !== '') ? ' ' : '';
+  const insert = prefix + name;
+  const newVal = cur.slice(0,start) + insert + cur.slice(end);
+  if(newVal.length > 60) return;
+  ta.value = newVal;
+  const pos = start + insert.length;
+  ta.focus();
+  ta.setSelectionRange(pos, pos);
+  updateNoteCount();
+  form.note = ta.value;
+}
+
 function renderEmojiBar(){
   const bar=document.getElementById('emoji-bar');
   bar.innerHTML=EMOJIS.map(({e,l})=>
