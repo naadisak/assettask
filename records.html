@@ -1020,13 +1020,9 @@ function goPage(n){
 // ── Edit Sheet ────────────────────────────────────────────────
 function openEdit(id){
   const r=allRecs.find(x=>x.id===id);if(!r)return;
-  const canEdit=user?.role==='admin'||r.created_by===user?.employee_id;
-
   // Highlight row
   document.querySelectorAll('.data-tbl tbody tr').forEach(tr=>tr.classList.remove('selected'));
   document.getElementById(`row-${id}`)?.classList.add('selected');
-
-  if(!canEdit){toast('🔒','คุณไม่มีสิทธิ์แก้ไขรายการนี้','error');return;}
 
   editRec=r;
   editState={curOS:r.current_os||'',curOSDetail:r.current_os_detail||'',
