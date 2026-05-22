@@ -182,6 +182,24 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
   line-height:1.55;
 }
 .note-textarea::placeholder{color:var(--muted)}
+/* Name quick-insert badges */
+.name-badges-wrap{
+  display:flex;gap:5px;flex-wrap:wrap;
+  padding:.55rem .75rem .45rem;
+  border-bottom:1px solid var(--border);
+  background:var(--surface2);
+}
+.name-badge{
+  display:inline-flex;align-items:center;
+  padding:.28rem .65rem;border-radius:20px;
+  font-size:.72rem;font-weight:700;
+  cursor:pointer;border:1.5px solid;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+  line-height:1;white-space:nowrap;
+  font-family:'Bai Jamjuree',sans-serif;
+}
+.name-badge:active{transform:scale(.93);opacity:.8}
+
 .note-footer{display:flex;align-items:center;justify-content:space-between;padding:.35rem .85rem .5rem;border-top:1px solid var(--border)}
 .note-char-count{font-size:.62rem;color:var(--muted);font-family:'Bai Jamjuree',monospace}
 .note-char-count.warn{color:#f87171}
@@ -600,8 +618,10 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Bai Jam
             <div class="emoji-editor-wrap">
               <!-- Emoji picker bar -->
               <div class="emoji-bar" id="emoji-bar"></div>
+              <!-- Name quick-insert badges -->
+              <div class="name-badges-wrap" id="name-badges"></div>
               <!-- Text area -->
-              <textarea class="note-textarea" id="f-note" maxlength="60" placeholder="พิมพ์บันทึก... แตะ emoji ด้านบนเพื่อแทรก"></textarea>
+              <textarea class="note-textarea" id="f-note" maxlength="60" placeholder="พิมพ์บันทึก... แตะ emoji หรือชื่อเพื่อแทรก"></textarea>
               <div class="note-footer">
                 <span class="note-char-count" id="note-count">0/60</span>
                 <span style="font-size:.62rem;color:var(--muted)">แตะ emoji เพื่อแทรกในข้อความ</span>
@@ -713,9 +733,9 @@ Theme.renderBtn(document.getElementById('theme-btn'));
 
 // ── 10 emoji iPhone-style ────────────────────────────────────
 const EMOJIS = [
-  {e:'🤗',l:'OK'},   {e:'⚠️',l:'Warning'},{e:'👨‍🔧',l:'Fix'},
-  {e:'🖥️',l:'PC'},   {e:'⛔',l:'Block'},  {e:'👏',l:'Done'},
-  {e:'🤙',l:'Good'}, {e:'🤬',l:'Fail'},   {e:'💋',l:'Retry'},
+  {e:'✅',l:'OK'},   {e:'⚠️',l:'Warning'},{e:'🔧',l:'Fix'},
+  {e:'💻',l:'PC'},   {e:'🚫',l:'Block'},  {e:'🎉',l:'Done'},
+  {e:'👍',l:'Good'}, {e:'❌',l:'Fail'},   {e:'🔄',l:'Retry'},
   {e:'📝',l:'Note'},
 ];
 
@@ -872,9 +892,13 @@ function selectStatus(val,label){
 // ── iPhone Emoji Bar ─────────────────────────────────────────
 // ── Name quick-insert badges ─────────────────────────────────
 const NAMES = [
-  { name:'ต้น',     color:'#38bdf8', bg:'rgba(14,165,233,.12)',  border:'rgba(14,165,233,.35)'  },
-  { name:'ต่อ',     color:'#4ade80', bg:'rgba(34,197,94,.12)',   border:'rgba(34,197,94,.35)'   },
-  { name:'เอกคุง',  color:'#f472b6', bg:'rgba(244,114,182,.12)', border:'rgba(244,114,182,.35)' },
+  { name:'ต้น',    color:'#38bdf8', bg:'rgba(14,165,233,.12)',  border:'rgba(14,165,233,.35)'  },
+  { name:'ต่อ',    color:'#4ade80', bg:'rgba(34,197,94,.12)',   border:'rgba(34,197,94,.35)'   },
+  { name:'เอกคุง', color:'#f472b6', bg:'rgba(244,114,182,.12)', border:'rgba(244,114,182,.35)' },
+  { name:'ฟิล์ม',  color:'#fb923c', bg:'rgba(249,115,22,.12)',  border:'rgba(249,115,22,.35)'  },
+  { name:'เอ็ม',   color:'#a78bfa', bg:'rgba(167,139,250,.12)', border:'rgba(167,139,250,.35)' },
+  { name:'โด่ง',   color:'#fbbf24', bg:'rgba(251,191,36,.12)',  border:'rgba(251,191,36,.35)'  },
+  { name:'ปู',     color:'#f87171', bg:'rgba(248,113,113,.12)', border:'rgba(248,113,113,.35)' },
   { name:'ฟิล์ม',   color:'#fb923c', bg:'rgba(249,115,22,.12)',  border:'rgba(249,115,22,.35)'  },
   { name:'เอ็ม',    color:'#a78bfa', bg:'rgba(167,139,250,.12)', border:'rgba(167,139,250,.35)' },
   { name:'โด่ง',    color:'#fbbf24', bg:'rgba(251,191,36,.12)',  border:'rgba(251,191,36,.35)'  },
@@ -884,6 +908,15 @@ const NAMES = [
 function renderNameBadges(){
   const wrap = document.getElementById('name-badges');
   if(!wrap) return;
+  const NAMES = [
+    { name:'ต้น',    color:'#38bdf8', bg:'rgba(14,165,233,.12)',  border:'rgba(14,165,233,.35)'  },
+    { name:'ต่อ',    color:'#4ade80', bg:'rgba(34,197,94,.12)',   border:'rgba(34,197,94,.35)'   },
+    { name:'เอกคุง', color:'#f472b6', bg:'rgba(244,114,182,.12)', border:'rgba(244,114,182,.35)' },
+    { name:'ฟิล์ม',  color:'#fb923c', bg:'rgba(249,115,22,.12)',  border:'rgba(249,115,22,.35)'  },
+    { name:'เอ็ม',   color:'#a78bfa', bg:'rgba(167,139,250,.12)', border:'rgba(167,139,250,.35)' },
+    { name:'โด่ง',   color:'#fbbf24', bg:'rgba(251,191,36,.12)',  border:'rgba(251,191,36,.35)'  },
+    { name:'ปู',     color:'#f87171', bg:'rgba(248,113,113,.12)', border:'rgba(248,113,113,.35)' },
+  ];
   wrap.innerHTML = NAMES.map(n =>
     `<div class="name-badge" onclick="insertName('${n.name}')"
       style="color:${n.color};background:${n.bg};border-color:${n.border}">
