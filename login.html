@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <link rel="manifest" href="manifest.json">
@@ -105,17 +105,17 @@ dotlottie-player{
   min-height:0;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-  background:#fff;
+  background:#fff !important;
   padding:clamp(1.2rem,4vw,1.75rem) clamp(1.25rem,5vw,2rem) calc(1.5rem + var(--safe-bot));
 }
-[data-dark="1"] .card{background:#0f0f0f}
+
 
 .sign-title{
   font-size:clamp(1.5rem,6vw,2rem);
-  font-weight:700;color:#111;letter-spacing:-.5px;
+  font-weight:700;color:#111 !important;letter-spacing:-.5px;
   margin-bottom:.25rem;
 }
-[data-dark="1"] .sign-title{color:#f0f0f0}
+
 .sign-bar{
   width:38px;height:3px;border-radius:2px;
   background:var(--accent);margin-bottom:clamp(1rem,4vw,1.6rem);
@@ -127,7 +127,7 @@ dotlottie-player{
   letter-spacing:.5px;margin-bottom:.4rem;
   text-transform:uppercase;
 }
-[data-dark="1"] .flbl{color:#555}
+
 
 /* Employee ID input */
 .input-row{
@@ -136,19 +136,19 @@ dotlottie-player{
   padding:.45rem 0;margin-bottom:clamp(.9rem,3.5vw,1.4rem);
   transition:border-color .2s;
 }
-[data-dark="1"] .input-row{border-color:#2a2a2a}
+
 .input-row:focus-within{border-color:var(--accent)}
 .input-row svg{width:15px;height:15px;stroke:#c0c0c0;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0}
-[data-dark="1"] .input-row svg{stroke:#444}
+
 .input-row input{
   flex:1;border:none;outline:none;background:transparent;
   font-size:clamp(.88rem,3.5vw,1rem);
   font-family:'Bai Jamjuree',sans-serif;
   color:#111;
 }
-[data-dark="1"] .input-row input{color:#f0f0f0}
+
 .input-row input::placeholder{color:#c8c8c8}
-[data-dark="1"] .input-row input::placeholder{color:#383838}
+
 
 /* PIN row */
 .pin-row{
@@ -167,10 +167,10 @@ dotlottie-player{
   background:#fafafa;cursor:text;
   transition:all .15s;
 }
-[data-dark="1"] .pin-box{background:#1a1a1a;border-color:#2a2a2a;color:#f0f0f0}
+
 .pin-box.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(192,0,0,.1)}
 .pin-box.filled{background:#fff5f5;border-color:#ffbbbb}
-[data-dark="1"] .pin-box.filled{background:rgba(192,0,0,.1);border-color:rgba(192,0,0,.35)}
+
 
 /* Hidden input to capture keystrokes */
 .pin-hidden{
@@ -244,8 +244,7 @@ dotlottie-player{
 
   <!-- Top -->
   <div class="top">
-    <button class="theme-btn" id="theme-btn">☀️</button>
-    <dotlottie-player
+      <dotlottie-player
       src="https://lottie.host/49f4ee9c-cf52-4c04-b6ec-a42bed73ef52/APHBFjhhvO.lottie"
       background="transparent" speed="1" loop autoplay>
     </dotlottie-player>
@@ -313,25 +312,7 @@ dotlottie-player{
 // ── Redirect if already logged in ────────────────────────────
 if(API.isLoggedIn()) location.replace('records.html');
 
-// ── Theme ─────────────────────────────────────────────────────
-const btn = document.getElementById('theme-btn');
-const card = document.getElementById('card');
-const wavePath = document.getElementById('wave-path');
-
-function applyTheme(){
-  const dark = document.documentElement.getAttribute('data-theme')==='dark';
-  card.setAttribute('data-dark', dark?'1':'0');
-  document.querySelectorAll('.sign-title,.flbl,.input-row,.pin-box').forEach(el=>{
-    el.setAttribute('data-dark', dark?'1':'0');
-  });
-  wavePath.setAttribute('fill', dark ? '#0f0f0f' : '#fff');
-  btn.textContent = dark ? '☀️' : '🌙';
-}
-applyTheme();
-btn.addEventListener('click', ()=>{
-  Theme.toggle();
-  applyTheme();
-});
+// theme disabled on login page
 
 // ── PIN ──────────────────────────────────────────────────────
 let pinVal = '';
