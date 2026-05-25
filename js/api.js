@@ -147,6 +147,7 @@ const API = (() => {
 
   return {
     login, logout, changePin, me, isLoggedIn,
+    setToken, getToken,
     getDepartments, getSettings,
     getRecords, saveRecord, updateRecord,
     uploadImage,
