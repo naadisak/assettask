@@ -7,366 +7,397 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="AssetSys">
-<meta name="theme-color" content="#c00000">
+<meta name="theme-color" content="#b50000">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AssetSys — Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<!-- Lottie player -->
 <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:'Bai Jamjuree',sans-serif;overflow:hidden}
 
-/* ── Background: red topo ── */
-body{background:#c00;position:relative}
-
-/* Topographic lines via repeating SVG */
-.topo-bg{
-  position:fixed;inset:0;z-index:0;
-  background-color:#b50000;
-  background-image:
-    radial-gradient(ellipse 120% 80% at 60% 20%,rgba(255,80,80,.18) 0%,transparent 60%),
-    radial-gradient(ellipse 80% 60% at 20% 70%,rgba(255,40,40,.12) 0%,transparent 55%);
-}
-/* Topo lines using SVG filter */
-.topo-lines{
-  position:fixed;inset:0;z-index:0;
-  opacity:.22;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cpath d='M 200 200 m -80 0 a 80 80 0 1 0 160 0 a 80 80 0 1 0 -160 0' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Cpath d='M 200 200 m -120 0 a 120 120 0 1 0 240 0 a 120 120 0 1 0 -240 0' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Cpath d='M 200 200 m -160 0 a 160 160 0 1 0 320 0 a 160 160 0 1 0 -320 0' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Cpath d='M 200 200 m -200 20 a 200 180 0 1 0 400 0 a 200 180 0 1 0 -400 0' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Cpath d='M 50 100 q 80 -60 160 20 q 80 80 150 -30 q 60 -80 140 10' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Cpath d='M 0 200 q 100 -80 200 0 q 100 80 200 -20' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Cpath d='M -20 280 q 120 -100 220 -20 q 80 60 220 -40' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Cpath d='M 30 350 q 90 -70 170 10 q 90 80 200 -30' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Ccircle cx='320' cy='80' r='60' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Ccircle cx='320' cy='80' r='100' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Ccircle cx='60' cy='320' r='50' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Ccircle cx='60' cy='320' r='90' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3C/svg%3E");
-  background-size:400px 400px;
+:root{
+  --accent:#c00;--accent-2:#ff2d2d;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
 }
 
-/* ── Wave card (bottom) ── */
-.page{
-  position:fixed;inset:0;z-index:1;
-  display:flex;flex-direction:column;
+html,body{
+  width:100%;height:100%;
+  font-family:'Bai Jamjuree',sans-serif;
   overflow:hidden;
+  background:#b50000;
 }
 
-/* Top zone: logo area */
-.top-zone{
-  flex:0 0 42%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding-top:env(safe-area-inset-top, 0px);
-  position:relative;z-index:2;
+/* ── Topo background ── */
+.bg-color{position:fixed;inset:0;background:#b50000;z-index:0}
+.bg-glow{
+  position:fixed;inset:0;z-index:1;
+  background:
+    radial-gradient(ellipse 120% 80% at 65% 15%,rgba(255,90,90,.2) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 60% at 15% 75%,rgba(255,40,40,.14) 0%,transparent 50%);
+}
+.bg-topo{
+  position:fixed;inset:0;z-index:1;opacity:.2;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Ccircle cx='250' cy='250' r='80' stroke='%23fff' stroke-width='1.2' fill='none'/%3E%3Ccircle cx='250' cy='250' r='130' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Ccircle cx='250' cy='250' r='185' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Ccircle cx='250' cy='250' r='240' stroke='%23fff' stroke-width='.6' fill='none'/%3E%3Ccircle cx='420' cy='80' r='70' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Ccircle cx='420' cy='80' r='110' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Ccircle cx='70' cy='420' r='60' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Ccircle cx='70' cy='420' r='100' stroke='%23fff' stroke-width='.8' fill='none'/%3E%3Cpath d='M0,180 Q120,100 240,160 Q360,220 500,140' stroke='%23fff' stroke-width='1' fill='none'/%3E%3Cpath d='M0,260 Q150,180 280,240 Q400,300 500,220' stroke='%23fff' stroke-width='.9' fill='none'/%3E%3Cpath d='M0,340 Q100,270 220,320 Q360,380 500,300' stroke='%23fff' stroke-width='.7' fill='none'/%3E%3C/svg%3E");
+  background-size:500px 500px;
 }
 
-/* Wave divider */
-.wave-wrap{
-  position:relative;z-index:3;
-  margin-top:-2px;
-  line-height:0;flex-shrink:0;
+/* ── Main layout: full height, column ── */
+.layout{
+  position:fixed;inset:0;z-index:2;
+  display:flex;flex-direction:column;
 }
-.wave-wrap svg{width:100%;height:70px;display:block}
 
-/* Bottom card */
-.card-zone{
-  flex:1;
-  background:#fff;
-  padding:1.5rem 1.75rem 2rem;
-  overflow-y:auto;
-  position:relative;z-index:3;
+/* ── Top section: logo + app name ── */
+.top{
+  /* 40% of screen height */
+  height:40%;
+  flex-shrink:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding-top:calc(var(--safe-top) + 10px);
+  position:relative;
 }
-[data-theme="dark"] .card-zone{background:#0f0f0f}
+.theme-btn{
+  position:absolute;top:calc(var(--safe-top) + 10px);right:14px;
+  width:34px;height:34px;border-radius:50%;
+  border:none;background:rgba(255,255,255,.18);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;transition:background .2s;
+}
+.theme-btn:active{background:rgba(255,255,255,.3)}
 
-/* App name */
+dotlottie-player{
+  width:min(130px, 30vw);
+  height:min(130px, 30vw);
+  flex-shrink:0;
+}
 .app-name{
-  font-size:1rem;font-weight:700;
-  color:rgba(255,255,255,.9);
-  letter-spacing:3px;text-align:center;
-  margin-bottom:.3rem;opacity:.85;
+  font-size:clamp(.8rem,3.5vw,1rem);
+  font-weight:700;color:rgba(255,255,255,.92);
+  letter-spacing:3px;margin-top:.2rem;
 }
 .app-sub{
-  font-size:.68rem;font-weight:500;
-  color:rgba(255,255,255,.55);
-  letter-spacing:1.5px;text-align:center;
+  font-size:clamp(.58rem,2.5vw,.68rem);
+  color:rgba(255,255,255,.52);letter-spacing:1.5px;margin-top:.2rem;
 }
 
-/* Lottie logo */
-dotlottie-player{
-  width:120px;height:120px;
-  margin-bottom:.2rem;
-}
+/* ── Wave ── */
+.wave{flex-shrink:0;line-height:0;margin-top:-1px}
+.wave svg{width:100%;height:clamp(40px,10vw,70px);display:block}
 
-/* Sign in title */
+/* ── Card (bottom) ── */
+.card{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  background:#fff;
+  padding:clamp(1.2rem,4vw,1.75rem) clamp(1.25rem,5vw,2rem) calc(1.5rem + var(--safe-bot));
+}
+[data-dark="1"] .card{background:#0f0f0f}
+
 .sign-title{
-  font-size:1.85rem;font-weight:700;
-  color:#111;margin-bottom:.2rem;
-  letter-spacing:-.5px;
+  font-size:clamp(1.5rem,6vw,2rem);
+  font-weight:700;color:#111;letter-spacing:-.5px;
+  margin-bottom:.25rem;
 }
-[data-theme="dark"] .sign-title{color:#f0f0f0}
-.sign-underline{
-  width:40px;height:3px;border-radius:2px;
-  background:#c00;margin-bottom:1.5rem;
+[data-dark="1"] .sign-title{color:#f0f0f0}
+.sign-bar{
+  width:38px;height:3px;border-radius:2px;
+  background:var(--accent);margin-bottom:clamp(1rem,4vw,1.6rem);
 }
 
-/* Input field */
-.field-lbl{
-  font-size:.72rem;font-weight:600;color:#888;
-  letter-spacing:.5px;margin-bottom:.45rem;
+/* Field label */
+.flbl{
+  font-size:.7rem;font-weight:600;color:#999;
+  letter-spacing:.5px;margin-bottom:.4rem;
+  text-transform:uppercase;
 }
-[data-theme="dark"] .field-lbl{color:#555}
-.input-wrap{
+[data-dark="1"] .flbl{color:#555}
+
+/* Employee ID input */
+.input-row{
   display:flex;align-items:center;gap:8px;
-  border-bottom:1.5px solid #e0e0e0;
-  padding-bottom:.55rem;margin-bottom:1.35rem;
+  border-bottom:1.5px solid #e5e5e5;
+  padding:.45rem 0;margin-bottom:clamp(.9rem,3.5vw,1.4rem);
   transition:border-color .2s;
 }
-[data-theme="dark"] .input-wrap{border-color:#2a2a2a}
-.input-wrap:focus-within{border-color:#c00}
-.input-wrap svg{width:16px;height:16px;stroke:#bbb;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0}
-[data-theme="dark"] .input-wrap svg{stroke:#555}
-.input-wrap input{
+[data-dark="1"] .input-row{border-color:#2a2a2a}
+.input-row:focus-within{border-color:var(--accent)}
+.input-row svg{width:15px;height:15px;stroke:#c0c0c0;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0}
+[data-dark="1"] .input-row svg{stroke:#444}
+.input-row input{
   flex:1;border:none;outline:none;background:transparent;
-  font-size:.92rem;font-family:'Bai Jamjuree',sans-serif;
+  font-size:clamp(.88rem,3.5vw,1rem);
+  font-family:'Bai Jamjuree',sans-serif;
   color:#111;
 }
-[data-theme="dark"] .input-wrap input{color:#f0f0f0}
-.input-wrap input::placeholder{color:#bbb}
-[data-theme="dark"] .input-wrap input::placeholder{color:#444}
+[data-dark="1"] .input-row input{color:#f0f0f0}
+.input-row input::placeholder{color:#c8c8c8}
+[data-dark="1"] .input-row input::placeholder{color:#383838}
 
-/* PIN boxes */
-.pin-label{
-  font-size:.72rem;font-weight:600;color:#888;
-  letter-spacing:.5px;margin-bottom:.65rem;
-}
-[data-theme="dark"] .pin-label{color:#555}
+/* PIN row */
 .pin-row{
-  display:flex;gap:8px;justify-content:space-between;
-  margin-bottom:1.75rem;
+  display:flex;gap:clamp(5px,1.5vw,10px);
+  margin-bottom:clamp(1.25rem,4.5vw,1.85rem);
 }
 .pin-box{
-  flex:1;height:48px;border-radius:10px;
-  border:1.5px solid #e0e0e0;
+  flex:1;
+  aspect-ratio:1 / 1.05;
+  max-height:54px;
+  border-radius:10px;
+  border:1.5px solid #e5e5e5;
   display:flex;align-items:center;justify-content:center;
-  font-size:1.4rem;font-weight:700;color:#111;
-  transition:all .2s;position:relative;
+  font-size:clamp(1.1rem,4.5vw,1.5rem);
+  font-weight:700;color:#111;
   background:#fafafa;cursor:text;
+  transition:all .15s;
 }
-[data-theme="dark"] .pin-box{background:#1a1a1a;border-color:#2a2a2a;color:#f0f0f0}
-.pin-box.active{border-color:#c00;box-shadow:0 0 0 3px rgba(192,0,0,.1)}
-.pin-box.has{background:#fff5f5;border-color:#ffaaaa}
-[data-theme="dark"] .pin-box.has{background:rgba(192,0,0,.08);border-color:rgba(192,0,0,.3)}
-.pin-input-hidden{
-  position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;
-}
+[data-dark="1"] .pin-box{background:#1a1a1a;border-color:#2a2a2a;color:#f0f0f0}
+.pin-box.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(192,0,0,.1)}
+.pin-box.filled{background:#fff5f5;border-color:#ffbbbb}
+[data-dark="1"] .pin-box.filled{background:rgba(192,0,0,.1);border-color:rgba(192,0,0,.35)}
 
-/* Login button */
-.login-btn{
-  width:100%;padding:1rem;
-  border-radius:14px;border:none;
-  background:linear-gradient(135deg,#ff2d2d,#b50000);
-  color:#fff;font-size:1rem;font-weight:700;
-  font-family:'Bai Jamjuree',sans-serif;
-  cursor:pointer;letter-spacing:.3px;
-  box-shadow:0 4px 20px rgba(192,0,0,.35);
-  transition:all .2s;position:relative;overflow:hidden;
-}
-.login-btn:active{transform:scale(.98);box-shadow:0 2px 10px rgba(192,0,0,.25)}
-.login-btn:disabled{opacity:.45;pointer-events:none}
-.login-btn::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);
-  pointer-events:none;
+/* Hidden input to capture keystrokes */
+.pin-hidden{
+  position:absolute;left:-9999px;top:-9999px;
+  opacity:0;width:1px;height:1px;
 }
 
 /* Error */
-.err-msg{
-  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
-  border-radius:10px;padding:.65rem .85rem;
+.err{
+  background:rgba(239,68,68,.07);
+  border:1px solid rgba(239,68,68,.2);
+  border-radius:10px;padding:.6rem .9rem;
   font-size:.78rem;color:#ef4444;
   margin-bottom:1rem;display:none;text-align:center;
+  animation:shake .35s ease;
 }
-.err-msg.show{display:block}
+.err.show{display:block}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
 
-/* Theme btn */
-.theme-btn{
-  position:absolute;top:.85rem;right:.85rem;z-index:10;
-  width:34px;height:34px;border-radius:50%;
-  border:none;background:rgba(255,255,255,.2);
-  backdrop-filter:blur(6px);
-  color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .2s;
+/* Login button */
+.btn-login{
+  width:100%;padding:clamp(.85rem,3.5vw,1.05rem);
+  border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--accent-2),var(--accent));
+  color:#fff;font-size:clamp(.9rem,3.5vw,1rem);font-weight:700;
+  font-family:'Bai Jamjuree',sans-serif;
+  cursor:pointer;letter-spacing:.3px;
+  box-shadow:0 4px 20px rgba(192,0,0,.35);
+  transition:all .18s;position:relative;overflow:hidden;
+}
+.btn-login:active{transform:scale(.98)}
+.btn-login:disabled{opacity:.45;pointer-events:none}
+.btn-login::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);
 }
 
 /* Spinner */
-.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;vertical-align:middle;margin-right:6px}
+.spin{
+  display:inline-block;width:15px;height:15px;
+  border:2px solid rgba(255,255,255,.35);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .6s linear infinite;
+  vertical-align:middle;margin-right:6px;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.card-zone{animation:fadeUp .4s ease .1s both}
+
+/* Animate card in */
+@keyframes slideUp{
+  from{transform:translateY(30px);opacity:0}
+  to{transform:none;opacity:1}
+}
+.card{animation:slideUp .4s cubic-bezier(.34,1,.64,1) .05s both}
 </style>
 </head>
 <body>
 
-<div class="topo-bg"></div>
-<div class="topo-lines"></div>
+<!-- BG layers -->
+<div class="bg-color"></div>
+<div class="bg-glow"></div>
+<div class="bg-topo"></div>
 
-<div class="page">
-  <!-- Top: logo + app name -->
-  <div class="top-zone">
-    <button class="theme-btn" id="theme-btn"></button>
+<div class="layout">
+
+  <!-- Top -->
+  <div class="top">
+    <button class="theme-btn" id="theme-btn">☀️</button>
     <dotlottie-player
       src="https://lottie.host/49f4ee9c-cf52-4c04-b6ec-a42bed73ef52/APHBFjhhvO.lottie"
-      background="transparent"
-      speed="1"
-      loop
-      autoplay>
+      background="transparent" speed="1" loop autoplay>
     </dotlottie-player>
     <div class="app-name">ASSETSYS</div>
     <div class="app-sub">PC UPGRADE TRACKING</div>
   </div>
 
-  <!-- Wave -->
-  <div class="wave-wrap">
+  <!-- Wave divider -->
+  <div class="wave">
     <svg viewBox="0 0 390 70" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,0 C60,55 150,75 230,45 C310,15 360,58 390,40 L390,70 L0,70 Z" fill="#fff"/>
+      <path id="wave-path"
+        d="M0,0 C70,60 160,80 240,48 C315,18 355,55 390,38 L390,70 L0,70 Z"
+        fill="#fff"/>
     </svg>
   </div>
 
-  <!-- Bottom card -->
-  <div class="card-zone">
-    <div class="sign-title">ยินดีต้อนรับ</div>
-    <div class="sign-underline"></div>
+  <!-- Card -->
+  <div class="card" id="card">
 
-    <!-- Error message -->
-    <div class="err-msg" id="err-msg"></div>
+    <div class="sign-title">ยินดีต้อนรับ</div>
+    <div class="sign-bar"></div>
+
+    <div class="err" id="err"></div>
 
     <!-- Employee ID -->
-    <div class="field-lbl">รหัสพนักงาน</div>
-    <div class="input-wrap">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <input type="text" id="emp-id" placeholder="กรอกรหัสพนักงาน"
-        autocomplete="username" spellcheck="false"
-        inputmode="text" autocapitalize="none"
-        onkeydown="if(event.key==='Enter')focusPin(0)">
+    <div class="flbl">รหัสพนักงาน</div>
+    <div class="input-row">
+      <svg viewBox="0 0 24 24">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <input id="emp-id" type="text" placeholder="กรอกรหัสพนักงาน"
+        autocomplete="username" autocapitalize="none" spellcheck="false"
+        onkeydown="if(event.key==='Enter')focusPin()">
     </div>
 
     <!-- PIN -->
-    <div class="pin-label">PIN 6 หลัก</div>
-    <div class="pin-row" id="pin-row">
-      <div class="pin-box" id="pb0" onclick="focusPin(0)"></div>
-      <div class="pin-box" id="pb1" onclick="focusPin(1)"></div>
-      <div class="pin-box" id="pb2" onclick="focusPin(2)"></div>
-      <div class="pin-box" id="pb3" onclick="focusPin(3)"></div>
-      <div class="pin-box" id="pb4" onclick="focusPin(4)"></div>
-      <div class="pin-box" id="pb5" onclick="focusPin(5)"></div>
+    <div class="flbl">PIN 6 หลัก</div>
+    <div class="pin-row" id="pin-row" onclick="focusPin()">
+      <div class="pin-box" id="pb0"></div>
+      <div class="pin-box" id="pb1"></div>
+      <div class="pin-box" id="pb2"></div>
+      <div class="pin-box" id="pb3"></div>
+      <div class="pin-box" id="pb4"></div>
+      <div class="pin-box" id="pb5"></div>
     </div>
-    <input type="password" id="pin-hidden" class="pin-input-hidden"
+    <input class="pin-hidden" id="pin-hidden" type="password"
       inputmode="numeric" maxlength="6" autocomplete="current-password"
-      oninput="onPinInput(this.value)" onkeydown="onPinKey(event)">
+      oninput="onPinInput(this.value)"
+      onkeydown="onPinKey(event)">
 
     <!-- Login button -->
-    <button class="login-btn" id="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
-  </div>
-</div>
+    <button class="btn-login" id="login-btn" onclick="doLogin()">
+      เข้าสู่ระบบ
+    </button>
+
+  </div><!-- /card -->
+</div><!-- /layout -->
 
 <script src="js/config.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/api.js"></script>
 <script>
-// ── Theme ─────────────────────────────────────────────────────
-Theme.renderBtn(document.getElementById('theme-btn'));
-
-// Update wave color on theme change
-function updateWave(){
-  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
-  document.querySelector('.wave-wrap path').setAttribute('fill', isDark?'#0f0f0f':'#fff');
-}
-updateWave();
-const themeBtn = document.getElementById('theme-btn');
-themeBtn.addEventListener('click', ()=>setTimeout(updateWave, 50));
-
-// Redirect if already logged in
+// ── Redirect if already logged in ────────────────────────────
 if(API.isLoggedIn()) location.replace('records.html');
 
-// ── PIN logic ─────────────────────────────────────────────────
+// ── Theme ─────────────────────────────────────────────────────
+const btn = document.getElementById('theme-btn');
+const card = document.getElementById('card');
+const wavePath = document.getElementById('wave-path');
+
+function applyTheme(){
+  const dark = document.documentElement.getAttribute('data-theme')==='dark';
+  card.setAttribute('data-dark', dark?'1':'0');
+  document.querySelectorAll('.sign-title,.flbl,.input-row,.pin-box').forEach(el=>{
+    el.setAttribute('data-dark', dark?'1':'0');
+  });
+  wavePath.setAttribute('fill', dark ? '#0f0f0f' : '#fff');
+  btn.textContent = dark ? '☀️' : '🌙';
+}
+applyTheme();
+btn.addEventListener('click', ()=>{
+  Theme.toggle();
+  applyTheme();
+});
+
+// ── PIN ──────────────────────────────────────────────────────
 let pinVal = '';
 
-function focusPin(idx){
+function focusPin(){
   const h = document.getElementById('pin-hidden');
-  h.focus();
-  // Move cursor to correct position
-  const len = pinVal.length;
-  if(idx <= len) {
-    try{ h.setSelectionRange(len, len); }catch(_){}
-  }
+  h.focus({ preventScroll: true });
+  setTimeout(()=>{ try{ h.setSelectionRange(pinVal.length, pinVal.length); }catch(_){} }, 10);
 }
 
-function onPinInput(val){
-  pinVal = val.replace(/\D/g,'').slice(0,6);
+function updateBoxes(){
+  for(let i=0;i<6;i++){
+    const b = document.getElementById(`pb${i}`);
+    b.classList.remove('active','filled');
+    if(i < pinVal.length){ b.textContent='●'; b.classList.add('filled'); }
+    else if(i === pinVal.length){ b.textContent=''; b.classList.add('active'); }
+    else { b.textContent=''; }
+  }
+}
+updateBoxes();
+
+function onPinInput(v){
+  pinVal = v.replace(/\D/g,'').slice(0,6);
   document.getElementById('pin-hidden').value = pinVal;
-  updatePinBoxes();
-  if(pinVal.length === 6) setTimeout(doLogin, 120);
+  updateBoxes();
+  if(pinVal.length===6) setTimeout(doLogin, 150);
 }
 
 function onPinKey(e){
-  if(e.key === 'Backspace'){
+  if(e.key==='Backspace'){
+    e.preventDefault();
     pinVal = pinVal.slice(0,-1);
     document.getElementById('pin-hidden').value = pinVal;
-    updatePinBoxes();
-    e.preventDefault();
+    updateBoxes();
   }
-  if(e.key === 'Enter' && pinVal.length === 6) doLogin();
+  if(e.key==='Enter' && pinVal.length===6) doLogin();
 }
-
-function updatePinBoxes(){
-  for(let i=0;i<6;i++){
-    const box = document.getElementById(`pb${i}`);
-    if(i < pinVal.length){
-      box.textContent = '●';
-      box.classList.add('has');
-      box.classList.remove('active');
-    } else if(i === pinVal.length){
-      box.textContent = '';
-      box.classList.add('active');
-      box.classList.remove('has');
-    } else {
-      box.textContent = '';
-      box.classList.remove('has','active');
-    }
-  }
-}
-
-// Tap pin row → focus hidden input
-document.getElementById('pin-row').addEventListener('click', ()=>focusPin(pinVal.length));
 
 // ── Login ─────────────────────────────────────────────────────
 function showErr(msg){
-  const el = document.getElementById('err-msg');
-  el.textContent = msg; el.classList.add('show');
+  const el = document.getElementById('err');
+  el.textContent = msg;
+  el.classList.remove('show');
+  void el.offsetWidth; // reflow for shake animation
+  el.classList.add('show');
+  // Reset PIN
+  pinVal='';
   document.getElementById('pin-hidden').value='';
-  pinVal=''; updatePinBoxes();
+  updateBoxes();
   setTimeout(()=>el.classList.remove('show'), 3500);
 }
 
 async function doLogin(){
   const empId = document.getElementById('emp-id').value.trim();
   if(!empId){ document.getElementById('emp-id').focus(); return; }
-  if(pinVal.length < 6){ focusPin(pinVal.length); return; }
+  if(pinVal.length<6){ focusPin(); return; }
 
-  const btn = document.getElementById('login-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>กำลังเข้าสู่ระบบ...';
+  const btn2 = document.getElementById('login-btn');
+  btn2.disabled = true;
+  btn2.innerHTML = '<span class="spin"></span>กำลังเข้าสู่ระบบ...';
 
-  try {
+  try{
     const res = await API.login(empId, pinVal);
-    if(!res?.token) throw new Error(res?.error || 'Login ไม่สำเร็จ');
+    if(!res?.token) throw new Error(res?.error||'ไม่สำเร็จ');
     API.setToken(res.token);
-    if(res.must_change_pw === '1' || res.must_change_pw === true){
+    if(res.must_change_pw==='1'||res.must_change_pw===true){
       location.replace('change_pin.html');
     } else {
       location.replace('records.html');
     }
   } catch(err){
-    showErr(err.message || 'รหัสพนักงานหรือ PIN ไม่ถูกต้อง');
-    btn.disabled = false;
-    btn.textContent = 'เข้าสู่ระบบ';
+    showErr(err.message||'รหัสพนักงานหรือ PIN ไม่ถูกต้อง');
+    btn2.disabled=false;
+    btn2.textContent='เข้าสู่ระบบ';
   }
 }
 
-// Auto-focus employee ID on load
-setTimeout(()=>document.getElementById('emp-id').focus(), 400);
+// Auto focus on load
+setTimeout(()=>document.getElementById('emp-id').focus(), 500);
 </script>
 </body>
 </html>
